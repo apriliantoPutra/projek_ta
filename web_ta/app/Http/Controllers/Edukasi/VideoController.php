@@ -12,4 +12,14 @@ class VideoController extends Controller
 
         return view('edukasi/video/index', ['headerTitle' => 'Manajemen Edukasi']);
     }
+    public function create()
+    {
+
+        return view('edukasi/video/create', ['headerTitle' => 'Manajemen Edukasi']);
+    }
+    public function edit()
+    {
+
+        return view('edukasi/video/edit', ['headerTitle' => 'Manajemen Edukasi']);
+    }
 }

@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('kategori_sampah', function (Blueprint $table) {
             $table->id();
-            $table->string('nama_sampah')->unique();
+            $table->string('jenis_sampah')->unique();
             $table->decimal('berat_sampah');
             $table->integer('harga_sampah');
             $table->string('warna_indikasi');

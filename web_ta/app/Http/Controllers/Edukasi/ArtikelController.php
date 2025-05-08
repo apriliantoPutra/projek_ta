@@ -12,4 +12,14 @@ class ArtikelController extends Controller
 
         return view('edukasi/artikel/index', ['headerTitle' => 'Manajemen Edukasi']);
     }
+    public function create()
+    {
+
+        return view('edukasi/artikel/create', ['headerTitle' => 'Manajemen Edukasi']);
+    }
+    public function edit()
+    {
+
+        return view('edukasi/artikel/edit', ['headerTitle' => 'Manajemen Edukasi']);
+    }
 }

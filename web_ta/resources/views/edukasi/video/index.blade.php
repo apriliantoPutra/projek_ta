@@ -8,7 +8,8 @@
                 <h1 class="text-xl font-bold text-gray-800 flex items-center gap-2">
                     <i class="ri-video-line"></i> Edukasi Video
                 </h1>
-                <a href="#" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition">+ Tambah
+                <a href="/video-tambah" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition">+
+                    Tambah
                     Video</a>
             </div>
 

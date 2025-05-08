@@ -9,6 +9,10 @@
     <link rel="icon" href="{{ asset('img/logo.png') }}" type="image/png">
     @vite('resources/css/app.css')
     <link href="https://cdn.jsdelivr.net/npm/remixicon@4.5.0/fonts/remixicon.css" rel="stylesheet" />
+
+    <!-- Trix Editor CSS & JS -->
+    <link rel="stylesheet" type="text/css" href="https://unpkg.com/trix@2.0.0/dist/trix.css">
+    <script type="text/javascript" src="https://unpkg.com/trix@2.0.0/dist/trix.umd.min.js"></script>
 </head>
 
 <body class="bg-gray-100 font-sans">
@@ -31,11 +35,9 @@
         function toggleDropdown(id) {
             let element = document.getElementById(id);
             element.classList.toggle('hidden');
-
-            // Hapus 'flex' dan 'md:flex' jika ada
-            element.classList.remove('flex', 'md:flex');
         }
     </script>
+
 </body>
 
 </html>
