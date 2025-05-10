@@ -16,7 +16,7 @@ return new class extends Migration
             $table->string('judul_video');
             $table->text('deskripsi_video');
             $table->string('video');
-            $table->dateTime('tanggal_rilis');
+            
             $table->timestamps();
         });
     }

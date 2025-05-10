@@ -1,10 +1,10 @@
-<aside id="sidebar-menu" class="hidden w-64 bg-gray-800 text-gray-100 flex flex-col justify-between">
+<aside id="sidebar-menu" class=" w-64 bg-gray-800 text-gray-100 flex flex-col justify-between md:flex">
     <div class="flex-1 flex flex-col justify-between"> <!-- pembungkus utama -->
 
         <!-- Bagian Atas (Logo + Navigasi) -->
         <div>
             <div class="px-5 py-2 text-center bg-green-300 text-white">
-                <img src="img/logo.png" alt="Logo" class="w-17 mx-auto">
+                <img src="/img/logo.png" alt="Logo" class="w-17 mx-auto">
             </div>
             <nav class="px-4 py-4 space-y-2 overflow-auto">
                 <a href="/dashboard"

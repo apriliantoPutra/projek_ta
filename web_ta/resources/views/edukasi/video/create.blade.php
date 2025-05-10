@@ -11,19 +11,18 @@
             </div>
 
             <!-- Form -->
-            <form action="#" method="POST" enctype="multipart/form-data" class="space-y-6">
+            <form action="{{ route('Video-Store') }}" method="POST" enctype="multipart/form-data" class="space-y-6">
                 @csrf
-
                 <!-- Judul -->
                 <div>
                     <label for="judul" class="block text-sm font-medium text-gray-700 mb-1">Judul</label>
-                    <input type="text" name="judul" id="judul" class="w-full border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                    <input type="text" name="judul_video" id="judul" class="w-full border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" required>
                 </div>
 
                 <!-- Deskripsi -->
                 <div>
                     <label for="deskripsi" class="block text-sm font-medium text-gray-700 mb-1">Deskripsi</label>
-                    <textarea name="deskripsi" id="deskripsi" rows="4" class="w-full border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" required></textarea>
+                    <textarea id="deskripsi" name="deskripsi_video" rows="4" class="w-full border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" required></textarea>
                 </div>
 
                 <!-- Upload Video -->
@@ -32,15 +31,9 @@
                     <input type="file" name="video" id="video" accept="video/*" class="w-full border border-gray-300 rounded-md px-4 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500" required>
                 </div>
 
-                <!-- Upload Poster -->
-                <div>
-                    <label for="gambar_poster" class="block text-sm font-medium text-gray-700 mb-1">Gambar Poster</label>
-                    <input type="file" name="gambar_poster" id="gambar_poster" accept="image/*" class="w-full border border-gray-300 rounded-md px-4 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500" required>
-                </div>
-
                 <!-- Tombol -->
                 <div class="flex justify-end gap-4">
-                    <a href="#" class="px-4 py-2 bg-gray-300 hover:bg-gray-400 text-gray-800 rounded-md transition">Batal</a>
+                    <a href="{{ route('Video') }}" class="px-4 py-2 bg-gray-300 hover:bg-gray-400 text-gray-800 rounded-md transition">Batal</a>
                     <button type="submit" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md shadow transition">Simpan</button>
                 </div>
             </form>

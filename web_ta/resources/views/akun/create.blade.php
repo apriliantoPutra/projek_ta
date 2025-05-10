@@ -11,7 +11,7 @@
             </div>
 
             <!-- Form Tambah Akun -->
-            <form action="#" method="POST" class="space-y-6">
+            <form action="{{ route('Akun-Store') }}" method="POST" class="space-y-6">
                 @csrf
 
                 <!-- Username -->
@@ -45,7 +45,7 @@
 
                 <!-- Tombol -->
                 <div class="flex justify-end gap-4">
-                    <a href="#" class="px-4 py-2 bg-gray-300 hover:bg-gray-400 text-gray-800 rounded-md transition">Batal</a>
+                    <a href="/akun" class="px-4 py-2 bg-gray-300 hover:bg-gray-400 text-gray-800 rounded-md transition">Batal</a>
                     <button type="submit" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md shadow transition">Simpan</button>
                 </div>
             </form>

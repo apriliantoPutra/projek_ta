@@ -17,7 +17,7 @@ return new class extends Migration
             $table->text('deskripsi_artikel');
             $table->string('gambar_artikel');
             $table->string('nama_author');
-            $table->dateTime('tanggal_rilis');
+            
 
             $table->timestamps();
         });

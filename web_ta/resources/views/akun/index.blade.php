@@ -9,7 +9,8 @@
                 <h1 class="text-xl font-bold text-gray-800 flex items-center gap-2">
                     <i class="ri-search-line"></i> Data Akun
                 </h1>
-                <a href="/akun-tambah" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition">+ Tambah
+                <a href="/akun-tambah" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition">+
+                    Tambah
                     Akun</a>
             </div>
 
@@ -50,39 +51,34 @@
                         </tr>
                     </thead>
                     <tbody class="bg-white divide-y divide-gray-200">
-                        <tr class="hover:bg-gray-50">
-                            <td class="px-5 py-3">1</td>
-                            <td class="px-5 py-3">Ahmad Rudi</td>
-                            <td class="px-5 py-3">ahmad@example.com</td>
-                            <td class="px-5 py-3">Admin</td>
-                            <td class="px-5 py-3 space-x-2">
-                                <a href="#" class="text-yellow-600 hover:underline">Edit</a>
-                                <a href="#" class="text-blue-600 hover:underline">Profil</a>
-                                <a href="#" class="text-red-600 hover:underline">Hapus</a>
-                            </td>
-                        </tr>
-                        <tr class="hover:bg-gray-50">
-                            <td class="px-5 py-3">2</td>
-                            <td class="px-5 py-3">Siti Aminah</td>
-                            <td class="px-5 py-3">siti@example.com</td>
-                            <td class="px-5 py-3">Petugas</td>
-                            <td class="px-5 py-3 space-x-2">
-                                <a href="#" class="text-yellow-600 hover:underline">Edit</a>
-                                <a href="#" class="text-blue-600 hover:underline">Profil</a>
-                                <a href="#" class="text-red-600 hover:underline">Hapus</a>
-                            </td>
-                        </tr>
-                        <tr class="hover:bg-gray-50">
-                            <td class="px-5 py-3">3</td>
-                            <td class="px-5 py-3">Budi Santoso</td>
-                            <td class="px-5 py-3">budi@example.com</td>
-                            <td class="px-5 py-3">Nasabah</td>
-                            <td class="px-5 py-3 space-x-2">
-                                <a href="#" class="text-yellow-600 hover:underline">Edit</a>
-                                <a href="#" class="text-blue-600 hover:underline">Profil</a>
-                                <a href="#" class="text-red-600 hover:underline">Hapus</a>
-                            </td>
-                        </tr>
+                        @forelse ($data as $akun)
+                            <tr class="hover:bg-gray-50">
+                                <td class="px-5 py-3">{{ $loop->iteration }}.</td>
+                                <td class="px-5 py-3">{{ $akun->username }}</td>
+                                <td class="px-5 py-3">{{ $akun->email }}</td>
+                                <td class="px-5 py-3">{{ $akun->role }}</td>
+                                <td class="px-5 py-3 space-x-2">
+                                    <a href="{{ route('Akun-Edit', $akun->id) }}"
+                                        class="text-yellow-600 hover:underline">Edit</a>
+                                    <a href="#" class="text-blue-600 hover:underline">Profil</a>
+                                    <form action="{{ route('Akun-Hapus', $akun->id) }}" method="POST" class="inline">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" onclick="return confirm('Yakin ingin menghapus akun ini?')"
+                                            class="text-red-600 hover:underline">
+                                            Hapus
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="5" class="px-5 py-8 text-center text-gray-500 italic">
+                                    Tidak ada data akun.
+                                </td>
+                            </tr>
+                        @endforelse
+
                     </tbody>
                 </table>
             </div>

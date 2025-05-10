@@ -11,37 +11,37 @@
             </div>
 
             <!-- Form -->
-            <form action="#" method="POST" enctype="multipart/form-data" class="space-y-6">
+            <form action="{{ route('Artikel-Store') }}" method="POST" enctype="multipart/form-data" class="space-y-6">
                 @csrf
 
                 <!-- Judul -->
                 <div>
                     <label for="judul" class="block text-sm font-medium text-gray-700 mb-1">Judul</label>
-                    <input type="text" name="judul" id="judul" class="w-full border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                    <input type="text" name="judul_artikel" id="judul" class="w-full border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" required>
                 </div>
 
                 <!-- Deskripsi (Trix Editor) -->
                 <div>
                     <label for="deskripsi" class="block text-sm font-medium text-gray-700 mb-1">Deskripsi</label>
-                    <input id="deskripsi" type="hidden" name="deskripsi">
+                    <input id="deskripsi" type="hidden" name="deskripsi_artikel">
                     <trix-editor input="deskripsi" class="trix-content bg-white border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"></trix-editor>
                 </div>
 
                 <!-- Gambar -->
                 <div>
                     <label for="gambar" class="block text-sm font-medium text-gray-700 mb-1">Gambar</label>
-                    <input type="file" name="gambar" id="gambar" accept="image/*" class="w-full border border-gray-300 rounded-md px-4 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <input type="file" name="gambar_artikel" id="gambar" accept="image/*" class="w-full border border-gray-300 rounded-md px-4 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500">
                 </div>
 
                 <!-- Author -->
                 <div>
                     <label for="author" class="block text-sm font-medium text-gray-700 mb-1">Nama Author</label>
-                    <input type="text" name="author" id="author" class="w-full border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                    <input type="text" name="nama_author" id="author" class="w-full border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" required>
                 </div>
 
                 <!-- Tombol -->
                 <div class="flex justify-end gap-4">
-                    <a href="#" class="px-4 py-2 bg-gray-300 hover:bg-gray-400 text-gray-800 rounded-md transition">Batal</a>
+                    <a href="{{ route('Artikel') }}" class="px-4 py-2 bg-gray-300 hover:bg-gray-400 text-gray-800 rounded-md transition">Batal</a>
                     <button type="submit" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md shadow transition">Simpan</button>
                 </div>
             </form>
