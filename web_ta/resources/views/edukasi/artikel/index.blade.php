@@ -75,7 +75,7 @@
                                         @csrf
                                         @method('DELETE')
                                         <button type="submit" onclick="return confirm('Yakin ingin menghapus artikel ini?')"
-                                            class="text-red-600 hover:underline">
+                                            class="text-red-600 cursor-pointer hover:underline">
                                             Hapus
                                         </button>
                                     </form>

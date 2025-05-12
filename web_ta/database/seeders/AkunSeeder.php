@@ -17,14 +17,14 @@ class AkunSeeder extends Seeder
     {
         DB::table('akun')->insert([
             [
-                'username'=> 'Admin Bank Sampah',
+                'username'=> 'Admin',
                 'email'=> 'admin@gmail.com',
                 'password'=> Hash::make('admin123'),
                 'role'=>'admin',
                 'created_at'=> Carbon::now()
             ],
             [
-                'username'=> 'warga Biasa',
+                'username'=> 'warga',
                 'email'=> 'warga@gmail.com',
                 'password'=> Hash::make('warga123'),
                 'role'=>'warga',

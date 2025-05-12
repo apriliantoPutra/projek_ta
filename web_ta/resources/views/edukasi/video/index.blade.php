@@ -65,7 +65,7 @@
                                         @method('DELETE')
                                         <button type="submit"
                                             onclick="return confirm('Yakin ingin menghapus video ini?')"
-                                            class="text-red-600 hover:underline">
+                                            class="text-red-600 cursor-pointer hover:underline">
                                             Hapus
                                         </button>
                                     </form>

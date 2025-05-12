@@ -27,7 +27,15 @@
                         <img src="img/logo.png" alt="Logo" class="w-28">
                     </div>
                     <h2 class="text-xl font-bold text-center text-gray-800 mb-4">Selamat Datang di Bank Sampah</h2>
-                    <form>
+                    @if (session()->has('loginError'))
+                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                            {{ session('loginError') }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"
+                                aria-label="Close"></button>
+                        </div>
+                    @endif
+                    <form action="/login" method="post">
+                        @csrf
                         <div class="mb-4 space-y-2">
                             <label for="username" class="text-lg font-medium text-gray-700 block">Username</label>
                             <input type="text" id="username" name="username" autocomplete="off"

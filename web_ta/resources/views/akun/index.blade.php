@@ -20,7 +20,7 @@
                 <div class="flex w-full md:w-1/2 gap-2">
                     <input type="text" placeholder="Cari nama atau email..."
                         class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500">
-                    <button class="bg-gray-200 text-sm px-4 py-2 rounded hover:bg-green-600 hover:text-white transition">
+                    <button class="bg-gray-200 cursor-pointer text-sm px-4 py-2 rounded hover:bg-green-600 hover:text-white transition">
                         Search
                     </button>
                 </div>
@@ -65,7 +65,7 @@
                                         @csrf
                                         @method('DELETE')
                                         <button type="submit" onclick="return confirm('Yakin ingin menghapus akun ini?')"
-                                            class="text-red-600 hover:underline">
+                                            class="text-red-600 cursor-pointer hover:underline">
                                             Hapus
                                         </button>
                                     </form>

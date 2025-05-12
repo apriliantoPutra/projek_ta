@@ -46,14 +46,13 @@
             <div class="flex flex-col space-y-2">
                 <a href="#"
                     class="text-sm bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700 text-center transition">Profil</a>
-                <form method="POST" action="#">
+                <form method="POST" action="/logout">
                     @csrf
                     <button type="submit"
-                        class="w-full text-sm bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700 transition">Logout</button>
+                        class="w-full text-sm bg-red-600 cursor-pointer text-white px-3 py-1 rounded hover:bg-red-700 transition">Logout</button>
                 </form>
             </div>
         </div>
 
     </div>
 </aside>
-
