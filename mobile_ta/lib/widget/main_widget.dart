@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../warga/beranda_page.dart';
+import '../petugas/beranda_page.dart';
 
 class MainWrapper extends StatefulWidget {
   const MainWrapper({Key? key}) : super(key: key);

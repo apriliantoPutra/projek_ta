@@ -62,6 +62,7 @@ class LoginPage extends StatelessWidget {
                     contentPadding: EdgeInsets.symmetric(horizontal: 20),
                   ),
                 ),
+                
                 SizedBox(height: 20),
                 ElevatedButton(
                   onPressed: () {
@@ -78,6 +79,7 @@ class LoginPage extends StatelessWidget {
                     minimumSize: Size(double.infinity, 45),
                   ),
                   child: Text("Log in"),
+                  
                 ),
                 SizedBox(height: 10),
                 TextButton(

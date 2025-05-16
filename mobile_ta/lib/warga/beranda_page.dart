@@ -19,14 +19,23 @@ class BerandaPage extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text("14,114,400kg Sampah Botol", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                Text(
+                  "14,114,400kg Sampah Botol",
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                ),
                 SizedBox(height: 8),
-                Text("Rp300.000,-", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                Text(
+                  "Rp300.000,-",
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                ),
               ],
             ),
           ),
           SizedBox(height: 20),
-          Text("Fitur Lain", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+          Text(
+            "Fitur Lain",
+            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          ),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
@@ -46,7 +55,10 @@ class BerandaPage extends StatelessWidget {
         Container(
           height: 60,
           width: 60,
-          decoration: BoxDecoration(color: Colors.grey.shade400, borderRadius: BorderRadius.circular(12)),
+          decoration: BoxDecoration(
+            color: Colors.grey.shade400,
+            borderRadius: BorderRadius.circular(12),
+          ),
           child: Icon(icon, size: 30),
         ),
         SizedBox(height: 8),
