@@ -2,60 +2,17 @@ import 'package:flutter/material.dart';
 import 'package:mobile_ta/widget/videoCard_widget.dart';
 import '../widget/eduCard_widget.dart';
 
-class WargaBerandaPage extends StatelessWidget {
+class WargaEdukasiPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        automaticallyImplyLeading: false,
-        backgroundColor: Colors.white,
-        elevation: 0,
-        title: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Row(
-              children: [
-                CircleAvatar(
-                  radius: 20,
-
-                  backgroundImage: NetworkImage(
-                    'https://www.perfocal.com/blog/content/images/2021/01/Perfocal_17-11-2019_TYWFAQ_100_standard-3.jpg',
-                  ),
-                  // child: Icon(Icons.person, color: Colors.greenAccent.shade400),
-                ),
-                SizedBox(width: 10),
-                Text(
-                  'Warga Biasa',
-                  style: TextStyle(
-                    color: Colors.black,
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ],
-            ),
-
-            Row(
-              children: [
-                IconButton(
-                  icon: Icon(Icons.settings, color: Colors.black26),
-                  onPressed: () {},
-                ),
-                IconButton(
-                  icon: Icon(Icons.notifications, color: Colors.black26),
-                  onPressed: () {},
-                ),
-              ],
-            ),
-          ],
-        ),
-      ),
       body: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Container(
               width: double.infinity,
+              height: 200,
               padding: EdgeInsets.all(16),
               decoration: BoxDecoration(
                 color: Colors.greenAccent.shade100,
@@ -64,70 +21,19 @@ class WargaBerandaPage extends StatelessWidget {
                   bottomRight: Radius.circular(20),
                 ),
               ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    "Total Sampah Terkumpul",
-                    style: TextStyle(
-                      fontSize: 16,
-                      color: Colors.green.shade900,
-                    ),
-                  ),
-                  SizedBox(height: 4),
-                  Text(
-                    "14,114,400 kg Sampah Botol",
-                    style: TextStyle(
-                      fontSize: 22,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.green.shade800,
-                    ),
-                  ),
-                  SizedBox(height: 12),
-                  Text(
-                    "Total Saldo",
-                    style: TextStyle(
-                      fontSize: 16,
-                      color: Colors.green.shade900,
-                    ),
-                  ),
-                  Text(
-                    "Rp300.000,-",
-                    style: TextStyle(
-                      fontSize: 22,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.green.shade800,
-                    ),
-                  ),
-                ],
+              alignment: Alignment.center, // Menengahkan isi
+              child: Text(
+                "Edukasi",
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.green.shade900,
+                ),
+                textAlign: TextAlign.center,
               ),
             ),
 
-            Container(
-              margin: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Text(
-                    "Fitur Lain",
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.green.shade800,
-                    ),
-                  ),
-                  SizedBox(height: 12),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    children: [
-                      _menuItem(Icons.calculate, "Kalkulator"),
-                      _menuItem(Icons.history, "Histori"),
-                      _menuItem(Icons.info_outline, "Info"),
-                    ],
-                  ),
-                ],
-              ),
-            ),
+            SizedBox(height: 10),
             Container(
               margin: EdgeInsets.only(top: 16),
               padding: EdgeInsets.all(16),
@@ -252,24 +158,6 @@ class WargaBerandaPage extends StatelessWidget {
           ],
         ),
       ),
-    );
-  }
-
-  Widget _menuItem(IconData icon, String title) {
-    return Column(
-      children: [
-        Container(
-          height: 60,
-          width: 60,
-          decoration: BoxDecoration(
-            color: Colors.greenAccent,
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: Icon(icon, size: 30),
-        ),
-        SizedBox(height: 8),
-        Text(title, textAlign: TextAlign.center),
-      ],
     );
   }
 }

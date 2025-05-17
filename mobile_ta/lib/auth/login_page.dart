@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'register_page.dart';
-import '../widget/main_widget.dart';
+import '../widget/warga_main_widget.dart';
 
 class LoginPage extends StatelessWidget {
   @override
@@ -65,9 +65,10 @@ class LoginPage extends StatelessWidget {
                 SizedBox(height: 20),
                 ElevatedButton(
                   onPressed: () {
-                    Navigator.push(
+                    Navigator.pushAndRemoveUntil(
                       context,
-                      MaterialPageRoute(builder: (context) => MainWrapper()),
+                      MaterialPageRoute(builder: (context) => WargaMainWrapper()),
+                      (route) => false,
                     );
                   },
                   style: ElevatedButton.styleFrom(
