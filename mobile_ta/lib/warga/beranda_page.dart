@@ -15,34 +15,6 @@ class WargaBerandaPage extends StatelessWidget {
           children: [
             Row(
               children: [
-<<<<<<< HEAD
-                Text(
-                  "14,114,400kg Sampah Botol",
-                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                ),
-                SizedBox(height: 8),
-                Text(
-                  "Rp300.000,-",
-                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                ),
-              ],
-            ),
-          ),
-          SizedBox(height: 20),
-          Text(
-            "Fitur Lain",
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-          ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
-              _menuItem(Icons.calculate, "Kalkulator"),
-              _menuItem(Icons.history, "Histori"),
-              _menuItem(Icons.info_outline, "Info"),
-            ],
-          ),
-        ],
-=======
                 CircleAvatar(
                   radius: 20,
 
@@ -279,7 +251,6 @@ class WargaBerandaPage extends StatelessWidget {
             ),
           ],
         ),
->>>>>>> 6ed2b676a7fca993eb1b005e0dca9206a7d997a0
       ),
     );
   }
@@ -291,11 +262,7 @@ class WargaBerandaPage extends StatelessWidget {
           height: 60,
           width: 60,
           decoration: BoxDecoration(
-<<<<<<< HEAD
-            color: Colors.grey.shade400,
-=======
             color: Colors.greenAccent,
->>>>>>> 6ed2b676a7fca993eb1b005e0dca9206a7d997a0
             borderRadius: BorderRadius.circular(12),
           ),
           child: Icon(icon, size: 30),

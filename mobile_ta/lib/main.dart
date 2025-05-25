@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:mobile_ta/widget/main_widget.dart';
+import 'package:mobile_ta/widget/petugas_main_widget.dart';
 import 'auth/login_page.dart';
 // import '../petugas/beranda_page.dart';
 

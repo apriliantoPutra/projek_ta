@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:mobile_ta/widget/petugas_main_widget.dart';
 import 'register_page.dart';
 import '../widget/warga_main_widget.dart';
 
@@ -68,7 +69,7 @@ class LoginPage extends StatelessWidget {
                   onPressed: () {
                     Navigator.pushAndRemoveUntil(
                       context,
-                      MaterialPageRoute(builder: (context) => WargaMainWrapper()),
+                      MaterialPageRoute(builder: (context) => PetugasMainWrapper()),
                       (route) => false,
                     );
                   },
