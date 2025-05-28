@@ -1,8 +1,46 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
-import '../warga/edit_akun_page.dart';
-import '../widget/eduCard_widget.dart';
+import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
+import 'edit_profil_page.dart';
+import '../auth/login_page.dart'; // Sesuaikan path halaman login kamu
 
 class WargaAkunPage extends StatelessWidget {
+  final Map<String, dynamic>? akunData;
+  final Map<String, dynamic>? profilData;
+  const WargaAkunPage({Key? key, this.akunData, this.profilData})
+    : super(key: key);
+
+  Future<void> logout(BuildContext context) async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('token');
+
+    if (token == null) {
+      return;
+    }
+
+    final response = await http.post(
+      Uri.parse('http://127.0.0.1:8000/api/v1/logout'),
+      headers: {'Authorization': 'Bearer $token', 'Accept': 'application/json'},
+    );
+
+    if (response.statusCode == 200) {
+      await prefs.remove('token');
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(
+          builder: (_) => LoginPage(),
+        ), // Ganti dengan halaman login
+        (route) => false,
+      );
+    } else {
+      final message = jsonDecode(response.body)['message'] ?? 'Gagal logout';
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(message)));
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -27,12 +65,13 @@ class WargaAkunPage extends StatelessWidget {
                     CircleAvatar(
                       radius: 40,
                       backgroundImage: NetworkImage(
-                        'https://www.perfocal.com/blog/content/images/2021/01/Perfocal_17-11-2019_TYWFAQ_100_standard-3.jpg',
-                      ), // Ganti dengan gambar profil user
+                        profilData?['gambar_url'] ??
+                            'https://i.pinimg.com/736x/8a/e9/e9/8ae9e92fa4e69967aa61bf2bda967b7b.jpg',
+                      ),
                     ),
                     SizedBox(height: 8),
                     Text(
-                      "Krisna Putra",
+                      akunData?['username'] ?? 'Memuat...',
                       style: TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
@@ -40,7 +79,7 @@ class WargaAkunPage extends StatelessWidget {
                       ),
                     ),
                     Text(
-                      "krisnaputra@gmail.com",
+                      akunData?['email'] ?? 'Memuat...',
                       style: TextStyle(
                         fontSize: 14,
                         color: Colors.grey.shade700,
@@ -52,11 +91,14 @@ class WargaAkunPage extends StatelessWidget {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => WargaEditAkunPage(),
+                            builder:
+                                (context) => WargaEditProfilPage(
+                                  akunData: akunData,
+                                  profilData: profilData,
+                                ),
                           ),
                         );
                       },
-
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.grey.shade300,
                         foregroundColor: Colors.black,
@@ -136,7 +178,12 @@ class WargaAkunPage extends StatelessWidget {
                 children: [
                   _buildMenuItem(Icons.settings, "Pengaturan"),
                   _buildMenuItem(Icons.mail_outline, "Notifikasi"),
-                  _buildMenuItem(Icons.logout, "Logout", iconColor: Colors.red),
+                  _buildMenuItem(
+                    Icons.logout,
+                    "Logout",
+                    iconColor: Colors.red,
+                    onTap: () => logout(context),
+                  ),
                 ],
               ),
             ],
@@ -146,7 +193,12 @@ class WargaAkunPage extends StatelessWidget {
     );
   }
 
-  Widget _buildMenuItem(IconData icon, String title, {Color? iconColor}) {
+  Widget _buildMenuItem(
+    IconData icon,
+    String title, {
+    Color? iconColor,
+    VoidCallback? onTap,
+  }) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 16.0),
       child: Container(
@@ -168,9 +220,7 @@ class WargaAkunPage extends StatelessWidget {
             size: 16,
             color: Colors.green.shade900,
           ),
-          onTap: () {
-            // Tambahkan aksi jika diperlukan
-          },
+          onTap: onTap,
         ),
       ),
     );

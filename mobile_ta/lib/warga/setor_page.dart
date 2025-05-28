@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
-import '../widget/eduCard_widget.dart';
+import 'package:mobile_ta/warga/setor_jemput/index_page.dart';
+import '../warga/setor_langsung/index_page.dart';
 
 class WargaSetorPage extends StatelessWidget {
+  final Map<String, dynamic>? akunData;
+  const WargaSetorPage({Key? key, this.akunData}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -30,7 +34,10 @@ class WargaSetorPage extends StatelessWidget {
             // Kartu Setor Langsung sebagai tombol
             InkWell(
               onTap: () {
-                // Aksi ketika Setor Langsung ditekan
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => WargaSetorLangsung()),
+                );
               },
               borderRadius: BorderRadius.circular(16),
               child: Container(
@@ -64,7 +71,10 @@ class WargaSetorPage extends StatelessWidget {
             // Kartu Setor Jemput sebagai tombol
             InkWell(
               onTap: () {
-                // Aksi ketika Setor Jemput ditekan
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => WargaSetorJemput()),
+                );
               },
               borderRadius: BorderRadius.circular(16),
               child: Container(

@@ -1,8 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:mobile_ta/warga/artikel/kumpulan_page.dart';
+import 'package:mobile_ta/warga/video/kumpulan_page.dart';
 import 'package:mobile_ta/widget/videoCard_widget.dart';
 import '../widget/eduCard_widget.dart';
 
 class WargaEdukasiPage extends StatelessWidget {
+  final Map<String, dynamic>? akunData;
+  const WargaEdukasiPage({Key? key, this.akunData}) : super(key: key);
+  
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -58,19 +63,29 @@ class WargaEdukasiPage extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        "Edukasi Terbaru",
+                        "Video Terbaru",
                         style: TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
                           color: Colors.green.shade800,
                         ),
                       ),
-                      Text(
-                        "Lainnya",
-                        style: TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w500,
-                          color: Colors.green.shade600,
+                      TextButton(
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => WargaKumpulanVideoPage(),
+                            ),
+                          );
+                        },
+                        child: Text(
+                          "Lainnya",
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w500,
+                            color: Colors.green.shade600,
+                          ),
                         ),
                       ),
                     ],
@@ -119,9 +134,42 @@ class WargaEdukasiPage extends StatelessWidget {
                     ),
                   ),
                   SizedBox(height: 12),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        "Artikel Terbaru",
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.green.shade800,
+                        ),
+                      ),
+                      TextButton(
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => WargaKumpulanArtikelPage(),
+                            ),
+                          );
+                        },
+                        child: Text(
+                          "Lainnya",
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w500,
+                            color: Colors.green.shade600,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: 12),
+
                   Wrap(
-                    spacing: 12, // Jarak horizontal antar card
-                    runSpacing: 12, // Jarak vertikal antar baris
+                    spacing: 5, // Jarak horizontal antar card
+                    runSpacing: 5, // Jarak vertikal antar baris
                     children: [
                       EduCard(
                         imageUrl:

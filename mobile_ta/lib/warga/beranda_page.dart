@@ -1,8 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:mobile_ta/warga/chatbot_page.dart';
 import 'package:mobile_ta/widget/videoCard_widget.dart';
 import '../widget/eduCard_widget.dart';
 
 class WargaBerandaPage extends StatelessWidget {
+  final Map<String, dynamic>? akunData;
+  final Map<String, dynamic>? profilData;
+  const WargaBerandaPage({Key? key, this.akunData, this.profilData})
+    : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -19,14 +25,15 @@ class WargaBerandaPage extends StatelessWidget {
                   radius: 20,
 
                   backgroundImage: NetworkImage(
-                    'https://www.perfocal.com/blog/content/images/2021/01/Perfocal_17-11-2019_TYWFAQ_100_standard-3.jpg',
+                    profilData?['gambar_url'] ??
+                        'https://i.pinimg.com/736x/8a/e9/e9/8ae9e92fa4e69967aa61bf2bda967b7b.jpg',
                   ),
                   // child: Icon(Icons.person, color: Colors.greenAccent.shade400),
                 ),
                 SizedBox(width: 10),
                 Text(
-                  'Warga Biasa',
-                  style: TextStyle(
+                  akunData?['username'] ?? 'Memuat...',
+                  style: const TextStyle(
                     color: Colors.black,
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
@@ -159,12 +166,17 @@ class WargaBerandaPage extends StatelessWidget {
                           color: Colors.green.shade800,
                         ),
                       ),
-                      Text(
-                        "Lainnya",
-                        style: TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w500,
-                          color: Colors.green.shade600,
+                      TextButton(
+                        onPressed: () {
+                          // Aksi saat ditekan
+                        },
+                        child: Text(
+                          "Lainnya",
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w500,
+                            color: Colors.green.shade600,
+                          ),
                         ),
                       ),
                     ],
@@ -204,27 +216,22 @@ class WargaBerandaPage extends StatelessWidget {
                           imageUrl: imageUrls[index],
                           title: titles[index],
                           date: dates[index],
-                          onTap: () {
-                            // Tindakan saat tombol "Tonton Video" ditekan
-                            print('Menonton: ${titles[index]}');
-                          },
+                          onTap: () {},
                         );
                       },
                     ),
                   ),
                   SizedBox(height: 12),
                   Wrap(
-                    spacing: 12, // Jarak horizontal antar card
-                    runSpacing: 12, // Jarak vertikal antar baris
+                    spacing: 5, // Jarak horizontal antar card
+                    runSpacing: 5, // Jarak vertikal antar baris
                     children: [
                       EduCard(
                         imageUrl:
                             'https://i.pinimg.com/736x/89/5c/c5/895cc5d9dcf9bcc8fa4a717ffbf9b9b1.jpg',
                         title: 'Menjaga Lingkungan',
                         date: '12 Mei 2025',
-                        onTap: () {
-                          // Aksi ketika artikel dibaca
-                        },
+                        onTap: () {},
                       ),
                       EduCard(
                         imageUrl:
@@ -251,6 +258,27 @@ class WargaBerandaPage extends StatelessWidget {
             ),
           ],
         ),
+      ),
+      floatingActionButton: Column(
+        mainAxisAlignment: MainAxisAlignment.end,
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: [
+          FloatingActionButton(
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => ChatbotPage()),
+              );
+            },
+            backgroundColor: Colors.green,
+            tooltip: 'Buka Chatbot',
+            child: const Icon(
+              Icons.smart_toy,
+              color: Colors.white,
+            ), // Icon chatbot AI
+          ),
+          const SizedBox(height: 16), // Jarak dari bawah
+        ],
       ),
     );
   }
