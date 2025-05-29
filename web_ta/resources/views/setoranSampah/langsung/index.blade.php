@@ -27,10 +27,8 @@
                 <!-- Filter Role -->
                 <div>
                     <span class="font-medium mr-2">Jenis Setoran:</span>
-                    <button
-                        class="bg-gray-200 text-sm px-3 py-1 rounded hover:bg-green-500 hover:text-white transition">Langsung</button>
-                    <button
-                        class="bg-gray-200 text-sm px-3 py-1 rounded hover:bg-green-500 hover:text-white transition">Layanan
+                    <button class=" text-sm px-3 py-1 rounded bg-green-500 text-white">Langsung</button>
+                    <button class="bg-gray-200 text-sm px-3 py-1 rounded hover:bg-green-500 hover:text-white transition">
                         Jemput</button>
 
                 </div>
@@ -43,9 +41,9 @@
                     <thead class="bg-green-600 text-white">
                         <tr>
                             <th class="px-5 py-3">#</th>
-                            <th class="px-5 py-3">Nama</th>
-                            <th class="px-5 py-3">Email</th>
-                            <th class="px-5 py-3">Role</th>
+                            <th class="px-5 py-3">Username</th>
+                            <th class="px-5 py-3">Tanggal Pengajuan</th>
+                            <th class="px-5 py-3">Status</th>
                             <th class="px-5 py-3">Aksi</th>
                         </tr>
                     </thead>
@@ -53,36 +51,32 @@
                         <tr class="hover:bg-gray-50">
                             <td class="px-5 py-3">1</td>
                             <td class="px-5 py-3">Ahmad Rudi</td>
-                            <td class="px-5 py-3">ahmad@example.com</td>
-                            <td class="px-5 py-3">Admin</td>
+                            <td class="px-5 py-3">Kamis 29/05/2025</td>
+                            <td class="px-5 py-3 text-green-600">Selesai</td>
                             <td class="px-5 py-3 space-x-2">
-                                <a href="#" class="text-yellow-600 hover:underline">Edit</a>
-                                <a href="#" class="text-blue-600 hover:underline">Profil</a>
-                                <a href="#" class="text-red-600 hover:underline">Hapus</a>
+                                <a href="#" class="text-blue-600 hover:underline">Detail</a>
                             </td>
                         </tr>
                         <tr class="hover:bg-gray-50">
                             <td class="px-5 py-3">2</td>
-                            <td class="px-5 py-3">Siti Aminah</td>
-                            <td class="px-5 py-3">siti@example.com</td>
-                            <td class="px-5 py-3">Petugas</td>
+                            <td class="px-5 py-3">Ahmad Rudi</td>
+                            <td class="px-5 py-3">Kamis 29/05/2025</td>
+                            <td class="px-5 py-3 text-yellow-600">Diproses</td>
                             <td class="px-5 py-3 space-x-2">
-                                <a href="#" class="text-yellow-600 hover:underline">Edit</a>
-                                <a href="#" class="text-blue-600 hover:underline">Profil</a>
-                                <a href="#" class="text-red-600 hover:underline">Hapus</a>
+                                <a href="#" class="text-blue-600 hover:underline">Detail</a>
                             </td>
                         </tr>
                         <tr class="hover:bg-gray-50">
                             <td class="px-5 py-3">3</td>
-                            <td class="px-5 py-3">Budi Santoso</td>
-                            <td class="px-5 py-3">budi@example.com</td>
-                            <td class="px-5 py-3">Nasabah</td>
+                            <td class="px-5 py-3">Ahmad Rudi</td>
+                            <td class="px-5 py-3">Kamis 29/05/2025</td>
+                            <td class="px-5 py-3 text-red-600">Dibatalkan</td>
                             <td class="px-5 py-3 space-x-2">
-                                <a href="#" class="text-yellow-600 hover:underline">Edit</a>
-                                <a href="#" class="text-blue-600 hover:underline">Profil</a>
-                                <a href="#" class="text-red-600 hover:underline">Hapus</a>
+                                <a href="#" class="text-blue-600 hover:underline">Detail</a>
                             </td>
                         </tr>
+
+
                     </tbody>
                 </table>
             </div>

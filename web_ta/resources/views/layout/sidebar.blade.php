@@ -15,11 +15,12 @@
                     class="flex items-center px-4 py-2 text-lg rounded-lg hover:bg-green-600 hover:text-white transition-colors border-b border-gray-700">
                     <i class="ri-user-line mr-3"></i> Akun
                 </a>
-                <a href="#"
+                <a href="{{ route('Master-Data') }}"
                     class="flex items-center px-4 py-2 text-lg rounded-lg hover:bg-green-600 hover:text-white transition-colors border-b border-gray-700">
-                    <i class="ri-bank-line mr-3"></i> Data Bank Sampah
+                    <i class="ri-database-2-line mr-3"></i> Master Data
+
                 </a>
-                <a href="#"
+                <a href="{{ route('Setor-Langsung') }}"
                     class="flex items-center px-4 py-2 text-lg rounded-lg hover:bg-green-600 hover:text-white transition-colors border-b border-gray-700">
                     <i class="ri-recycle-line mr-3"></i> Setoran Sampah
                 </a>
@@ -44,7 +45,7 @@
                 </div>
             </div>
             <div class="flex flex-col space-y-2">
-                <a href="#"
+                <a href="{{ route('Profil') }}"
                     class="text-sm bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700 text-center transition">Profil</a>
                 <form method="POST" action="/logout">
                     @csrf

@@ -20,7 +20,8 @@
                 <div class="flex w-full md:w-1/2 gap-2">
                     <input type="text" placeholder="Cari nama atau email..."
                         class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500">
-                    <button class="bg-gray-200 cursor-pointer text-sm px-4 py-2 rounded hover:bg-green-600 hover:text-white transition">
+                    <button
+                        class="bg-gray-200 cursor-pointer text-sm px-4 py-2 rounded hover:bg-green-600 hover:text-white transition">
                         Search
                     </button>
                 </div>
@@ -60,7 +61,8 @@
                                 <td class="px-5 py-3 space-x-2">
                                     <a href="{{ route('Akun-Edit', $akun->id) }}"
                                         class="text-yellow-600 hover:underline">Edit</a>
-                                    <a href="#" class="text-blue-600 hover:underline">Profil</a>
+                                    <a href="{{ route('Profil-Akun', $akun->id) }}"
+                                        class="text-blue-600 hover:underline">Profil</a>
                                     <form action="{{ route('Akun-Hapus', $akun->id) }}" method="POST" class="inline">
                                         @csrf
                                         @method('DELETE')

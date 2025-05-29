@@ -4,12 +4,13 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class AkunController extends Controller
 {
     public function index()
     {
-        $datas = User::all();
+        $datas = User::where('id', '!=', Auth::user()->id)->get();
 
         return view('akun/index', ['headerTitle' => 'Manajemen Akun', 'data' => $datas]);
     }
@@ -55,7 +56,8 @@ class AkunController extends Controller
         $datas->update($validated);
         return redirect()->route('Akun');
     }
-    public function destroy($id){
+    public function destroy($id)
+    {
         $datas = User::find($id);
         $datas->delete();
         return redirect()->back();
