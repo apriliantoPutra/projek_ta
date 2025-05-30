@@ -5,7 +5,9 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\Edukasi\ArtikelController;
 use App\Http\Controllers\Edukasi\VideoController;
 use App\Http\Controllers\LoginController;
+use App\Http\Controllers\Master\BankSampahController;
 use App\Http\Controllers\Master\DataController;
+use App\Http\Controllers\Master\JenisSampahController;
 use App\Http\Controllers\ProfilController;
 use App\Http\Controllers\Setoran\SetorLangsungController;
 use Illuminate\Support\Facades\Route;
@@ -18,6 +20,19 @@ Route::middleware(['authorization', 'admin'])->group(function () {
     // Master Data
     Route::prefix('/master')->group(function () {
         Route::get('/', [DataController::class, 'index'])->name('Master-Data');
+
+        Route::get('/jenis-sampah', [JenisSampahController::class, 'index'])->name('Jenis-Sampah');
+        Route::get('/jenis-sampah-tambah', [JenisSampahController::class, 'create'])->name('Jenis-Sampah-Tambah');
+        Route::post('/jenis-sampah-store', [JenisSampahController::class, 'store'])->name('Jenis-Sampah-Store');
+        Route::get('/jenis-sampah-edit/{id}', [JenisSampahController::class, 'edit'])->name('Jenis-Sampah-Edit');
+        Route::put('/jenis-sampah-update/{id}', [JenisSampahController::class, 'update'])->name('Jenis-Sampah-Update');
+        Route::delete('/jenis-sampah-delete/{id}', [JenisSampahController::class, 'destroy'])->name('Jenis-Sampah-delete');
+
+        Route::get('/bank-sampah', [BankSampahController::class, 'index'])->name('Bank-Sampah');
+        Route::get('/bank-sampah-tambah', [BankSampahController::class, 'create'])->name('Bank-Sampah-Tambah');
+        Route::post('/bank-sampah-store', [BankSampahController::class, 'store'])->name('Bank-Sampah-Store');
+        Route::get('/bank-sampah-edit', [BankSampahController::class, 'edit'])->name('Bank-Sampah-Edit');
+        Route::put('/bank-sampah-update/{id}', [BankSampahController::class, 'update'])->name('Bank-Sampah-Update');
     });
 
     Route::get('/setoran-langsung', [SetorLangsungController::class, 'index'])->name('Setor-Langsung');
@@ -32,6 +47,11 @@ Route::middleware(['authorization', 'admin'])->group(function () {
     Route::delete('/akun-hapus/{id}', [AkunController::class, 'destroy',])->name('Akun-Hapus');
 
     Route::get('/profil', [ProfilController::class, 'index'])->name('Profil');
+    Route::get('/profil-tambah', [ProfilController::class, 'create'])->name('Profil-Tambah');
+    Route::post('/profil-store', [ProfilController::class, 'store'])->name('Profil-Store');
+    Route::get('/profil-edit', [ProfilController::class, 'edit'])->name('Profil-Edit');
+    Route::put('/profil-update/{id}', [ProfilController::class, 'update'])->name('Profil-Update');
+
     Route::get('/profil-akun/{id}', [ProfilController::class, 'show'])->name('Profil-Akun');
 
     Route::get('/artikel', [ArtikelController::class, 'index',])->name('Artikel');

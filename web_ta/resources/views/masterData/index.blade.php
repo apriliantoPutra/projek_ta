@@ -21,7 +21,7 @@
                         <p class="text-sm text-gray-600">Kelola data kategori jenis sampah yang tersedia dalam sistem.</p>
                     </div>
                     <div class="mt-4 text-center">
-                        <a href="#"
+                        <a href="{{ route('Jenis-Sampah') }}"
                             class="inline-block bg-green-600 hover:bg-green-700 text-white text-sm font-semibold px-4 py-2 rounded-lg shadow">
                             Kelola
                         </a>
@@ -36,7 +36,7 @@
                         <p class="text-sm text-gray-600">Atur informasi bank sampah aktif di berbagai lokasi.</p>
                     </div>
                     <div class="mt-4 text-center">
-                        <a href="#"
+                        <a href="{{ route('Bank-Sampah') }}"
                             class="inline-block bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold px-4 py-2 rounded-lg shadow">
                             Kelola
                         </a>

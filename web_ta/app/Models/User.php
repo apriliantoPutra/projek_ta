@@ -3,10 +3,11 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+use App\Models\Master\BankSampah;
+use Laravel\Sanctum\HasApiTokens;
+use Illuminate\Notifications\Notifiable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
-use Illuminate\Notifications\Notifiable;
-use Laravel\Sanctum\HasApiTokens;
 
 class User extends Authenticatable
 {
@@ -18,7 +19,7 @@ class User extends Authenticatable
      *
      * @var list<string>
      */
-    protected $table= 'akun';
+    protected $table = 'akun';
     protected $fillable = [
         'username',
         'email',
@@ -47,5 +48,15 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
+    }
+
+    public function profil()
+    {
+        return $this->hasOne(Profil::class, 'akun_id'); // profil.akun_id mengarah ke user.id
+    }
+
+    public function bankSampah()
+    {
+        return $this->hasOne(BankSampah::class, 'admin_id'); // bank_sampah.admin_id = user.id
     }
 }

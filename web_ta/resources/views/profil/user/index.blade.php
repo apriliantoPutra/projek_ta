@@ -14,14 +14,10 @@
                     <!-- Foto & Nama -->
                     <div class="flex flex-col items-center">
                         <img src="{{ $profil->gambar_pengguna ? asset('storage/' . $profil->gambar_pengguna) : 'https://i.pravatar.cc/150?img=12' }}"
-                            alt="Foto Profil" class="rounded-full w-44 h-44 shadow-lg object-cover border-4 border-green-100">
+                            alt="Foto Profil" class="rounded-full w-52 h-52 shadow-lg object-cover border-4 border-green-100">
                         <h3 class="mt-4 text-xl font-semibold text-gray-700">
                             {{ $profil->nama_pengguna ?? 'Nama Tidak Diketahui' }}</h3>
                         <p class="text-sm text-gray-500">{{ ucfirst($akun->role) }}</p>
-                        <a href="{{ route('Profil-Edit') }}"
-                            class="mt-4 inline-block px-5 py-2 bg-blue-600 text-white text-sm font-semibold rounded-md shadow hover:bg-blue-700 transition">
-                            Edit Profil
-                        </a>
                     </div>
 
                     <!-- Informasi Akun -->

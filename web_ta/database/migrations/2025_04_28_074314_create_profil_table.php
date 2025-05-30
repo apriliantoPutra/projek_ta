@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('profil', function (Blueprint $table) {
             $table->id();
-            $table->bigInteger("akun_id")->constrained('akun');
+            $table->foreignId("akun_id")->constrained('akun');
             $table->string('nama_pengguna')->unique();
             $table->string('alamat_pengguna');
             $table->string('no_hp_pengguna')->unique();

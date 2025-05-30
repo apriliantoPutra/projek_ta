@@ -13,6 +13,7 @@ return new class extends Migration
     {
         Schema::create('bank_sampah', function (Blueprint $table) {
             $table->id();
+            $table->foreignId("admin_id")->constrained('akun');
             $table->string('nama_bank_sampah');
             $table->text('deskripsi_bank_sampah');
             $table->string('alamat_bank_sampah');
