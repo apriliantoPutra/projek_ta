@@ -8,8 +8,13 @@ import '../auth/login_page.dart'; // Sesuaikan path halaman login kamu
 class WargaAkunPage extends StatelessWidget {
   final Map<String, dynamic>? akunData;
   final Map<String, dynamic>? profilData;
-  const WargaAkunPage({Key? key, this.akunData, this.profilData})
-    : super(key: key);
+  final Map<String, dynamic>? saldoData;
+  const WargaAkunPage({
+    Key? key,
+    this.akunData,
+    this.profilData,
+    this.saldoData,
+  }) : super(key: key);
 
   Future<void> logout(BuildContext context) async {
     final prefs = await SharedPreferences.getInstance();
@@ -65,10 +70,12 @@ class WargaAkunPage extends StatelessWidget {
                     CircleAvatar(
                       radius: 40,
                       backgroundImage: NetworkImage(
-                        profilData?['gambar_url'] ??
-                            'https://i.pinimg.com/736x/8a/e9/e9/8ae9e92fa4e69967aa61bf2bda967b7b.jpg',
+                        (profilData?['gambar_pengguna'] ?? '').isNotEmpty
+                            ? profilData!['gambar_url']
+                            : 'https://i.pinimg.com/736x/8a/e9/e9/8ae9e92fa4e69967aa61bf2bda967b7b.jpg',
                       ),
                     ),
+
                     SizedBox(height: 8),
                     Text(
                       akunData?['username'] ?? 'Memuat...',
@@ -133,13 +140,16 @@ class WargaAkunPage extends StatelessWidget {
                     ),
                     SizedBox(height: 4),
                     Text(
-                      "Rp300.000",
-                      style: TextStyle(
+                      saldoData != null
+                          ? 'Rp ${saldoData!['total_saldo']}'
+                          : 'Memuat...',
+                      style: const TextStyle(
                         fontSize: 24,
                         fontWeight: FontWeight.bold,
                         color: Colors.white,
                       ),
                     ),
+
                     SizedBox(height: 12),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,

@@ -6,8 +6,13 @@ import '../widget/eduCard_widget.dart';
 class WargaBerandaPage extends StatelessWidget {
   final Map<String, dynamic>? akunData;
   final Map<String, dynamic>? profilData;
-  const WargaBerandaPage({Key? key, this.akunData, this.profilData})
-    : super(key: key);
+  final Map<String, dynamic>? saldoData;
+  const WargaBerandaPage({
+    Key? key,
+    this.akunData,
+    this.profilData,
+    this.saldoData,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -23,13 +28,13 @@ class WargaBerandaPage extends StatelessWidget {
               children: [
                 CircleAvatar(
                   radius: 20,
-
                   backgroundImage: NetworkImage(
-                    profilData?['gambar_url'] ??
-                        'https://i.pinimg.com/736x/8a/e9/e9/8ae9e92fa4e69967aa61bf2bda967b7b.jpg',
+                    (profilData?['gambar_pengguna'] ?? '').isNotEmpty
+                        ? profilData!['gambar_url']
+                        : 'https://i.pinimg.com/736x/8a/e9/e9/8ae9e92fa4e69967aa61bf2bda967b7b.jpg',
                   ),
-                  // child: Icon(Icons.person, color: Colors.greenAccent.shade400),
                 ),
+
                 SizedBox(width: 10),
                 Text(
                   akunData?['username'] ?? 'Memuat...',
@@ -99,7 +104,9 @@ class WargaBerandaPage extends StatelessWidget {
                     ),
                   ),
                   Text(
-                    "Rp300.000,-",
+                    saldoData != null
+                        ? 'Rp ${saldoData!['total_saldo']}'
+                        : 'Memuat...',
                     style: TextStyle(
                       fontSize: 22,
                       fontWeight: FontWeight.bold,

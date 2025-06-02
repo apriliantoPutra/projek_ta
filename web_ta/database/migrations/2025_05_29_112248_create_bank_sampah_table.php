@@ -17,7 +17,7 @@ return new class extends Migration
             $table->string('nama_bank_sampah');
             $table->text('deskripsi_bank_sampah');
             $table->string('alamat_bank_sampah');
-            $table->string('gps_bank_sampah');
+            $table->string('koordinat_bank_sampah');
             $table->timestamps();
         });
     }

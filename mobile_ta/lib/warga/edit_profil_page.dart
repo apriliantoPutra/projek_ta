@@ -206,8 +206,11 @@ class _WargaEditProfilPageState extends State<WargaEditProfilPage> {
                           _profileImage != null
                               ? FileImage(_profileImage!)
                               : NetworkImage(
-                                    widget.profilData?['gambar_url'] ??
-                                        'https://i.pinimg.com/736x/8a/e9/e9/8ae9e92fa4e69967aa61bf2bda967b7b.jpg',
+                                    (widget.profilData?['gambar_pengguna'] ??
+                                                '')
+                                            .isNotEmpty
+                                        ? widget.profilData!['gambar_url']
+                                        : 'https://i.pinimg.com/736x/8a/e9/e9/8ae9e92fa4e69967aa61bf2bda967b7b.jpg',
                                   )
                                   as ImageProvider,
                     ),

@@ -4,6 +4,7 @@ use App\Http\Controllers\Api\ApiAkunController;
 use App\Http\Controllers\Api\ArtikelController;
 use App\Http\Controllers\Api\LoginController as ApiLoginController;
 use App\Http\Controllers\Api\ProfilController as ApiProfilController;
+use App\Http\Controllers\Api\SaldoController;
 use App\Http\Controllers\Api\VideoController;
 use Illuminate\Support\Facades\Route;
 
@@ -21,6 +22,7 @@ Route::prefix('v1')->group(function () {
         });
 
         Route::get('/akun', [ApiAkunController::class, 'show']);
+        Route::get('/saldo', [SaldoController::class, 'show']);
 
         // Logout
         Route::post('logout', [ApiLoginController::class, 'logout']);
