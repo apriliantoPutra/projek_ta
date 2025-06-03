@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:mobile_ta/warga/chatbot_page.dart';
+import 'package:mobile_ta/warga/histori_setor_page.dart';
 import 'package:mobile_ta/widget/videoCard_widget.dart';
 import '../widget/eduCard_widget.dart';
 
@@ -135,7 +136,18 @@ class WargaBerandaPage extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.spaceAround,
                     children: [
                       _menuItem(Icons.calculate, "Kalkulator"),
-                      _menuItem(Icons.history, "Histori"),
+                      _menuItem(
+                        Icons.history,
+                        "Histori",
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => WargaHistoriSetor(),
+                            ),
+                          );
+                        },
+                      ),
                       _menuItem(Icons.info_outline, "Info"),
                     ],
                   ),
@@ -290,21 +302,24 @@ class WargaBerandaPage extends StatelessWidget {
     );
   }
 
-  Widget _menuItem(IconData icon, String title) {
-    return Column(
-      children: [
-        Container(
-          height: 60,
-          width: 60,
-          decoration: BoxDecoration(
-            color: Colors.greenAccent,
-            borderRadius: BorderRadius.circular(12),
+  Widget _menuItem(IconData icon, String title, {VoidCallback? onTap}) {
+    return GestureDetector(
+      onTap: onTap ?? () {},
+      child: Column(
+        children: [
+          Container(
+            height: 60,
+            width: 60,
+            decoration: BoxDecoration(
+              color: Colors.greenAccent,
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Icon(icon, size: 30),
           ),
-          child: Icon(icon, size: 30),
-        ),
-        SizedBox(height: 8),
-        Text(title, textAlign: TextAlign.center),
-      ],
+          const SizedBox(height: 8),
+          Text(title, textAlign: TextAlign.center),
+        ],
+      ),
     );
   }
 }

@@ -1,11 +1,29 @@
 import 'package:flutter/material.dart';
+import 'package:mobile_ta/warga/setor_langsung/detail_page.dart';
 
-class WargaSetorLangsung extends StatelessWidget {
+class WargaSetorLangsung extends StatefulWidget {
   const WargaSetorLangsung({super.key});
 
   @override
+  State<WargaSetorLangsung> createState() => _WargaSetorLangsungState();
+}
+
+class _WargaSetorLangsungState extends State<WargaSetorLangsung> {
+  final TextEditingController _tanggalController = TextEditingController();
+
+  final List<String> _lokasiList = [
+    'Bank Sampah Kecamatan Tembalang',
+    'Bank Sampah Kelurahan Mangunharjo',
+    'Bank Sampah Kecamatan Banyumanik',
+  ];
+  String? _selectedLokasi;
+  void initState() {
+    super.initState();
+    _selectedLokasi = _lokasiList[0];
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final TextEditingController _tanggalController = TextEditingController();
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.greenAccent.shade400,
@@ -95,6 +113,31 @@ class WargaSetorLangsung extends StatelessWidget {
             ),
 
             const SizedBox(height: 24),
+            Text(
+              "Catatan Petugas (Opsional)",
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+
+            const SizedBox(height: 8),
+
+            // Input catatan
+            Container(
+              height: 120,
+              decoration: BoxDecoration(
+                color: Colors.greenAccent.shade100,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              padding: const EdgeInsets.symmetric(horizontal: 12),
+              child: TextFormField(
+                maxLines: null,
+                keyboardType: TextInputType.multiline,
+                decoration: InputDecoration(
+                  border: InputBorder.none,
+                  hintText: "Masukkan catatan untuk petugas...",
+                ),
+              ),
+            ),
+            const SizedBox(height: 24),
 
             // Label lokasi
             Text(
@@ -111,12 +154,23 @@ class WargaSetorLangsung extends StatelessWidget {
                 borderRadius: BorderRadius.circular(12),
               ),
               padding: const EdgeInsets.symmetric(horizontal: 12),
-              child: TextFormField(
-                initialValue: "Bank Sampah Kecamatan Tembalang",
-                decoration: InputDecoration(
-                  border: InputBorder.none,
-                  hintText: "Lokasi",
-                ),
+              child: DropdownButtonFormField<String>(
+                value: _selectedLokasi,
+                decoration: const InputDecoration(border: InputBorder.none),
+                icon: const Icon(Icons.arrow_drop_down),
+                dropdownColor: Colors.greenAccent.shade100,
+                items:
+                    _lokasiList.map((String value) {
+                      return DropdownMenuItem<String>(
+                        value: value,
+                        child: Text(value),
+                      );
+                    }).toList(),
+                onChanged: (newValue) {
+                  setState(() {
+                    _selectedLokasi = newValue;
+                  });
+                },
               ),
             ),
 
@@ -130,7 +184,12 @@ class WargaSetorLangsung extends StatelessWidget {
             const SizedBox(height: 32),
             ElevatedButton(
               onPressed: () {
-                // Aksi konfirmasi
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => WargaDetailSetorLangsung(),
+                  ),
+                );
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.greenAccent.shade400,
@@ -141,44 +200,6 @@ class WargaSetorLangsung extends StatelessWidget {
               ),
               child: const Text("Selanjutnya"),
             ),
-            // Tombol Konfirmasi dan Batalkan
-            // Row(
-            //   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            //   children: [
-            //     Expanded(
-            //       child: ElevatedButton(
-            //         onPressed: () {
-            //           // Aksi konfirmasi
-            //         },
-            //         style: ElevatedButton.styleFrom(
-            //           backgroundColor: Colors.greenAccent.shade400,
-            //           padding: const EdgeInsets.symmetric(vertical: 14),
-            //           shape: RoundedRectangleBorder(
-            //             borderRadius: BorderRadius.circular(12),
-            //           ),
-            //         ),
-            //         child: const Text("Konfirmasi"),
-            //       ),
-            //     ),
-            //     const SizedBox(width: 16),
-            //     Expanded(
-            //       child: ElevatedButton(
-            //         onPressed: () {
-            //           // Aksi batalkan
-            //         },
-            //         style: ElevatedButton.styleFrom(
-            //           backgroundColor: Colors.orange,
-            //           foregroundColor: Colors.white,
-            //           padding: const EdgeInsets.symmetric(vertical: 14),
-            //           shape: RoundedRectangleBorder(
-            //             borderRadius: BorderRadius.circular(12),
-            //           ),
-            //         ),
-            //         child: const Text("Batalkan"),
-            //       ),
-            //     ),
-            //   ],
-            // ),
           ],
         ),
       ),
