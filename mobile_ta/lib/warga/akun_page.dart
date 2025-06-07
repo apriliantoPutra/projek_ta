@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:mobile_ta/constants/constants.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'edit_profil_page.dart';
 import '../auth/login_page.dart'; // Sesuaikan path halaman login kamu
@@ -25,7 +26,7 @@ class WargaAkunPage extends StatelessWidget {
     }
 
     final response = await http.post(
-      Uri.parse('http://127.0.0.1:8000/api/v1/logout'),
+      Uri.parse('$baseUrl/logout'),
       headers: {'Authorization': 'Bearer $token', 'Accept': 'application/json'},
     );
 

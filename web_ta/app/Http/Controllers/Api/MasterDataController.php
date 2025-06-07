@@ -18,6 +18,23 @@ class MasterDataController extends Controller
             'data' => $jenisSampah
         ]);
     }
+    public function jenisSampahShow($id)
+    {
+        $jenisSampah = JenisSampah::find($id);
+
+        if (!$jenisSampah) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Data tidak ditemukan'
+            ], 404);
+        }
+
+        return response()->json([
+            'success' => true,
+            'data' => $jenisSampah
+        ]);
+    }
+
     public function bankSampahIndex()
     {
         $bankSampah = BankSampah::all();
@@ -26,5 +43,21 @@ class MasterDataController extends Controller
             'data' => $bankSampah
         ]);
     }
-    public function bankSampahDetail() {}
+    public function bankSampahShow($id)
+    {
+        $bankSampah = BankSampah::with(['user.profil']) // eager load user dan profil user
+            ->find($id);
+
+        if (!$bankSampah) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Data tidak ditemukan'
+            ], 404);
+        }
+
+        return response()->json([
+            'success' => true,
+            'data' => $bankSampah
+        ]);
+    }
 }

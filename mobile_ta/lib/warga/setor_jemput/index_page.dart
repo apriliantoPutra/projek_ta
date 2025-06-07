@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:mobile_ta/constants/constants.dart';
 import 'package:mobile_ta/warga/setor_jemput/konfirmasi_page.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -28,7 +29,7 @@ class _WargaSetorJemputState extends State<WargaSetorJemput> {
     }
 
     final response = await http.get(
-      Uri.parse('http://127.0.0.1:8000/api/v1/jenis-sampah'),
+      Uri.parse('$baseUrl/jenis-sampah'),
       headers: {'Authorization': 'Bearer $token', 'Accept': 'application/json'},
     );
 

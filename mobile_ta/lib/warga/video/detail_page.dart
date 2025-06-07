@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:mobile_ta/constants/constants.dart';
 import 'package:video_player/video_player.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -25,7 +26,7 @@ class _WargaDetailVideoPageState extends State<WargaDetailVideoPage> {
 
   Future<void> fetchVideoDetail() async {
     final response = await http.get(
-      Uri.parse('http://127.0.0.1:8000/api/v1/video/${widget.videoId}'),
+      Uri.parse('$baseUrl/video/${widget.videoId}'),
     );
 
     if (response.statusCode == 200) {

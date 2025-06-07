@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:mobile_ta/constants/constants.dart';
 import 'package:mobile_ta/widget/warga_main_widget.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -21,7 +22,7 @@ class _RegisterPageState extends State<RegisterPage> {
   bool _isLoading = false;
 
   Future<void> registerUser() async {
-    final url = Uri.parse('http://127.0.0.1:8000/api/v1/register');
+    final url = Uri.parse('$baseUrl/register');
 
     setState(() {
       _isLoading = true;

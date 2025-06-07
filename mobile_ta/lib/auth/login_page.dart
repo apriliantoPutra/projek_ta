@@ -5,6 +5,7 @@ import 'package:mobile_ta/auth/register_page.dart';
 import 'package:mobile_ta/widget/petugas_main_widget.dart';
 import 'package:mobile_ta/widget/warga_main_widget.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../constants/constants.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -24,7 +25,7 @@ class _LoginPageState extends State<LoginPage> {
     });
 
     final response = await http.post(
-      Uri.parse('http://127.0.0.1:8000/api/v1/authenticate'),
+      Uri.parse('$baseUrl/authenticate'),
       body: {
         'username': _usernameController.text,
         'password': _passwordController.text,

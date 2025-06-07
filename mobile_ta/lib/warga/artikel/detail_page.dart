@@ -3,6 +3,7 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:intl/intl.dart';
 import 'package:flutter_html/flutter_html.dart';
+import 'package:mobile_ta/constants/constants.dart';
 
 class WargaDetailArtikelPage extends StatefulWidget {
   final int id;
@@ -18,7 +19,7 @@ class _WargaDetailArtikelPageState extends State<WargaDetailArtikelPage> {
 
   Future<void> fetchArtikelDetail() async {
     final response = await http.get(
-      Uri.parse('http://127.0.0.1:8000/api/v1/artikel/${widget.id}'),
+      Uri.parse('$baseUrl/artikel/${widget.id}'),
     );
 
     if (response.statusCode == 200) {

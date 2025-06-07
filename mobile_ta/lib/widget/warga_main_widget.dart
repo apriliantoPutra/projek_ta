@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:mobile_ta/constants/constants.dart';
 import 'package:mobile_ta/warga/akun_page.dart';
 import 'package:mobile_ta/warga/edukasi_page.dart';
 import 'package:mobile_ta/warga/setor_page.dart';
@@ -67,7 +68,7 @@ class _WargaMainWrapperState extends State<WargaMainWrapper> {
     }
 
     final response = await http.get(
-      Uri.parse('http://127.0.0.1:8000/api/v1/profil'),
+      Uri.parse('$baseUrl/profil'),
       headers: {'Authorization': 'Bearer $token', 'Accept': 'application/json'},
     );
 
@@ -92,7 +93,7 @@ class _WargaMainWrapperState extends State<WargaMainWrapper> {
     }
 
     final response = await http.get(
-      Uri.parse('http://127.0.0.1:8000/api/v1/akun'),
+      Uri.parse('$baseUrl/akun'),
       headers: {'Authorization': 'Bearer $token', 'Accept': 'application/json'},
     );
 
@@ -115,7 +116,7 @@ class _WargaMainWrapperState extends State<WargaMainWrapper> {
     }
 
     final response = await http.get(
-      Uri.parse('http://127.0.0.1:8000/api/v1/saldo'),
+      Uri.parse('$baseUrl/saldo'),
       headers: {'Authorization': 'Bearer $token', 'Accept': 'application/json'},
     );
 

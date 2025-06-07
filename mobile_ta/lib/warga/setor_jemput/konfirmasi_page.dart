@@ -72,49 +72,52 @@ class WargaKonfirmasiSetorJemputPage extends StatelessWidget {
                     // Bar indikator total
                     Stack(
                       children: [
+                        // Background
                         Container(
-                          height: 16,
+                          height: 24, // ✅ Lebih tinggi
                           decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(8),
+                            borderRadius: BorderRadius.circular(12),
                             color: Colors.grey[300],
                           ),
                         ),
+                        // Progress bar per kategori
                         Row(
                           children: [
                             Expanded(
                               flex: 2, // Sampah Kardus
                               child: Container(
-                                height: 16,
+                                height: 24,
                                 decoration: BoxDecoration(
                                   color: Colors.orange,
                                   borderRadius: const BorderRadius.horizontal(
-                                    left: Radius.circular(8),
+                                    left: Radius.circular(12),
                                   ),
                                 ),
                               ),
                             ),
                             Expanded(
                               flex: 7, // Sampah Botol Kaca
-                              child: Container(height: 16, color: Colors.blue),
+                              child: Container(height: 24, color: Colors.blue),
                             ),
                             Expanded(
                               flex: 1, // Sampah Botol Plastik
-                              child: Container(height: 16, color: Colors.green),
+                              child: Container(height: 24, color: Colors.green),
                             ),
                             Expanded(
                               flex: 1, // Sampah Kertas
                               child: Container(
-                                height: 16,
+                                height: 24,
                                 decoration: const BoxDecoration(
                                   color: Colors.teal,
                                   borderRadius: BorderRadius.horizontal(
-                                    right: Radius.circular(8),
+                                    right: Radius.circular(12),
                                   ),
                                 ),
                               ),
                             ),
                           ],
                         ),
+                        // Centered Text
                         const Positioned.fill(
                           child: Center(
                             child: Text(
@@ -128,6 +131,7 @@ class WargaKonfirmasiSetorJemputPage extends StatelessWidget {
                         ),
                       ],
                     ),
+
                     const SizedBox(height: 12),
                     // Daftar sampah
                     Row(
@@ -182,12 +186,31 @@ class WargaKonfirmasiSetorJemputPage extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: const [
-                    Text('Estimasi harga sampah anda   Rp40.000'),
-                    Text('Biaya Layanan                        -Rp8.000'),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text('Estimasi harga sampah anda'),
+                        Text('Rp 40.000'),
+                      ],
+                    ),
+                    SizedBox(height: 4),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [Text('Biaya Layanan'), Text('-Rp 8.000')],
+                    ),
                     Divider(),
-                    Text(
-                      'Perkiraan Insentif                Rp32.000',
-                      style: TextStyle(fontWeight: FontWeight.bold),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          'Perkiraan Insentif',
+                          style: TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                        Text(
+                          'Rp 32.000',
+                          style: TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                      ],
                     ),
                   ],
                 ),

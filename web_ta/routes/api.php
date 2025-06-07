@@ -8,6 +8,7 @@ use App\Http\Controllers\Api\ProfilController as ApiProfilController;
 use App\Http\Controllers\Api\SaldoController;
 use App\Http\Controllers\Api\SetorLangsungController;
 use App\Http\Controllers\Api\VideoController;
+use App\Http\Controllers\PengajuanPetugasController;
 use Illuminate\Support\Facades\Route;
 
 
@@ -19,7 +20,9 @@ Route::prefix('v1')->group(function () {
     Route::middleware('auth:sanctum')->group(function () {
         // master
         Route::get('/jenis-sampah', [MasterDataController::class, 'jenisSampahIndex']);
+        Route::get('/jenis-sampah/{id}', [MasterDataController::class, 'jenisSampahShow']);
         Route::get('/bank-sampah', [MasterDataController::class, 'bankSampahIndex']);
+        Route::get('/bank-sampah/{id}', [MasterDataController::class, 'bankSampahShow']);
 
         Route::prefix('profil')->group(function () {
             Route::post('/', [ApiProfilController::class, 'store']);
@@ -31,13 +34,18 @@ Route::prefix('v1')->group(function () {
         Route::get('/saldo', [SaldoController::class, 'show']);
 
         Route::prefix('setor-langsung')->group(function () {
-            Route::post('/pengajuan-warga', [SetorLangsungController::class, 'storePengajuan']);
-            Route::put('/pengajuan-petugas', [SetorLangsungController::class, 'updatePengajuan']);
+            Route::post('/', [SetorLangsungController::class, 'storePengajuan']);
+            Route::put('/', [SetorLangsungController::class, 'updatePengajuan']);
         });
+
+
+        Route::post('/setor-sampah', [PengajuanPetugasController::class, 'store']);
+        Route::get('/setor-sampah/{id}', [PengajuanPetugasController::class, 'show']);
 
         // Logout
         Route::post('logout', [ApiLoginController::class, 'logout']);
     });
+
 
 
     Route::prefix('artikel')->group(function () {
