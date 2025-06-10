@@ -6,6 +6,7 @@ use App\Http\Controllers\Api\LoginController as ApiLoginController;
 use App\Http\Controllers\Api\MasterDataController;
 use App\Http\Controllers\Api\ProfilController as ApiProfilController;
 use App\Http\Controllers\Api\SaldoController;
+use App\Http\Controllers\Api\SetorJemputController;
 use App\Http\Controllers\Api\SetorLangsungController;
 use App\Http\Controllers\Api\VideoController;
 use App\Http\Controllers\PengajuanPetugasController;
@@ -35,7 +36,11 @@ Route::prefix('v1')->group(function () {
 
         Route::prefix('setor-langsung')->group(function () {
             Route::post('/', [SetorLangsungController::class, 'storePengajuan']);
-            Route::put('/', [SetorLangsungController::class, 'updatePengajuan']);
+
+        });
+        Route::prefix('setor-jemput')->group(function (){
+            Route::post('/', [SetorJemputController::class, 'storePengajuan']);
+            
         });
 
 

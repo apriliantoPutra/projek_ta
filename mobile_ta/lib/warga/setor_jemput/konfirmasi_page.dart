@@ -1,20 +1,210 @@
-import 'package:flutter/material.dart';
+import 'dart:convert';
 
-class WargaKonfirmasiSetorJemputPage extends StatelessWidget {
-  const WargaKonfirmasiSetorJemputPage({super.key});
+import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'package:intl/intl.dart';
+import 'package:mobile_ta/constants/constants.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:mobile_ta/warga/setor_langsung/status_page.dart';
+
+class WargaKonfirmasiSetorJemputPage extends StatefulWidget {
+  final List<Map<String, dynamic>> dataSetoran;
+  final String tanggal;
+  final String? catatan;
+
+  const WargaKonfirmasiSetorJemputPage({
+    super.key,
+    required this.dataSetoran,
+    required this.tanggal,
+    required this.catatan,
+  });
+
+  @override
+  State<WargaKonfirmasiSetorJemputPage> createState() =>
+      _WargaKonfirmasiSetorJemputPageState();
+}
+
+class _WargaKonfirmasiSetorJemputPageState
+    extends State<WargaKonfirmasiSetorJemputPage> {
+  final Map<int, Map<String, dynamic>> jenisSampahCache = {};
+  List<Map<String, dynamic>> processedSetoran = [];
+  double totalBerat = 0.0;
+  int totalHarga = 0;
+  int biayaLayanan = 0;
+  bool isLoading = true;
+  String? formattedDate;
+
+  @override
+  void initState() {
+    super.initState();
+    processSetoran();
+
+    try {
+      final inputDate = DateFormat('dd/MM/yyyy').parse(widget.tanggal);
+      formattedDate = DateFormat('yyyy-MM-dd').format(inputDate);
+    } catch (e) {
+      formattedDate = null;
+    }
+  }
+
+  Future<void> processSetoran() async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('token');
+
+    if (token == null) {
+      debugPrint('Token tidak ditemukan');
+      return;
+    }
+
+    for (var item in widget.dataSetoran) {
+      final int jenisId = item['jenis_sampah_id'];
+      final double berat = item['berat'] * 1.0;
+
+      // Cek cache dulu
+      Map<String, dynamic> jenisData;
+      if (jenisSampahCache.containsKey(jenisId)) {
+        jenisData = jenisSampahCache[jenisId]!;
+      } else {
+        final response = await http.get(
+          Uri.parse('$baseUrl/jenis-sampah/$jenisId'),
+          headers: {
+            'Authorization': 'Bearer $token',
+            'Accept': 'application/json',
+          },
+        );
+
+        if (response.statusCode == 200) {
+          final data = json.decode(response.body)['data'];
+          jenisData = {
+            'nama': data['nama_sampah'],
+            'harga': data['harga_per_satuan'],
+            'warna': data['warna_indikasi'],
+          };
+          jenisSampahCache[jenisId] = jenisData; // simpan di cache
+        } else {
+          debugPrint('Gagal ambil data jenis sampah id: $jenisId');
+          continue;
+        }
+      }
+
+      final int harga = jenisData['harga'];
+      final int subtotal = (berat * harga).round();
+
+      processedSetoran.add({
+        'nama': jenisData['nama'],
+        'berat': berat,
+        'harga': harga,
+        'subtotal': subtotal,
+        'warna': jenisData['warna'],
+      });
+
+      totalBerat += berat;
+      totalHarga += subtotal;
+    }
+
+    setState(() {
+      isLoading = false;
+    });
+  }
+
+  Future<void> storePengajuanSetorJemput() async {
+    if (formattedDate == null) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Tanggal tidak valid.')));
+      return;
+    }
+
+    setState(() {
+      isLoading = true;
+    });
+
+    final prefs = await SharedPreferences.getInstance();
+    final String? token = prefs.getString('token');
+
+    if (token == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Token tidak ditemukan. Silakan login ulang.')),
+      );
+      return;
+    }
+
+    // Bentuk data setoran_sampah dari dataSetoran awal
+    final List<Map<String, dynamic>> setoranSampah =
+        widget.dataSetoran.map((item) {
+          return {
+            "jenis_sampah_id": item['jenis_sampah_id'],
+            "berat": item['berat'],
+          };
+        }).toList();
+
+    final url = Uri.parse("$baseUrl/setor-jemput");
+    try {
+      final response = await http.post(
+        url,
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+        body: jsonEncode({
+          'waktu_pengajuan': formattedDate,
+          'catatan_petugas': widget.catatan ?? '',
+          'setoran_sampah': setoranSampah,
+          'total_berat': totalBerat,
+          'total_harga': totalHarga,
+        }),
+      );
+
+      final responseData = jsonDecode(response.body);
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(responseData['message'] ?? 'Berhasil mengirim'),
+          ),
+        );
+
+        Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(
+            builder: (context) => const WargaStatusTungguSetorLangsung(),
+          ),
+          (Route<dynamic> route) => false,
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(responseData['message'] ?? 'Gagal mengirim')),
+        );
+      }
+    } catch (e) {
+      print("Error: $e");
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Terjadi kesalahan, coba lagi.')));
+    } finally {
+      setState(() {
+        isLoading = false;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
+    if (isLoading) {
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+    }
+
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.greenAccent.shade400,
         elevation: 0,
         centerTitle: true,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: Colors.white),
+          icon: const Icon(Icons.arrow_back, color: Colors.white),
           onPressed: () => Navigator.pop(context),
         ),
-        title: Text(
+        title: const Text(
           'Setor Jemput',
           style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
         ),
@@ -68,61 +258,45 @@ class WargaKonfirmasiSetorJemputPage extends StatelessWidget {
                   borderRadius: BorderRadius.circular(16),
                 ),
                 child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Bar indikator total
                     Stack(
                       children: [
-                        // Background
                         Container(
-                          height: 24, // ✅ Lebih tinggi
+                          height: 24,
                           decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(12),
                             color: Colors.grey[300],
                           ),
                         ),
-                        // Progress bar per kategori
                         Row(
-                          children: [
-                            Expanded(
-                              flex: 2, // Sampah Kardus
-                              child: Container(
-                                height: 24,
-                                decoration: BoxDecoration(
-                                  color: Colors.orange,
-                                  borderRadius: const BorderRadius.horizontal(
-                                    left: Radius.circular(12),
+                          children:
+                              processedSetoran.map((item) {
+                                final double proportion =
+                                    item['berat'] / totalBerat;
+                                return Expanded(
+                                  flex: (proportion * 1000).round(),
+                                  child: Container(
+                                    height: 24,
+                                    decoration: BoxDecoration(
+                                      color: Color(
+                                        int.parse(
+                                          item['warna'].toString().replaceAll(
+                                            '#',
+                                            '0xff',
+                                          ),
+                                        ),
+                                      ),
+                                    ),
                                   ),
-                                ),
-                              ),
-                            ),
-                            Expanded(
-                              flex: 7, // Sampah Botol Kaca
-                              child: Container(height: 24, color: Colors.blue),
-                            ),
-                            Expanded(
-                              flex: 1, // Sampah Botol Plastik
-                              child: Container(height: 24, color: Colors.green),
-                            ),
-                            Expanded(
-                              flex: 1, // Sampah Kertas
-                              child: Container(
-                                height: 24,
-                                decoration: const BoxDecoration(
-                                  color: Colors.teal,
-                                  borderRadius: BorderRadius.horizontal(
-                                    right: Radius.circular(12),
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ],
+                                );
+                              }).toList(),
                         ),
-                        // Centered Text
-                        const Positioned.fill(
+                        Positioned.fill(
                           child: Center(
                             child: Text(
-                              '11kg',
-                              style: TextStyle(
+                              '${totalBerat.toStringAsFixed(1)}kg',
+                              style: const TextStyle(
                                 fontWeight: FontWeight.bold,
                                 color: Colors.white,
                               ),
@@ -131,41 +305,27 @@ class WargaKonfirmasiSetorJemputPage extends StatelessWidget {
                         ),
                       ],
                     ),
-
                     const SizedBox(height: 12),
-                    // Daftar sampah
-                    Row(
-                      children: const [
-                        Icon(Icons.square, color: Colors.orange),
-                        SizedBox(width: 6),
-                        Expanded(child: Text('Sampah Kardus')),
-                        Text('2kg'),
-                      ],
-                    ),
-                    Row(
-                      children: const [
-                        Icon(Icons.square, color: Colors.blue),
-                        SizedBox(width: 6),
-                        Expanded(child: Text('Sampah Botol Kaca')),
-                        Text('7kg'),
-                      ],
-                    ),
-                    Row(
-                      children: const [
-                        Icon(Icons.square, color: Colors.green),
-                        SizedBox(width: 6),
-                        Expanded(child: Text('Sampah Botol Plastik')),
-                        Text('1kg'),
-                      ],
-                    ),
-                    Row(
-                      children: const [
-                        Icon(Icons.square, color: Colors.teal),
-                        SizedBox(width: 6),
-                        Expanded(child: Text('Sampah Kertas')),
-                        Text('1.4kg'),
-                      ],
-                    ),
+                    ...processedSetoran.map((item) {
+                      return Row(
+                        children: [
+                          Icon(
+                            Icons.square,
+                            color: Color(
+                              int.parse(
+                                item['warna'].toString().replaceAll(
+                                  '#',
+                                  '0xff',
+                                ),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 6),
+                          Expanded(child: Text(item['nama'])),
+                          Text('${item['berat']}kg'),
+                        ],
+                      );
+                    }).toList(),
                   ],
                 ),
               ),
@@ -185,30 +345,33 @@ class WargaKonfirmasiSetorJemputPage extends StatelessWidget {
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
-                  children: const [
+                  children: [
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text('Estimasi harga sampah anda'),
-                        Text('Rp 40.000'),
+                        const Text('Estimasi harga sampah anda'),
+                        Text('Rp $totalHarga'),
                       ],
                     ),
-                    SizedBox(height: 4),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [Text('Biaya Layanan'), Text('-Rp 8.000')],
-                    ),
-                    Divider(),
+                    const SizedBox(height: 4),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text(
+                        const Text('Biaya Layanan'),
+                        Text('-Rp $biayaLayanan'),
+                      ],
+                    ),
+                    const Divider(),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const Text(
                           'Perkiraan Insentif',
                           style: TextStyle(fontWeight: FontWeight.bold),
                         ),
                         Text(
-                          'Rp 32.000',
-                          style: TextStyle(fontWeight: FontWeight.bold),
+                          'Rp ${totalHarga - biayaLayanan}',
+                          style: const TextStyle(fontWeight: FontWeight.bold),
                         ),
                       ],
                     ),
@@ -216,8 +379,29 @@ class WargaKonfirmasiSetorJemputPage extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 20),
+              const Text(
+                'Informasi Penyetoran',
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 6),
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Colors.greenAccent.shade100,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text("Tanggal: ${widget.tanggal}"),
+                    Text("Catatan: ${widget.catatan ?? "-"}"),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 20),
 
-              // Nama Bank Sampah
+              // Bank Sampah
               const Text(
                 'Nama Bank Sampah',
                 style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
@@ -231,7 +415,7 @@ class WargaKonfirmasiSetorJemputPage extends StatelessWidget {
               ClipRRect(
                 borderRadius: BorderRadius.circular(10),
                 child: Image.network(
-                  'https://i.pinimg.com/736x/b0/79/09/b079096855c0edbaba47d93c67f18853.jpg', // Ganti dengan path gambar peta kamu
+                  'https://i.pinimg.com/736x/b0/79/09/b079096855c0edbaba47d93c67f18853.jpg',
                   height: 140,
                   width: double.infinity,
                   fit: BoxFit.cover,
@@ -239,12 +423,11 @@ class WargaKonfirmasiSetorJemputPage extends StatelessWidget {
               ),
               const SizedBox(height: 30),
 
-              // Tombol
               Row(
                 children: [
                   Expanded(
                     child: ElevatedButton(
-                      onPressed: () {},
+                      onPressed: isLoading ? null : storePengajuanSetorJemput,
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.greenAccent.shade400,
                         shape: RoundedRectangleBorder(
@@ -252,10 +435,22 @@ class WargaKonfirmasiSetorJemputPage extends StatelessWidget {
                         ),
                         padding: const EdgeInsets.symmetric(vertical: 14),
                       ),
-                      child: const Text(
-                        'Konfirmasi',
-                        style: TextStyle(fontWeight: FontWeight.bold),
-                      ),
+                      child:
+                          isLoading
+                              ? const SizedBox(
+                                height: 20,
+                                width: 20,
+                                child: CircularProgressIndicator(
+                                  valueColor: AlwaysStoppedAnimation<Color>(
+                                    Colors.white,
+                                  ),
+                                  strokeWidth: 2,
+                                ),
+                              )
+                              : const Text(
+                                "Konfirmasi Setoran",
+                                style: TextStyle(fontSize: 16),
+                              ),
                     ),
                   ),
                   const SizedBox(width: 16),

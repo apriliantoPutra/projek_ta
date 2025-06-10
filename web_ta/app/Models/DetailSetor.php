@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class DetailSetor extends Model
 {
-    protected $table= 'detail_setor';
+    protected $table = 'detail_setor';
     protected $fillable = [
         'pengajuan_id',
         'petugas_id',

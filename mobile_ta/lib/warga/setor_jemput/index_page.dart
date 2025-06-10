@@ -14,8 +14,10 @@ class WargaSetorJemput extends StatefulWidget {
 
 class _WargaSetorJemputState extends State<WargaSetorJemput> {
   List<Map<String, dynamic>> _jenisSampahList = [
-    {'jenis': null, 'berat': TextEditingController()},
+    {'jenis_sampah_id': null, 'berat': null},
   ];
+  final TextEditingController _tanggalController = TextEditingController();
+  final TextEditingController _catatanController = TextEditingController();
 
   List<Map<String, dynamic>> _jenisSampahOptions = [];
 
@@ -135,7 +137,7 @@ class _WargaSetorJemputState extends State<WargaSetorJemput> {
                             Expanded(
                               flex: 2,
                               child: DropdownButtonFormField<int>(
-                                value: item['jenis'],
+                                value: item['jenis_sampah_id'],
                                 hint: Text('Pilih jenis'),
                                 items:
                                     _jenisSampahOptions.map((option) {
@@ -146,19 +148,31 @@ class _WargaSetorJemputState extends State<WargaSetorJemput> {
                                     }).toList(),
                                 onChanged: (value) {
                                   setState(() {
-                                    item['jenis'] = value;
+                                    _jenisSampahList[index]['jenis_sampah_id'] =
+                                        value;
                                   });
                                 },
                               ),
                             ),
                             SizedBox(width: 8),
                             Expanded(
-                              child: TextFormField(
-                                controller: item['berat'],
-                                keyboardType: TextInputType.number,
-                                decoration: const InputDecoration(
-                                  hintText: 'Berat',
-                                ),
+                              child: DropdownButtonFormField<double>(
+                                value: item['berat'],
+                                hint: Text('Berat'),
+                                items: List.generate(20, (i) {
+                                  final val = 0.5 * (i + 1);
+                                  return DropdownMenuItem<double>(
+                                    value: val,
+                                    child: Text(
+                                      val.toString().replaceAll('.', ','),
+                                    ),
+                                  );
+                                }),
+                                onChanged: (value) {
+                                  setState(() {
+                                    _jenisSampahList[index]['berat'] = value;
+                                  });
+                                },
                               ),
                             ),
                           ],
@@ -170,8 +184,8 @@ class _WargaSetorJemputState extends State<WargaSetorJemput> {
                       onPressed: () {
                         setState(() {
                           _jenisSampahList.add({
-                            'jenis': null,
-                            'berat': TextEditingController(),
+                            'jenis_sampah_id': null,
+                            'berat': null,
                           });
                         });
                       },
@@ -179,6 +193,56 @@ class _WargaSetorJemputState extends State<WargaSetorJemput> {
                       label: Text(
                         'Tambah Jenis Sampah',
                         style: TextStyle(color: Colors.green),
+                      ),
+                    ),
+                    SizedBox(height: 10),
+                    Container(
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      padding: const EdgeInsets.symmetric(horizontal: 12),
+                      child: TextFormField(
+                        controller: _tanggalController,
+                        readOnly: true,
+                        onTap: () async {
+                          final pickedDate = await showDatePicker(
+                            context: context,
+                            initialDate: DateTime.now(),
+                            firstDate: DateTime(2024),
+                            lastDate: DateTime(2030),
+                          );
+                          if (pickedDate != null) {
+                            // Format tanggal: dd/MM/yyyy
+                            String formattedDate =
+                                "${pickedDate.day.toString().padLeft(2, '0')}/"
+                                "${pickedDate.month.toString().padLeft(2, '0')}/"
+                                "${pickedDate.year}";
+                            _tanggalController.text = formattedDate;
+                          }
+                        },
+                        decoration: InputDecoration(
+                          border: InputBorder.none,
+                          hintText: "Tanggal",
+                        ),
+                      ),
+                    ),
+                    SizedBox(height: 15),
+                    Container(
+                      height: 120,
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      padding: const EdgeInsets.symmetric(horizontal: 12),
+                      child: TextFormField(
+                        controller: _catatanController,
+                        maxLines: null,
+                        keyboardType: TextInputType.multiline,
+                        decoration: InputDecoration(
+                          border: InputBorder.none,
+                          hintText: "Masukkan catatan untuk petugas...",
+                        ),
                       ),
                     ),
                   ],
@@ -195,10 +259,38 @@ class _WargaSetorJemputState extends State<WargaSetorJemput> {
                     padding: EdgeInsets.symmetric(horizontal: 30, vertical: 14),
                   ),
                   onPressed: () {
+                    final dataSetor =
+                        _jenisSampahList
+                            .where(
+                              (item) =>
+                                  item['jenis_sampah_id'] != null &&
+                                  item['berat'] != null,
+                            )
+                            .toList();
+
+                    if (dataSetor.isEmpty) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(
+                            'Harap isi semua jenis sampah dan berat.',
+                          ),
+                        ),
+                      );
+                      return;
+                    }
+
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => WargaKonfirmasiSetorJemputPage(),
+                        builder:
+                            (context) => WargaKonfirmasiSetorJemputPage(
+                              dataSetoran: dataSetor,
+                              tanggal: _tanggalController.text,
+                              catatan:
+                                  _catatanController.text.isNotEmpty
+                                      ? _catatanController.text
+                                      : null,
+                            ),
                       ),
                     );
                   },
