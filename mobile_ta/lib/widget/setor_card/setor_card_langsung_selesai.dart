@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:mobile_ta/petugas/petugas_setor_jemput_baru.dart';
+import 'package:mobile_ta/petugas/petugas_setor_jemput_selesai.dart';
+import 'package:mobile_ta/petugas/petugas_setor_langsung_selesai.dart';
 
-class SetorCard extends StatelessWidget {
-  const SetorCard({super.key});
+class SetorCardLangsungSelesai extends StatelessWidget {
+  const SetorCardLangsungSelesai({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -36,9 +39,9 @@ class SetorCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  "maryserran",
+                  "Putra Selesai",
                   style: TextStyle(
-                    fontSize: 22,
+                    fontSize: 18,
                     fontWeight: FontWeight.w600,
                     color: Colors.white,
                   ),
@@ -67,7 +70,14 @@ class SetorCard extends StatelessWidget {
                 Icons.arrow_forward,
                 color: Colors.white,
               ), // Arah kanan
-              onPressed: () {},
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => PetugasSetorLangsungSelesai(),
+                  ),
+                );
+              },
             ),
           ],
         ),

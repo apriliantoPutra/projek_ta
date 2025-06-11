@@ -2,7 +2,7 @@ import 'dart:collection';
 
 import 'package:flutter/material.dart';
 import 'package:material_color_utilities/material_color_utilities.dart';
-import 'package:mobile_ta/widget/setor_card.dart';
+import 'package:mobile_ta/widget/setor_card/setor_card_langsung_baru.dart';
 import 'package:mobile_ta/widget/videoCard_widget.dart';
 import '../widget/eduCard_widget.dart';
 
@@ -187,7 +187,13 @@ class PetugasBerandaPage extends StatelessWidget {
                     ],
                   ),
                   SizedBox(height: 8),
-                  Column(children: [SetorCard(), SetorCard(), SetorCard()]),
+                  Column(
+                    children: [
+                      SetorCardLangsungBaru(),
+                      SetorCardLangsungBaru(),
+                      SetorCardLangsungBaru(),
+                    ],
+                  ),
                 ],
               ),
             ),

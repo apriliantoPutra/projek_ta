@@ -1,0 +1,135 @@
+import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+import 'package:intl/intl.dart';
+import 'package:flutter_html/flutter_html.dart';
+
+class PetugasDetailKontenPage extends StatefulWidget {
+  final int id;
+
+  const PetugasDetailKontenPage({super.key, required this.id});
+
+  @override
+  State<PetugasDetailKontenPage> createState() => _PetugasDetailKontenPage();
+}
+
+class _PetugasDetailKontenPage extends State<PetugasDetailKontenPage> {
+  Map<String, dynamic>? artikel;
+
+  Future<void> fetchArtikelDetail() async {
+    final response = await http.get(
+      Uri.parse('http://127.0.0.1:8000/api/v1/artikel/${widget.id}'),
+    );
+
+    if (response.statusCode == 200) {
+      final data = json.decode(response.body)['data'];
+      setState(() {
+        artikel = data;
+      });
+    } else {
+      throw Exception('Gagal memuat detail artikel');
+    }
+  }
+
+  String formatTanggal(String dateStr) {
+    final date = DateTime.parse(dateStr);
+    return DateFormat('d MMMM yyyy', 'id_ID').format(date);
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    fetchArtikelDetail();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        backgroundColor: Colors.greenAccent.shade400,
+        elevation: 0,
+        centerTitle: true,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          onPressed: () => Navigator.pop(context),
+        ),
+        title: const Text(
+          'Artikel Edukasi',
+          style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
+        ),
+      ),
+      body:
+          artikel == null
+              ? const Center(child: CircularProgressIndicator())
+              : SingleChildScrollView(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    // Gambar Artikel
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(16),
+                      child: Image.network(
+                        artikel!['gambar_url'],
+                        width: double.infinity,
+                        height: 200,
+                        fit: BoxFit.cover,
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+
+                    // Judul
+                    Text(
+                      artikel!['judul_artikel'],
+                      style: const TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black87,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 12),
+
+                    // Info Author dan Tanggal
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Icon(Icons.person, size: 16, color: Colors.grey),
+                        const SizedBox(width: 4),
+                        Text(
+                          artikel!['nama_author'],
+                          style: const TextStyle(color: Colors.grey),
+                        ),
+                        const SizedBox(width: 10),
+                        const Icon(
+                          Icons.calendar_today,
+                          size: 16,
+                          color: Colors.grey,
+                        ),
+                        const SizedBox(width: 4),
+                        Text(
+                          formatTanggal(artikel!['created_at']),
+                          style: const TextStyle(color: Colors.grey),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 20),
+
+                    // Deskripsi HTML
+                    Html(
+                      data: artikel!['deskripsi_artikel'],
+                      style: {
+                        "div": Style(
+                          fontSize: FontSize(16.0),
+                          lineHeight: LineHeight(1.6),
+                          textAlign: TextAlign.justify,
+                        ),
+                        "strong": Style(fontWeight: FontWeight.bold),
+                      },
+                    ),
+                  ],
+                ),
+              ),
+    );
+  }
+}

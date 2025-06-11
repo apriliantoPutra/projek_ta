@@ -1,7 +1,12 @@
 import 'dart:ffi';
 
 import 'package:flutter/material.dart';
-import '../widget/setor_card.dart';
+import 'package:mobile_ta/widget/setor_card/setor_card_jemput_baru.dart';
+import 'package:mobile_ta/widget/setor_card/setor_card_jemput_proses.dart';
+import 'package:mobile_ta/widget/setor_card/setor_card_jemput_selesai.dart';
+import 'package:mobile_ta/widget/setor_card/setor_card_langsung_proses.dart';
+import 'package:mobile_ta/widget/setor_card/setor_card_langsung_selesai.dart';
+import '../widget/setor_card/setor_card_langsung_baru.dart';
 
 class PetugasSetorPage extends StatefulWidget {
   @override
@@ -101,9 +106,11 @@ class _PetugasSetorPageState extends State<PetugasSetorPage>
     return SingleChildScrollView(
       child: Column(
         children: [
-          _buildSection("Setor Terbaru", [SetorCard(), SetorCard()]),
-          _buildSection("Setor Proses", [SetorCard()]),
-          _buildSection("Setor Selesai", [SetorCard()]),
+          _buildSection("Setor Terbaru", [
+            SetorCardLangsungBaru(),
+            SetorCardLangsungBaru(),
+          ]),
+          _buildSection("Setor Selesai", [SetorCardLangsungSelesai()]),
         ],
       ),
     );
@@ -113,9 +120,15 @@ class _PetugasSetorPageState extends State<PetugasSetorPage>
     return SingleChildScrollView(
       child: Column(
         children: [
-          _buildSection("Setor Terbaru", [SetorCard(), SetorCard()]),
-          _buildSection("Setor Proses", [SetorCard(), SetorCard()]),
-          _buildSection("Setor Selesai", [SetorCard()]),
+          _buildSection("Setor Terbaru", [
+            SetorCardJemputBaru(),
+            SetorCardJemputBaru(),
+          ]),
+          _buildSection("Setor Proses", [
+            SetorCardJemputProses(),
+            SetorCardJemputProses(),
+          ]),
+          _buildSection("Setor Selesai", [SetorCardJemputSelesai()]),
         ],
       ),
     );
