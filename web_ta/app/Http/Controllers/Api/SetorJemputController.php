@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use App\Models\PengajuanSetor;
 use App\Http\Controllers\Controller;
 use App\Models\InputDetailSetor;
+use App\Models\Saldo;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 
@@ -78,7 +79,7 @@ class SetorJemputController extends Controller
         ]);
     }
     // edit dan menyetujui
-    public function updatePengajuan(Request $request, $id)
+    public function terimaPengajuan(Request $request, $id)
     {
         $validator = Validator::make($request->all(), [
             'waktu_pengajuan' => 'required|string',
@@ -109,6 +110,12 @@ class SetorJemputController extends Controller
             'total_harga' => $request->total_harga,
             'status_setor' => 'selesai'
 
+        ]);
+
+        // Update jumlah saldo
+        $saldo = Saldo::where('warga_id', '=', $pengajuan_setor->warga_id)->first();
+        $saldo->update([
+            "total_saldo" => $saldo->total_saldo + $request->total_harga
         ]);
 
         return response()->json([

@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:mobile_ta/constants/constants.dart';
 import 'package:mobile_ta/petugas/petugas_edit_profil_page.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 // import 'edit_profil_page.dart';
@@ -8,6 +9,35 @@ import '../auth/login_page.dart';
 
 class PetugasAkunPage extends StatelessWidget {
   const PetugasAkunPage({super.key});
+  Future<void> logout(BuildContext context) async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('token');
+
+    if (token == null) {
+      return;
+    }
+
+    final response = await http.post(
+      Uri.parse('$baseUrl/logout'),
+      headers: {'Authorization': 'Bearer $token', 'Accept': 'application/json'},
+    );
+
+    if (response.statusCode == 200) {
+      await prefs.remove('token');
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(
+          builder: (_) => LoginPage(),
+        ), // Ganti dengan halaman login
+        (route) => false,
+      );
+    } else {
+      final message = jsonDecode(response.body)['message'] ?? 'Gagal logout';
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(message)));
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -85,7 +115,12 @@ class PetugasAkunPage extends StatelessWidget {
                 children: [
                   _buildMenuItem(Icons.settings, "Pengaturan"),
                   _buildMenuItem(Icons.mail_outline, "Notifikasi"),
-                  _buildMenuItem(Icons.logout, "Logout", iconColor: Colors.red),
+                  _buildMenuItem(
+                    Icons.logout,
+                    "Logout",
+                    iconColor: Colors.red,
+                    onTap: () => logout(context),
+                  ),
                 ],
               ),
             ),

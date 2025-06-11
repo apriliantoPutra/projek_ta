@@ -24,6 +24,10 @@
                     class="flex items-center px-4 py-2 text-lg rounded-lg hover:bg-green-600 hover:text-white transition-colors border-b border-gray-700">
                     <i class="ri-recycle-line mr-3"></i> Setoran Sampah
                 </a>
+                <a href="#"
+                    class="flex items-center px-4 py-2 text-lg rounded-lg hover:bg-green-600 hover:text-white transition-colors border-b border-gray-700">
+                    <i class="ri-wallet-3-line mr-3"></i> Tarik Saldo
+                </a>
                 <a href="/artikel"
                     class="flex items-center px-4 py-2 text-lg rounded-lg hover:bg-green-600 hover:text-white transition-colors border-b border-gray-700">
                     <i class="ri-book-open-line mr-3"></i> Edukasi

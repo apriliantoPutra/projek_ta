@@ -1,9 +1,55 @@
-import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
-import 'package:mobile_ta/petugas/petugas_setor_langsung_selesai.dart';
+import 'dart:convert';
 
-class PetugasSetorLangsungBaru extends StatelessWidget {
+import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'package:mobile_ta/constants/constants.dart';
+import 'package:mobile_ta/petugas/petugas_setor_langsung_selesai.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
+class PetugasSetorLangsungBaru extends StatefulWidget {
   const PetugasSetorLangsungBaru({super.key});
+
+  @override
+  State<PetugasSetorLangsungBaru> createState() =>
+      _PetugasSetorLangsungBaruState();
+}
+
+class _PetugasSetorLangsungBaruState extends State<PetugasSetorLangsungBaru> {
+  List<Map<String, dynamic>> _jenisSampahList = [
+    {'jenis_sampah_id': null, 'berat': null},
+  ];
+
+  List<Map<String, dynamic>> _jenisSampahOptions = [];
+
+  @override
+  void initState() {
+    super.initState();
+    fetchJenisSampah();
+  }
+
+  Future<void> fetchJenisSampah() async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('token');
+
+    if (token == null) {
+      debugPrint('Token tidak ditemukan');
+      return;
+    }
+
+    final response = await http.get(
+      Uri.parse('$baseUrl/jenis-sampah'),
+      headers: {'Authorization': 'Bearer $token', 'Accept': 'application/json'},
+    );
+
+    if (response.statusCode == 200) {
+      final json = jsonDecode(response.body);
+      setState(() {
+        _jenisSampahOptions = List<Map<String, dynamic>>.from(json['data']);
+      });
+    } else {
+      debugPrint('Gagal ambil data jenis sampah: ${response.body}');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -54,26 +100,99 @@ class PetugasSetorLangsungBaru extends StatelessWidget {
                     "Masukkan Berat Sampah",
                     style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
                   ),
-                  SizedBox(height: 100),
 
                   // Teks "Form disini nanti" di-center
-                  Center(
-                    child: Text(
-                      "Form disini nanti",
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.w800,
-                        backgroundColor: Colors.red,
-                        color: Colors.white,
-                      ),
+                  SizedBox(height: 8),
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color:
+                          Colors
+                              .green
+                              .shade50, // Warna latar belakang hijau muda
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        ..._jenisSampahList.asMap().entries.map((entry) {
+                          final index = entry.key;
+                          final item = entry.value;
+                          return Padding(
+                            padding: const EdgeInsets.only(bottom: 8.0),
+                            child: Row(
+                              children: [
+                                Expanded(
+                                  flex: 2,
+                                  child: DropdownButtonFormField<int>(
+                                    value: item['jenis_sampah_id'],
+                                    hint: Text('Pilih jenis'),
+                                    items:
+                                        _jenisSampahOptions.map((option) {
+                                          return DropdownMenuItem<int>(
+                                            value: option['id'],
+                                            child: Text(option['nama_sampah']),
+                                          );
+                                        }).toList(),
+                                    onChanged: (value) {
+                                      setState(() {
+                                        _jenisSampahList[index]['jenis_sampah_id'] =
+                                            value;
+                                      });
+                                    },
+                                  ),
+                                ),
+                                SizedBox(width: 8),
+                                Expanded(
+                                  child: DropdownButtonFormField<double>(
+                                    value: item['berat'],
+                                    hint: Text('Berat'),
+                                    items: List.generate(20, (i) {
+                                      final val = 0.5 * (i + 1);
+                                      return DropdownMenuItem<double>(
+                                        value: val,
+                                        child: Text(
+                                          val.toString().replaceAll('.', ','),
+                                        ),
+                                      );
+                                    }),
+                                    onChanged: (value) {
+                                      setState(() {
+                                        _jenisSampahList[index]['berat'] =
+                                            value;
+                                      });
+                                    },
+                                  ),
+                                ),
+                              ],
+                            ),
+                          );
+                        }).toList(),
+                        SizedBox(height: 8),
+                        TextButton.icon(
+                          onPressed: () {
+                            setState(() {
+                              _jenisSampahList.add({
+                                'jenis_sampah_id': null,
+                                'berat': null,
+                              });
+                            });
+                          },
+                          icon: Icon(Icons.add, color: Colors.green),
+                          label: Text(
+                            'Tambah Jenis Sampah',
+                            style: TextStyle(color: Colors.green),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ],
               ),
             ),
-            SizedBox(height: 100),
             Container(
-              padding: EdgeInsets.symmetric(horizontal: 30),
+              padding: EdgeInsets.symmetric(horizontal: 30, vertical: 8),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [

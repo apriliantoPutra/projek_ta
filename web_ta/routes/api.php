@@ -35,12 +35,18 @@ Route::prefix('v1')->group(function () {
         Route::get('/saldo', [SaldoController::class, 'show']);
 
         Route::prefix('setor-langsung')->group(function () {
+            // warga
             Route::post('/', [SetorLangsungController::class, 'storePengajuan']);
+            // petugas
+            Route::get('/', [SetorLangsungController::class, 'listPengajuan']); // list pengajuan
+            Route::get('/{id}', [SetorLangsungController::class, 'showPengajuan']); // detail pengajuan by id
+            Route::put('/terima-pengajuan/{id}', [SetorLangsungController::class, 'terimaPengajuan']); // ubah status
+            Route::put('/batal-pengajuan/{id}', [SetorLangsungController::class, 'batalPengajuan']); // ubah status
 
+            Route::post('/detail-sampah/{id}', [SetorLangsungController::class, 'storeDetail']); // input detail sampah berdasarkan id pengajuan
         });
-        Route::prefix('setor-jemput')->group(function (){
+        Route::prefix('setor-jemput')->group(function () {
             Route::post('/', [SetorJemputController::class, 'storePengajuan']);
-            
         });
 
 
