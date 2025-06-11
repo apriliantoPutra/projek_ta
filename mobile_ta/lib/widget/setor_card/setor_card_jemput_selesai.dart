@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:mobile_ta/petugas/petugas_setor_jemput_baru.dart';
+import 'package:mobile_ta/petugas/petugas_setor_jemput_selesai.dart';
 
 class SetorCardJemputSelesai extends StatelessWidget {
   const SetorCardJemputSelesai({super.key});
@@ -72,7 +72,7 @@ class SetorCardJemputSelesai extends StatelessWidget {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => PetugasSetorJemputBaru(),
+                    builder: (context) => PetugasSetorJemputSelesai(),
                   ),
                 );
               },
