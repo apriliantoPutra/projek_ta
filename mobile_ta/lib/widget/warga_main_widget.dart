@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:mobile_ta/constants/constants.dart';
 import 'package:mobile_ta/warga/akun_page.dart';
 import 'package:mobile_ta/warga/edukasi_page.dart';
 import 'package:mobile_ta/warga/setor_page.dart';
@@ -19,6 +20,7 @@ class WargaMainWrapper extends StatefulWidget {
 class _WargaMainWrapperState extends State<WargaMainWrapper> {
   int selectedMenu = 0;
   Map<String, dynamic>? akunData;
+  Map<String, dynamic>? saldoData;
   Map<String, dynamic>? profilData; // Tambahkan ini
 
   @override
@@ -34,12 +36,23 @@ class _WargaMainWrapperState extends State<WargaMainWrapper> {
     });
   }
 
+  Future<void> loadSaldoData() async {
+    final data = await fetchSaldoData();
+    setState(() {
+      saldoData = data;
+    });
+  }
+
   bool isLoading = true;
   bool profilDitemukan = false;
 
   Future<void> checkInitialData() async {
     await loadAkunData();
     await cekProfil();
+    // Jika profil ditemukan, baru load saldo
+    if (profilDitemukan) {
+      await loadSaldoData();
+    }
     setState(() {
       isLoading = false;
     });
@@ -55,7 +68,7 @@ class _WargaMainWrapperState extends State<WargaMainWrapper> {
     }
 
     final response = await http.get(
-      Uri.parse('http://127.0.0.1:8000/api/v1/profil'),
+      Uri.parse('$baseUrl/profil'),
       headers: {'Authorization': 'Bearer $token', 'Accept': 'application/json'},
     );
 
@@ -80,7 +93,7 @@ class _WargaMainWrapperState extends State<WargaMainWrapper> {
     }
 
     final response = await http.get(
-      Uri.parse('http://127.0.0.1:8000/api/v1/akun'),
+      Uri.parse('$baseUrl/akun'),
       headers: {'Authorization': 'Bearer $token', 'Accept': 'application/json'},
     );
 
@@ -89,6 +102,29 @@ class _WargaMainWrapperState extends State<WargaMainWrapper> {
       return json['data'];
     } else {
       debugPrint('Gagal ambil data akun: ${response.body}');
+      return null;
+    }
+  }
+
+  Future<Map<String, dynamic>?> fetchSaldoData() async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('token');
+
+    if (token == null) {
+      debugPrint('Token tidak ditemukan');
+      return null;
+    }
+
+    final response = await http.get(
+      Uri.parse('$baseUrl/saldo'),
+      headers: {'Authorization': 'Bearer $token', 'Accept': 'application/json'},
+    );
+
+    if (response.statusCode == 200) {
+      final json = jsonDecode(response.body);
+      return json['data'];
+    } else {
+      debugPrint('Gagal ambil data saldo: ${response.body}');
       return null;
     }
   }
@@ -104,10 +140,14 @@ class _WargaMainWrapperState extends State<WargaMainWrapper> {
     }
 
     List<Widget> menu = [
-      WargaBerandaPage(akunData: akunData, profilData: profilData),
+      WargaBerandaPage(akunData: akunData, profilData: profilData, saldoData: saldoData),
       WargaSetorPage(akunData: akunData),
       WargaEdukasiPage(akunData: akunData),
-      WargaAkunPage(akunData: akunData, profilData: profilData),
+      WargaAkunPage(
+        akunData: akunData,
+        profilData: profilData,
+        saldoData: saldoData,
+      ),
     ];
 
     return Scaffold(

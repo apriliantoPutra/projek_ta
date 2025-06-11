@@ -1,13 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:mobile_ta/warga/chatbot_page.dart';
+import 'package:mobile_ta/warga/histori_setor_page.dart';
 import 'package:mobile_ta/widget/videoCard_widget.dart';
 import '../widget/eduCard_widget.dart';
 
 class WargaBerandaPage extends StatelessWidget {
   final Map<String, dynamic>? akunData;
   final Map<String, dynamic>? profilData;
-  const WargaBerandaPage({Key? key, this.akunData, this.profilData})
-    : super(key: key);
+  final Map<String, dynamic>? saldoData;
+  const WargaBerandaPage({
+    Key? key,
+    this.akunData,
+    this.profilData,
+    this.saldoData,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -23,13 +29,13 @@ class WargaBerandaPage extends StatelessWidget {
               children: [
                 CircleAvatar(
                   radius: 20,
-
                   backgroundImage: NetworkImage(
-                    profilData?['gambar_url'] ??
-                        'https://i.pinimg.com/736x/8a/e9/e9/8ae9e92fa4e69967aa61bf2bda967b7b.jpg',
+                    (profilData?['gambar_pengguna'] ?? '').isNotEmpty
+                        ? profilData!['gambar_url']
+                        : 'https://i.pinimg.com/736x/8a/e9/e9/8ae9e92fa4e69967aa61bf2bda967b7b.jpg',
                   ),
-                  // child: Icon(Icons.person, color: Colors.greenAccent.shade400),
                 ),
+
                 SizedBox(width: 10),
                 Text(
                   akunData?['username'] ?? 'Memuat...',
@@ -99,7 +105,9 @@ class WargaBerandaPage extends StatelessWidget {
                     ),
                   ),
                   Text(
-                    "Rp300.000,-",
+                    saldoData != null
+                        ? 'Rp ${saldoData!['total_saldo']}'
+                        : 'Memuat...',
                     style: TextStyle(
                       fontSize: 22,
                       fontWeight: FontWeight.bold,
@@ -128,7 +136,18 @@ class WargaBerandaPage extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.spaceAround,
                     children: [
                       _menuItem(Icons.calculate, "Kalkulator"),
-                      _menuItem(Icons.history, "Histori"),
+                      _menuItem(
+                        Icons.history,
+                        "Histori",
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => WargaHistoriSetor(),
+                            ),
+                          );
+                        },
+                      ),
                       _menuItem(Icons.info_outline, "Info"),
                     ],
                   ),
@@ -283,21 +302,24 @@ class WargaBerandaPage extends StatelessWidget {
     );
   }
 
-  Widget _menuItem(IconData icon, String title) {
-    return Column(
-      children: [
-        Container(
-          height: 60,
-          width: 60,
-          decoration: BoxDecoration(
-            color: Colors.greenAccent,
-            borderRadius: BorderRadius.circular(12),
+  Widget _menuItem(IconData icon, String title, {VoidCallback? onTap}) {
+    return GestureDetector(
+      onTap: onTap ?? () {},
+      child: Column(
+        children: [
+          Container(
+            height: 60,
+            width: 60,
+            decoration: BoxDecoration(
+              color: Colors.greenAccent,
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Icon(icon, size: 30),
           ),
-          child: Icon(icon, size: 30),
-        ),
-        SizedBox(height: 8),
-        Text(title, textAlign: TextAlign.center),
-      ],
+          const SizedBox(height: 8),
+          Text(title, textAlign: TextAlign.center),
+        ],
+      ),
     );
   }
 }

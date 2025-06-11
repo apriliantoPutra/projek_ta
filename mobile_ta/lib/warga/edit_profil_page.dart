@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
+import 'package:mobile_ta/constants/constants.dart';
 import 'package:mobile_ta/widget/warga_main_widget.dart';
 import 'package:path/path.dart' as Path;
 import 'package:shared_preferences/shared_preferences.dart';
@@ -102,7 +103,7 @@ class _WargaEditProfilPageState extends State<WargaEditProfilPage> {
       SharedPreferences prefs = await SharedPreferences.getInstance();
       String? token = prefs.getString('token');
 
-      var uri = Uri.parse('http://127.0.0.1:8000/api/v1/profil');
+      var uri = Uri.parse('$baseUrl/profil');
       var request = http.MultipartRequest('POST', uri);
       request.headers['Authorization'] = 'Bearer $token';
 
@@ -206,8 +207,11 @@ class _WargaEditProfilPageState extends State<WargaEditProfilPage> {
                           _profileImage != null
                               ? FileImage(_profileImage!)
                               : NetworkImage(
-                                    widget.profilData?['gambar_url'] ??
-                                        'https://i.pinimg.com/736x/8a/e9/e9/8ae9e92fa4e69967aa61bf2bda967b7b.jpg',
+                                    (widget.profilData?['gambar_pengguna'] ??
+                                                '')
+                                            .isNotEmpty
+                                        ? widget.profilData!['gambar_url']
+                                        : 'https://i.pinimg.com/736x/8a/e9/e9/8ae9e92fa4e69967aa61bf2bda967b7b.jpg',
                                   )
                                   as ImageProvider,
                     ),

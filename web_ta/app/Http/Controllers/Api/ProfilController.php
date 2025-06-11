@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Models\Profil;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use App\Models\Saldo;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
@@ -34,6 +35,15 @@ class ProfilController extends Controller
         }
 
         $akun_id = Auth::user()->id;
+        $cek_role= Auth::user()->role;
+        if($cek_role == 'warga'){
+            $saldo= Saldo::create(
+                [
+                    'warga_id'=> $akun_id,
+                    'total_saldo'=> 0,
+                ]
+            );
+        }
 
         $profil = Profil::create([
             'akun_id' => $akun_id,

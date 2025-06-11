@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:intl/intl.dart';
+import 'package:mobile_ta/constants/constants.dart';
 
 import 'package:mobile_ta/warga/artikel/detail_page.dart';
 import 'package:mobile_ta/widget/eduCard_widget.dart';
@@ -19,7 +20,7 @@ class _WargaKumpulanArtikelPageState extends State<WargaKumpulanArtikelPage> {
 
   Future<List<dynamic>> fetchArtikel() async {
     final response = await http.get(
-      Uri.parse('http://127.0.0.1:8000/api/v1/artikel'),
+      Uri.parse('$baseUrl/artikel'),
     );
 
     if (response.statusCode == 200) {
