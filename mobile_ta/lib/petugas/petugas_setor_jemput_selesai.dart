@@ -21,7 +21,7 @@ class PetugasSetorJemputSelesai extends StatelessWidget {
                 context,
                 MaterialPageRoute(
                   builder:
-                      (context) => const PetugasMainWrapper(initialIndex: 1),
+                      (context) => PetugasSetorPage(),
                 ),
                 (Route<dynamic> route) => false,
               ),

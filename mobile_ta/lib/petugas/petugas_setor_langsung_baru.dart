@@ -2,12 +2,14 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:intl/intl.dart';
 import 'package:mobile_ta/constants/constants.dart';
 import 'package:mobile_ta/petugas/petugas_setor_langsung_selesai.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class PetugasSetorLangsungBaru extends StatefulWidget {
-  const PetugasSetorLangsungBaru({super.key});
+  final int id;
+  const PetugasSetorLangsungBaru({required this.id, super.key});
 
   @override
   State<PetugasSetorLangsungBaru> createState() =>
@@ -18,46 +20,133 @@ class _PetugasSetorLangsungBaruState extends State<PetugasSetorLangsungBaru> {
   List<Map<String, dynamic>> _jenisSampahList = [
     {'jenis_sampah_id': null, 'berat': null},
   ];
-
+  Map<String, dynamic>? pengajuanSetor;
   List<Map<String, dynamic>> _jenisSampahOptions = [];
+  double totalBerat = 0.0;
+  int totalHarga = 0;
+  bool isLoading = false;
 
   @override
   void initState() {
     super.initState();
     fetchJenisSampah();
+    fetchPengajuanSetor();
   }
 
   Future<void> fetchJenisSampah() async {
     final prefs = await SharedPreferences.getInstance();
-    final token = prefs.getString('token');
-
-    if (token == null) {
-      debugPrint('Token tidak ditemukan');
-      return;
-    }
-
-    final response = await http.get(
+    final token = prefs.getString('token') ?? '';
+    final resp = await http.get(
       Uri.parse('$baseUrl/jenis-sampah'),
       headers: {'Authorization': 'Bearer $token', 'Accept': 'application/json'},
     );
-
-    if (response.statusCode == 200) {
-      final json = jsonDecode(response.body);
+    if (resp.statusCode == 200) {
+      final json = jsonDecode(resp.body);
       setState(() {
         _jenisSampahOptions = List<Map<String, dynamic>>.from(json['data']);
       });
     } else {
-      debugPrint('Gagal ambil data jenis sampah: ${response.body}');
+      debugPrint('fetchJenisSampah failed: ${resp.body}');
+    }
+  }
+
+  Future<void> fetchPengajuanSetor() async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('token') ?? '';
+    final resp = await http.get(
+      Uri.parse('$baseUrl/setor-langsung/${widget.id}'),
+      headers: {'Authorization': 'Bearer $token', 'Accept': 'application/json'},
+    );
+    if (resp.statusCode == 200) {
+      final data = jsonDecode(resp.body)['data'];
+      setState(() => pengajuanSetor = data);
+    } else {
+      throw Exception('fetchPengajuanSetor failed');
+    }
+  }
+
+  Future<void> calculateSetoran() async {
+    totalBerat = 0;
+    totalHarga = 0;
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('token') ?? '';
+
+    for (var item in _jenisSampahList) {
+      final id = item['jenis_sampah_id'];
+      final berat = (item['berat'] as double?) ?? 0;
+      if (id == null) continue;
+
+      final resp = await http.get(
+        Uri.parse('$baseUrl/jenis-sampah/$id'),
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Accept': 'application/json',
+        },
+      );
+      if (resp.statusCode == 200) {
+        final d = jsonDecode(resp.body)['data'];
+        final harga = d['harga_per_satuan'] as int;
+        totalBerat += berat;
+        totalHarga += (berat * harga).round();
+      }
+    }
+  }
+
+  Future<void> storePengajuanSetorLangsung() async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('token') ?? '';
+    final List<Map<String, dynamic>> setoran =
+        _jenisSampahList
+            .where((it) => it['jenis_sampah_id'] != null && it['berat'] != null)
+            .map(
+              (it) => {
+                'jenis_sampah_id': it['jenis_sampah_id'],
+                'berat': it['berat'],
+              },
+            )
+            .toList();
+
+    final resp = await http.post(
+      Uri.parse('$baseUrl/setor-langsung/detail-sampah/${widget.id}'),
+      headers: {
+        'Authorization': 'Bearer $token',
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      },
+      body: jsonEncode({
+        'setoran_sampah': setoran,
+        'total_berat': totalBerat,
+        'total_harga': totalHarga,
+      }),
+    );
+
+    final body = jsonDecode(resp.body);
+    if (!(resp.statusCode == 200 || resp.statusCode == 201)) {
+      throw Exception(body['message'] ?? 'error');
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    if (pengajuanSetor == null) {
+      return Scaffold(
+        appBar: AppBar(title: Text("Setor Langsung Sampah")),
+        body: Center(child: CircularProgressIndicator()),
+      );
+    }
+
+    final profil = pengajuanSetor!['user']['profil'];
+    final pic = (profil['gambar_url'] as String?) ?? '';
+    final avatarUrl =
+        pic.isNotEmpty
+            ? pic
+            : 'https://i.pinimg.com/736x/8a/e9/e9/8ae9e92fa4e69967aa61bf2bda967b7b.jpg';
+    final nama = profil['nama_pengguna'] as String? ?? '';
+
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
-        centerTitle: true,
         title: Text(
           "Setor Langsung Sampah",
           style: TextStyle(
@@ -67,294 +156,179 @@ class _PetugasSetorLangsungBaruState extends State<PetugasSetorLangsungBaru> {
           ),
         ),
       ),
-
       body: SingleChildScrollView(
+        padding: EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Container(
-              padding: const EdgeInsets.all(16),
-              child: Row(
-                children: [
-                  const CircleAvatar(
-                    radius: 20,
-                    backgroundImage: NetworkImage(
-                      "https://www.perfocal.com/blog/content/images/2021/01/Perfocal_17-11-2019_TYWFAQ_100_standard-3.jpg",
-                    ),
-                  ),
-                  const SizedBox(width: 16),
-                  const Text(
-                    "Nama Penyetor",
-                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
-                  ),
-                ],
-              ),
+            Row(
+              children: [
+                CircleAvatar(
+                  radius: 20,
+                  backgroundImage: NetworkImage(avatarUrl),
+                ),
+                SizedBox(width: 16),
+                Text(
+                  nama,
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
+                ),
+              ],
             ),
-
+            SizedBox(height: 16),
+            Text(
+              "Masukkan Berat Sampah",
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+            ),
             Container(
-              padding: EdgeInsets.symmetric(horizontal: 16),
+              margin: EdgeInsets.symmetric(vertical: 8),
+              padding: EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Colors.green.shade50,
+                borderRadius: BorderRadius.circular(12),
+              ),
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    "Masukkan Berat Sampah",
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
-                  ),
-
-                  // Teks "Form disini nanti" di-center
-                  SizedBox(height: 8),
-                  Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color:
-                          Colors
-                              .green
-                              .shade50, // Warna latar belakang hijau muda
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        ..._jenisSampahList.asMap().entries.map((entry) {
-                          final index = entry.key;
-                          final item = entry.value;
-                          return Padding(
-                            padding: const EdgeInsets.only(bottom: 8.0),
-                            child: Row(
-                              children: [
-                                Expanded(
-                                  flex: 2,
-                                  child: DropdownButtonFormField<int>(
-                                    value: item['jenis_sampah_id'],
-                                    hint: Text('Pilih jenis'),
-                                    items:
-                                        _jenisSampahOptions.map((option) {
-                                          return DropdownMenuItem<int>(
-                                            value: option['id'],
-                                            child: Text(option['nama_sampah']),
-                                          );
-                                        }).toList(),
-                                    onChanged: (value) {
-                                      setState(() {
-                                        _jenisSampahList[index]['jenis_sampah_id'] =
-                                            value;
-                                      });
-                                    },
-                                  ),
-                                ),
-                                SizedBox(width: 8),
-                                Expanded(
-                                  child: DropdownButtonFormField<double>(
-                                    value: item['berat'],
-                                    hint: Text('Berat'),
-                                    items: List.generate(20, (i) {
-                                      final val = 0.5 * (i + 1);
-                                      return DropdownMenuItem<double>(
-                                        value: val,
-                                        child: Text(
-                                          val.toString().replaceAll('.', ','),
+                  ..._jenisSampahList.asMap().entries.map((e) {
+                    final i = e.key;
+                    final it = e.value;
+                    return Padding(
+                      padding: EdgeInsets.only(bottom: 8),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            flex: 2,
+                            child: DropdownButtonFormField<int>(
+                              value: it['jenis_sampah_id'] as int?,
+                              items:
+                                  _jenisSampahOptions
+                                      .map(
+                                        (opt) => DropdownMenuItem<int>(
+                                          value: opt['id'],
+                                          child: Text(opt['nama_sampah']),
                                         ),
-                                      );
-                                    }),
-                                    onChanged: (value) {
-                                      setState(() {
-                                        _jenisSampahList[index]['berat'] =
-                                            value;
-                                      });
-                                    },
-                                  ),
-                                ),
-                              ],
+                                      )
+                                      .toList(),
+                              onChanged: (v) {
+                                setState(
+                                  () =>
+                                      _jenisSampahList[i]['jenis_sampah_id'] =
+                                          v,
+                                );
+                              },
+                              decoration: InputDecoration(
+                                labelText: "Jenis Sampah",
+                              ),
                             ),
-                          );
-                        }).toList(),
-                        SizedBox(height: 8),
-                        TextButton.icon(
-                          onPressed: () {
-                            setState(() {
-                              _jenisSampahList.add({
-                                'jenis_sampah_id': null,
-                                'berat': null,
-                              });
-                            });
-                          },
-                          icon: Icon(Icons.add, color: Colors.green),
-                          label: Text(
-                            'Tambah Jenis Sampah',
-                            style: TextStyle(color: Colors.green),
                           ),
-                        ),
-                      ],
+                          SizedBox(width: 8),
+                          Expanded(
+                            child: DropdownButtonFormField<double>(
+                              value: it['berat'] as double?,
+                              items:
+                                  List.generate(20, (j) => 0.5 * (j + 1))
+                                      .map(
+                                        (val) => DropdownMenuItem<double>(
+                                          value: val,
+                                          child: Text(
+                                            val.toString().replaceAll('.', ','),
+                                          ),
+                                        ),
+                                      )
+                                      .toList(),
+                              onChanged: (v) {
+                                setState(
+                                  () => _jenisSampahList[i]['berat'] = v,
+                                );
+                              },
+                              decoration: InputDecoration(
+                                labelText: "Berat (kg)",
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  }).toList(),
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: TextButton.icon(
+                      onPressed: () {
+                        setState(
+                          () => _jenisSampahList.add({
+                            'jenis_sampah_id': null,
+                            'berat': null,
+                          }),
+                        );
+                      },
+                      icon: Icon(Icons.add, color: Colors.green),
+                      label: Text(
+                        "Tambah Jenis Sampah",
+                        style: TextStyle(color: Colors.green),
+                      ),
                     ),
                   ),
                 ],
               ),
             ),
-            Container(
-              padding: EdgeInsets.symmetric(horizontal: 30, vertical: 8),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  Text(
-                    "Estimasi Harga",
-                    style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
-                  ),
-                  SizedBox(width: 8),
-                  Text(
-                    "Rp50.000",
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.normal,
-                    ),
-                  ),
-                ],
-              ),
+            SizedBox(height: 8),
+            TextButton(
+              onPressed: () async {
+                setState(() => isLoading = true);
+                await calculateSetoran();
+                setState(() => isLoading = false); // supaya UI refresh
+              },
+              child: Text("Hitung Estimasi Harga"),
             ),
-            Container(
-              padding: EdgeInsets.all(16),
-              child: Row(
-                children: [
-                  Text(
-                    "Nama Petugas",
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black,
-                    ),
-                  ),
-                  Spacer(),
-                  Text(
-                    "Petugas Krisna",
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.normal,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            Container(
-              padding: EdgeInsets.symmetric(horizontal: 16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    "Nama Bank Sampah",
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w700,
-                      color: Colors.black,
-                    ),
-                  ),
-                  // SizedBox(height: 8),
-                  Text(
-                    "Alamat Bank Sampah: Jl. Lorem ipsum dolor sit amet, consectetur adipiscing elit, Semarang",
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.normal,
-                      color: Colors.black54,
-                    ),
-                  ),
-                ],
+
+            SizedBox(height: 8),
+            Align(
+              alignment: Alignment.centerRight,
+              child: Text(
+                "Estimasi Harga: Rp ${NumberFormat.decimalPattern().format(totalHarga)}",
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
               ),
             ),
             SizedBox(height: 16),
             Center(
               child: ElevatedButton(
-                onPressed: () {
-                  showDialog(
-                    context: context,
-                    builder: (BuildContext context) {
-                      return AlertDialog(
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(16),
-                        ),
-                        title: Text(
-                          "Konfirmasi",
-                          style: TextStyle(
-                            fontWeight: FontWeight.w400,
-                            fontSize: 18,
-                          ),
-                        ),
-                        content: Text(
-                          "Apakah Anda yakin untuk mengambil sampah ini?",
-                          style: TextStyle(fontSize: 16, color: Colors.black),
-                        ),
-                        actionsPadding: EdgeInsets.all(16),
-                        actions: [
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              ElevatedButton(
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: Color(0xFFFF6600),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(8),
-                                  ),
-                                ),
-                                onPressed: () {
-                                  Navigator.of(context).pop(); // Tutup dialog
-                                },
-                                child: Text(
-                                  "Batalkan",
-                                  style: TextStyle(
-                                    color: Colors.white,
-                                  ), // Teks tetap hitam
-                                ),
-                              ),
-                              SizedBox(width: 8),
-                              ElevatedButton(
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: Color(0xff8fd14f),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(8),
-                                  ),
-                                ),
-                                child: Text(
-                                  "Ambil Sampah",
-                                  style: TextStyle(color: Colors.white),
-                                ),
-                                onPressed: () {
-                                  Navigator.of(context).pop(); // Tutup dialog
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(
-                                      content: Text("Sampah telah diambil"),
-                                    ),
-                                  ); // Tambahkan aksi lain jika perlu
-                                  Navigator.pushAndRemoveUntil(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder:
-                                          (context) =>
-                                              const PetugasSetorLangsungSelesai(),
-                                    ),
-                                    (Route<dynamic> route) => false,
-                                  );
-                                },
-                              ),
-                            ],
-                          ),
-                        ],
-                      );
-                    },
-                  );
+                onPressed: () async {
+                  setState(() => isLoading = true);
+                  await calculateSetoran();
+                  try {
+                    await storePengajuanSetorLangsung();
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text("Setoran berhasil dikirim")),
+                    );
+                    Navigator.pushAndRemoveUntil(
+                      context,
+                      MaterialPageRoute(
+                        builder:
+                            (_) => PetugasSetorLangsungSelesai(id: widget.id),
+                      ),
+                      (r) => false,
+                    );
+                  } catch (e) {
+                    ScaffoldMessenger.of(
+                      context,
+                    ).showSnackBar(SnackBar(content: Text(e.toString())));
+                  }
+                  setState(() => isLoading = false);
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Color(0xff8fd14f),
-                  padding: EdgeInsets.symmetric(vertical: 16, horizontal: 16),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
+                  padding: EdgeInsets.symmetric(vertical: 16, horizontal: 32),
                 ),
-                child: Text(
-                  "Ambil Sampah",
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                    color: Colors.white,
-                  ),
-                ),
+                child:
+                    isLoading
+                        ? CircularProgressIndicator(color: Colors.white)
+                        : Text(
+                          "Ambil Sampah",
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.white,
+                          ),
+                        ),
               ),
             ),
           ],

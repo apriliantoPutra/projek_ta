@@ -2,11 +2,16 @@ import 'dart:collection';
 
 import 'package:flutter/material.dart';
 import 'package:material_color_utilities/material_color_utilities.dart';
+import 'package:mobile_ta/widget/setor_card/setor_card_jemput_proses.dart';
 import 'package:mobile_ta/widget/setor_card/setor_card_langsung_baru.dart';
 import 'package:mobile_ta/widget/videoCard_widget.dart';
 import '../widget/eduCard_widget.dart';
 
 class PetugasBerandaPage extends StatelessWidget {
+  final Map<String, dynamic>? akunData;
+  final Map<String, dynamic>? profilData;
+  const PetugasBerandaPage({Key? key, this.akunData, this.profilData})
+    : super(key: key);
   @override
   Widget build(BuildContext) {
     return Scaffold(
@@ -22,14 +27,15 @@ class PetugasBerandaPage extends StatelessWidget {
                 CircleAvatar(
                   radius: 20,
                   backgroundImage: NetworkImage(
-                    'https://www.perfocal.com/blog/content/images/2021/01/Perfocal_17-11-2019_TYWFAQ_100_standard-3.jpg',
+                    (profilData?['gambar_pengguna'] ?? '').isNotEmpty
+                        ? profilData!['gambar_url']
+                        : 'https://i.pinimg.com/736x/8a/e9/e9/8ae9e92fa4e69967aa61bf2bda967b7b.jpg',
                   ),
-                  // child: Icon(Icons.person, color: Colors.greenAccent.shade400),
                 ),
                 SizedBox(width: 10),
                 Text(
-                  'Petugas Sampah',
-                  style: TextStyle(
+                  akunData?['username'] ?? 'Memuat...',
+                  style: const TextStyle(
                     color: Colors.black,
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
@@ -189,9 +195,9 @@ class PetugasBerandaPage extends StatelessWidget {
                   SizedBox(height: 8),
                   Column(
                     children: [
-                      SetorCardLangsungBaru(),
-                      SetorCardLangsungBaru(),
-                      SetorCardLangsungBaru(),
+                      SetorCardJemputProses(),
+                      SetorCardJemputProses(),
+                      SetorCardJemputProses(),
                     ],
                   ),
                 ],

@@ -9,6 +9,7 @@ use App\Http\Controllers\Master\BankSampahController;
 use App\Http\Controllers\Master\DataController;
 use App\Http\Controllers\Master\JenisSampahController;
 use App\Http\Controllers\ProfilController;
+use App\Http\Controllers\Setoran\SetorJemputController;
 use App\Http\Controllers\Setoran\SetorLangsungController;
 use Illuminate\Support\Facades\Route;
 
@@ -69,4 +70,8 @@ Route::middleware(['authorization', 'admin'])->group(function () {
     Route::get('/video-edit/{id}', [VideoController::class, 'edit',])->name('Video-Edit');
     Route::put('/video-edit/{id}', [VideoController::class, 'update',])->name('Video-Update');
     Route::delete('/video-hapus/{id}', [VideoController::class, 'destroy',])->name('Video-Hapus');
+
+    Route::get('/setor-langsung', [SetorLangsungController::class, 'index',])->name('Setor-Langsung');
+
+    Route::get('/setor-jemput', [SetorJemputController::class, 'index',])->name('Setor-Jemput');
 });

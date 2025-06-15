@@ -1,36 +1,116 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'package:mobile_ta/constants/constants.dart';
 import 'package:mobile_ta/petugas/petugas_akun_page.dart';
 import 'package:mobile_ta/petugas/petugas_konten_page.dart';
 import 'package:mobile_ta/petugas/petugas_setor_page.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../petugas/beranda_page.dart';
+import '../petugas/petugas_tambah_profil_page.dart';
 
 class PetugasMainWrapper extends StatefulWidget {
-  final int initialIndex;
-
-  const PetugasMainWrapper({Key? key, this.initialIndex = 0}) : super(key: key);
+  const PetugasMainWrapper({Key? key}) : super(key: key);
 
   @override
   State<PetugasMainWrapper> createState() => _WargaMainWrapperState();
 }
 
 class _WargaMainWrapperState extends State<PetugasMainWrapper> {
-  late int selectedMenu;
+  int selectedMenu = 0;
+  Map<String, dynamic>? akunData;
+  Map<String, dynamic>? profilData;
 
   @override
   void initState() {
     super.initState();
-    selectedMenu = widget.initialIndex;
+    checkInitialData();
   }
 
-  List menu = [
-    PetugasBerandaPage(),
-    PetugasSetorPage(),
-    PetugasKontenPage(),
-    PetugasAkunPage(),
-  ];
+  Future<void> loadAkunData() async {
+    final data = await fetchAkunData();
+    setState(() {
+      akunData = data;
+    });
+  }
+
+  bool isLoading = true;
+  bool profilDitemukan = false;
+
+  Future<void> checkInitialData() async {
+    await loadAkunData();
+    await cekProfil();
+
+    setState(() {
+      isLoading = false;
+    });
+  }
+
+  Future<void> cekProfil() async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('token');
+
+    if (token == null) {
+      debugPrint('Token tidak ditemukan saat cek profil');
+      return;
+    }
+
+    final response = await http.get(
+      Uri.parse('$baseUrl/profil'),
+      headers: {'Authorization': 'Bearer $token', 'Accept': 'application/json'},
+    );
+
+    if (response.statusCode == 200) {
+      final json = jsonDecode(response.body);
+      profilDitemukan = true;
+      profilData = json['data'];
+    } else if (response.statusCode == 404) {
+      profilDitemukan = false;
+    } else {
+      debugPrint('Gagal cek profil: ${response.body}');
+    }
+  }
+
+  Future<Map<String, dynamic>?> fetchAkunData() async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('token');
+
+    if (token == null) {
+      debugPrint('Token tidak ditemukan');
+      return null;
+    }
+
+    final response = await http.get(
+      Uri.parse('$baseUrl/akun'),
+      headers: {'Authorization': 'Bearer $token', 'Accept': 'application/json'},
+    );
+
+    if (response.statusCode == 200) {
+      final json = jsonDecode(response.body);
+      return json['data'];
+    } else {
+      debugPrint('Gagal ambil data akun: ${response.body}');
+      return null;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
+    if (isLoading) {
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+    }
+
+    if (!profilDitemukan) {
+      return const PetugasTambahProfilPage(); // redirect ke tambah profil jika tidak ditemukan
+    }
+    List menu = [
+      PetugasBerandaPage(akunData: akunData, profilData: profilData),
+      PetugasSetorPage(),
+      PetugasKontenPage(),
+      PetugasAkunPage(akunData: akunData, profilData: profilData),
+    ];
+
     return Scaffold(
       backgroundColor: Colors.white,
       body: menu[selectedMenu],

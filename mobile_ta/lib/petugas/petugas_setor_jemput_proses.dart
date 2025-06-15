@@ -66,10 +66,7 @@ class _PetugasSetorJemputProsesState extends State<PetugasSetorJemputProses> {
           onPressed:
               () => Navigator.pushAndRemoveUntil(
                 context,
-                MaterialPageRoute(
-                  builder:
-                      (context) => const PetugasMainWrapper(initialIndex: 1),
-                ),
+                MaterialPageRoute(builder: (context) => PetugasSetorPage()),
                 (Route<dynamic> route) => false,
               ),
         ),

@@ -8,7 +8,11 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../auth/login_page.dart';
 
 class PetugasAkunPage extends StatelessWidget {
-  const PetugasAkunPage({super.key});
+  final Map<String, dynamic>? akunData;
+  final Map<String, dynamic>? profilData;
+  const PetugasAkunPage({Key? key, this.akunData, this.profilData})
+    : super(key: key);
+
   Future<void> logout(BuildContext context) async {
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('token');
@@ -63,14 +67,16 @@ class PetugasAkunPage extends StatelessWidget {
                   CircleAvatar(
                     radius: 40,
                     backgroundImage: NetworkImage(
-                      'https://i.pinimg.com/736x/8a/e9/e9/8ae9e92fa4e69967aa61bf2bda967b7b.jpg',
+                      (profilData?['gambar_pengguna'] ?? '').isNotEmpty
+                          ? profilData!['gambar_url']
+                          : 'https://i.pinimg.com/736x/8a/e9/e9/8ae9e92fa4e69967aa61bf2bda967b7b.jpg',
                     ),
                   ),
                   SizedBox(height: 8),
 
                   //username
                   Text(
-                    "username",
+                    akunData?['username'] ?? 'Memuat...',
                     style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
@@ -80,7 +86,7 @@ class PetugasAkunPage extends StatelessWidget {
 
                   //email
                   Text(
-                    "email@email.com",
+                    akunData?['email'] ?? 'Memuat...',
                     style: TextStyle(fontSize: 14, color: Colors.black),
                   ),
 
@@ -90,7 +96,9 @@ class PetugasAkunPage extends StatelessWidget {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => PetugasEditProfilPage(),
+                          builder: (context) => PetugasEditProfilPage(
+                            profilData: profilData
+                          ),
                         ),
                       );
                     },

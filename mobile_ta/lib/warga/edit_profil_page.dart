@@ -10,9 +10,8 @@ import 'package:path/path.dart' as Path;
 import 'package:shared_preferences/shared_preferences.dart';
 
 class WargaEditProfilPage extends StatefulWidget {
-  final Map<String, dynamic>? akunData;
   final Map<String, dynamic>? profilData;
-  const WargaEditProfilPage({Key? key, this.akunData, this.profilData})
+  const WargaEditProfilPage({Key? key, this.profilData})
     : super(key: key);
 
   @override

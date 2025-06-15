@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Models\Saldo;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 
@@ -28,36 +29,51 @@ class ProfilController extends Controller
                 'errors' => $validator->errors()
             ], 422);
         }
-        $gambar_path = null;
-        if ($request->hasFile('gambar_pengguna')) {
-            $filaname = time() . '_' . uniqid() . '.' . $request->file('gambar_pengguna')->getClientOriginalExtension();
-            $gambar_path = $request->file('gambar_pengguna')->storeAs('img/profil', $filaname, 'public');
-        }
 
-        $akun_id = Auth::user()->id;
-        $cek_role= Auth::user()->role;
-        if($cek_role == 'warga'){
-            $saldo= Saldo::create(
+        DB::beginTransaction();
+        try {
+            $gambar_path = null;
+            if ($request->hasFile('gambar_pengguna')) {
+                $filaname = time() . '_' . uniqid() . '.' . $request->file('gambar_pengguna')->getClientOriginalExtension();
+                $gambar_path = $request->file('gambar_pengguna')->storeAs('img/profil', $filaname, 'public');
+            }
+
+            $akun_id = Auth::user()->id;
+            $cek_role = Auth::user()->role;
+            if ($cek_role == 'warga') {
+                Saldo::create(
+                    [
+                        'warga_id' => $akun_id,
+                        'total_saldo' => 0,
+                    ]
+                );
+            }
+
+            $profil = Profil::create([
+                'akun_id' => $akun_id,
+                'nama_pengguna' => $request->nama_pengguna,
+                'alamat_pengguna' => $request->alamat_pengguna,
+                'no_hp_pengguna' => $request->no_hp_pengguna,
+                'gambar_pengguna' => $gambar_path,
+                'koordinat_pengguna' => $request->koordinat_pengguna,
+            ]);
+
+            DB::commit();
+            return response()->json([
+                'success' => true,
+                'message' => 'Berhasil Tambah Profil ' . $cek_role,
+                'data' => $profil
+            ]);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json(
                 [
-                    'warga_id'=> $akun_id,
-                    'total_saldo'=> 0,
+                    "success" => false,
+                    "message" => $e->getMessage()
+
                 ]
             );
         }
-
-        $profil = Profil::create([
-            'akun_id' => $akun_id,
-            'nama_pengguna' => $request->nama_pengguna,
-            'alamat_pengguna' => $request->alamat_pengguna,
-            'no_hp_pengguna' => $request->no_hp_pengguna,
-            'gambar_pengguna' => $gambar_path,
-            'koordinat_pengguna' => $request->koordinat_pengguna,
-        ]);
-        return response()->json([
-            'success' => true,
-            'message' => 'Berhasil Tambah Profil',
-            'data' => $profil
-        ]);
     }
 
     public function show()
@@ -100,31 +116,42 @@ class ProfilController extends Controller
                 'errors' => $validator->errors()
             ], 422);
         }
-
-        // Default null jika tidak upload gambar
         $gambar_path = $profil->gambar_pengguna;
 
-        if ($request->hasFile('gambar_pengguna')) {
-            if ($profil->gambar_pengguna) {
-                Storage::disk('public')->delete($profil->gambar_pengguna);
+        DB::beginTransaction();
+        try {
+
+            if ($request->hasFile('gambar_pengguna')) {
+                if ($profil->gambar_pengguna) {
+                    Storage::disk('public')->delete($profil->gambar_pengguna);
+                }
+
+                $filename = time() . '_' . uniqid() . '.' . $request->file('gambar_pengguna')->getClientOriginalExtension();
+                $gambar_path = $request->file('gambar_pengguna')->storeAs('img/profil', $filename, 'public');
             }
 
-            $filename = time() . '_' . uniqid() . '.' . $request->file('gambar_pengguna')->getClientOriginalExtension();
-            $gambar_path = $request->file('gambar_pengguna')->storeAs('img/profil', $filename, 'public');
+            $profil->update([
+                'nama_pengguna' => $request->nama_pengguna,
+                'alamat_pengguna' => $request->alamat_pengguna,
+                'no_hp_pengguna' => $request->no_hp_pengguna,
+                'gambar_pengguna' => $gambar_path,
+                'koordinat_pengguna' => $request->koordinat_pengguna,
+            ]);
+
+            DB::commit();
+            return response()->json([
+                'success' => true,
+                'message' => 'Berhasil Edit Profil',
+                'data' => $profil
+            ]);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json(
+                [
+                    "success" => false,
+                    "message" => $e->getMessage()
+                ]
+            );
         }
-
-        $profil->update([
-            'nama_pengguna' => $request->nama_pengguna,
-            'alamat_pengguna' => $request->alamat_pengguna,
-            'no_hp_pengguna' => $request->no_hp_pengguna,
-            'gambar_pengguna' => $gambar_path,
-            'koordinat_pengguna' => $request->koordinat_pengguna,
-        ]);
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Berhasil Edit Profil',
-            'data' => $profil
-        ]);
     }
 }

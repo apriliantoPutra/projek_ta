@@ -1,11 +1,27 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:mobile_ta/petugas/petugas_setor_jemput_baru.dart';
 
 class SetorCardJemputBaru extends StatelessWidget {
-  const SetorCardJemputBaru({super.key});
+  final Map<String, dynamic> data;
+  const SetorCardJemputBaru({required this.data, super.key});
 
   @override
   Widget build(BuildContext context) {
+    final waktuPengajuan = data['waktu_pengajuan'];
+    final tanggal =
+        waktuPengajuan != null
+            ? DateFormat('EEEE, dd-MM-yyyy', 'id_ID') // format lengkap + lokal
+            .format(DateTime.parse(waktuPengajuan))
+            : "-";
+    final profil = data['user']?['profil'];
+    final gambarPengguna =
+        (profil != null && (profil['gambar_pengguna'] ?? '').isNotEmpty)
+            ? profil['gambar_url']
+            : 'https://i.pinimg.com/736x/8a/e9/e9/8ae9e92fa4e69967aa61bf2bda967b7b.jpg';
+
+    final namaPengguna = profil['nama_pengguna'] ?? 'memuat..';
+
     return Container(
       margin: EdgeInsets.symmetric(vertical: 4),
       decoration: BoxDecoration(
@@ -27,9 +43,7 @@ class SetorCardJemputBaru extends StatelessWidget {
           children: [
             CircleAvatar(
               radius: 20, // Perbesar avatar
-              backgroundImage: NetworkImage(
-                "https://www.perfocal.com/blog/content/images/2021/01/Perfocal_17-11-2019_TYWFAQ_100_standard-3.jpg",
-              ),
+              backgroundImage: NetworkImage(gambarPengguna),
             ),
             SizedBox(width: 10), // Jarak antara avatar dan teks
             Column(
@@ -37,7 +51,7 @@ class SetorCardJemputBaru extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  "wanda",
+                  namaPengguna,
                   style: TextStyle(
                     fontSize: 22,
                     fontWeight: FontWeight.w600,
@@ -56,7 +70,7 @@ class SetorCardJemputBaru extends StatelessWidget {
             ),
             Spacer(), // Memberi jarak fleksibel antara teks dan tanggal
             Text(
-              "Senin, 14-04-2025",
+              tanggal,
               style: TextStyle(
                 fontSize: 16,
                 color: Colors.white, // Mengubah warna teks menjadi putih

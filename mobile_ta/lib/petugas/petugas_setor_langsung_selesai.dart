@@ -1,11 +1,107 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'package:mobile_ta/constants/constants.dart';
 import 'package:mobile_ta/widget/petugas_main_widget.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
-class PetugasSetorLangsungSelesai extends StatelessWidget {
-  const PetugasSetorLangsungSelesai({super.key});
+class PetugasSetorLangsungSelesai extends StatefulWidget {
+  final int id;
+  const PetugasSetorLangsungSelesai({required this.id, super.key});
+
+  @override
+  State<PetugasSetorLangsungSelesai> createState() =>
+      _PetugasSetorLangsungSelesaiState();
+}
+
+class _PetugasSetorLangsungSelesaiState
+    extends State<PetugasSetorLangsungSelesai> {
+  Map<String, dynamic>? pengajuanDetailSetor;
+  Map<int, Map<String, dynamic>> jenisSampahCache = {};
+  bool isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    fetchData();
+  }
+
+  Future<void> fetchData() async {
+    await fetchPengajuanDetailSetor();
+    await fetchJenisSampah();
+    setState(() {
+      isLoading = false;
+    });
+  }
+
+  Future<void> fetchPengajuanDetailSetor() async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('token') ?? '';
+    final resp = await http.get(
+      Uri.parse('$baseUrl/setor-langsung/selesai/${widget.id}'),
+      headers: {'Authorization': 'Bearer $token', 'Accept': 'application/json'},
+    );
+    if (resp.statusCode == 200) {
+      final data = jsonDecode(resp.body)['data'];
+      pengajuanDetailSetor = data;
+    } else {
+      throw Exception('fetchPengajuanSetor failed');
+    }
+  }
+
+  Future<void> fetchJenisSampah() async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('token');
+    if (token == null) return;
+
+    final setoran =
+        pengajuanDetailSetor?['input_detail']['setoran_sampah'] ?? [];
+
+    for (var item in setoran) {
+      final int jenisId = item['jenis_sampah_id'];
+
+      if (!jenisSampahCache.containsKey(jenisId)) {
+        final response = await http.get(
+          Uri.parse('$baseUrl/jenis-sampah/$jenisId'),
+          headers: {
+            'Authorization': 'Bearer $token',
+            'Accept': 'application/json',
+          },
+        );
+
+        if (response.statusCode == 200) {
+          final data = json.decode(response.body)['data'];
+          jenisSampahCache[jenisId] = {
+            'nama': data['nama_sampah'],
+            'harga': data['harga_per_satuan'],
+            'warna': data['warna_indikasi'],
+          };
+        }
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
+    if (isLoading || pengajuanDetailSetor == null) {
+      return Scaffold(
+        appBar: AppBar(title: Text("Setor Langsung Sampah")),
+        body: Center(child: CircularProgressIndicator()),
+      );
+    }
+
+    final profil = pengajuanDetailSetor!['user']?['profil'];
+    final gambarPengguna =
+        (profil != null && (profil['gambar_pengguna'] ?? '').isNotEmpty)
+            ? profil['gambar_url']
+            : 'https://i.pinimg.com/736x/8a/e9/e9/8ae9e92fa4e69967aa61bf2bda967b7b.jpg';
+
+    final namaPengguna = profil['nama_pengguna'] ?? 'memuat..';
+    final detailSetoran = pengajuanDetailSetor!['input_detail'];
+    final totalBerat = detailSetoran['total_berat'].toString();
+    final totalHarga = detailSetoran['total_harga'];
+    final setoranSampah = detailSetoran['setoran_sampah'] as List;
+
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
@@ -17,14 +113,11 @@ class PetugasSetorLangsungSelesai extends StatelessWidget {
           onPressed:
               () => Navigator.pushAndRemoveUntil(
                 context,
-                MaterialPageRoute(
-                  builder:
-                      (context) => const PetugasMainWrapper(initialIndex: 1),
-                ),
+                MaterialPageRoute(builder: (context) => PetugasMainWrapper()),
                 (Route<dynamic> route) => false,
               ),
         ),
-        title: Text(
+        title: const Text(
           "Setor Langsung Sampah",
           style: TextStyle(
             fontWeight: FontWeight.w600,
@@ -33,29 +126,32 @@ class PetugasSetorLangsungSelesai extends StatelessWidget {
           ),
         ),
       ),
-
       body: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // Profil pengguna
             Container(
               padding: const EdgeInsets.all(16),
               child: Row(
                 children: [
-                  const CircleAvatar(
+                  CircleAvatar(
                     radius: 20,
-                    backgroundImage: NetworkImage(
-                      "https://www.perfocal.com/blog/content/images/2021/01/Perfocal_17-11-2019_TYWFAQ_100_standard-3.jpg",
-                    ),
+                    backgroundImage: NetworkImage(gambarPengguna),
                   ),
                   const SizedBox(width: 16),
-                  const Text(
-                    "Nama Penyetor",
-                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
+                  Text(
+                    namaPengguna,
+                    style: const TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
                 ],
               ),
             ),
+
+            // Panel setoran
             Container(
               padding: const EdgeInsets.all(16),
               margin: const EdgeInsets.all(16),
@@ -65,7 +161,7 @@ class PetugasSetorLangsungSelesai extends StatelessWidget {
               ),
               child: Column(
                 children: [
-                  // Progress bar
+                  // Bar total berat
                   Stack(
                     children: [
                       Container(
@@ -76,46 +172,43 @@ class PetugasSetorLangsungSelesai extends StatelessWidget {
                         ),
                       ),
                       Row(
-                        children: [
-                          Expanded(
-                            flex: 2,
-                            child: Container(
-                              height: 32,
-                              decoration: const BoxDecoration(
-                                color: Colors.orange,
-                                borderRadius: BorderRadius.horizontal(
-                                  left: Radius.circular(8),
-                                ),
-                              ),
-                            ),
-                          ),
-                          Expanded(
-                            flex: 7,
-                            child: Container(height: 32, color: Colors.blue),
-                          ),
-                          Expanded(
-                            flex: 1,
-                            child: Container(height: 32, color: Colors.green),
-                          ),
-                          Expanded(
-                            flex: 1,
-                            child: Container(
-                              height: 32,
-                              decoration: const BoxDecoration(
-                                color: Colors.teal,
-                                borderRadius: BorderRadius.horizontal(
-                                  right: Radius.circular(8),
-                                ),
-                              ),
-                            ),
-                          ),
-                        ],
+                        children:
+                            pengajuanDetailSetor!['input_detail']['setoran_sampah']
+                                .map<Widget>((item) {
+                                  final jenisId = item['jenis_sampah_id'];
+                                  final berat = item['berat'] * 1.0;
+                                  final totalBerat =
+                                      pengajuanDetailSetor!['input_detail']['total_berat'] *
+                                      1.0;
+                                  final proportion = berat / totalBerat;
+
+                                  final warna =
+                                      jenisSampahCache[jenisId]?['warna'] ??
+                                      '#999999';
+
+                                  return Expanded(
+                                    flex:
+                                        (proportion * 1000)
+                                            .round(), // agar fleksibel
+                                    child: Container(
+                                      height: 32,
+                                      decoration: BoxDecoration(
+                                        color: Color(
+                                          int.parse(
+                                            warna.replaceAll('#', '0xff'),
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  );
+                                })
+                                .toList(),
                       ),
-                      const Positioned.fill(
+                      Positioned.fill(
                         child: Center(
                           child: Text(
-                            '11kg',
-                            style: TextStyle(
+                            "${pengajuanDetailSetor!['input_detail']['total_berat']} kg",
+                            style: const TextStyle(
                               fontWeight: FontWeight.bold,
                               color: Colors.white,
                             ),
@@ -124,64 +217,50 @@ class PetugasSetorLangsungSelesai extends StatelessWidget {
                       ),
                     ],
                   ),
+
                   const SizedBox(height: 16),
 
-                  // Legend sampah
-                  Row(
-                    children: [
-                      _buildLegend(
-                        color: Colors.orange,
-                        label: "Sampah Kardus",
-                        weight: "2kg",
+                  // Legend dari data setoran
+                  ...setoranSampah.map((item) {
+                    final jenisId = item['jenis_sampah_id'];
+                    final berat = item['berat'];
+                    final jenisInfo = jenisSampahCache[jenisId];
+
+                    if (jenisInfo == null) return SizedBox();
+
+                    final Color color = _parseHexColor(jenisInfo['warna']);
+
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: 8.0),
+                      child: Row(
+                        children: [
+                          _buildLegend(
+                            color: color,
+                            label: jenisInfo['nama'],
+                            weight: "${berat}kg",
+                          ),
+                        ],
                       ),
-                    ],
-                  ),
-                  const SizedBox(height: 8),
-                  Row(
-                    children: [
-                      _buildLegend(
-                        color: Colors.blue,
-                        label: "Sampah Kaleng",
-                        weight: "7kg",
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 8),
-                  Row(
-                    children: [
-                      _buildLegend(
-                        color: Colors.green,
-                        label: "Sampah Botol Plastik",
-                        weight: "1kg",
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 8),
-                  Row(
-                    children: [
-                      _buildLegend(
-                        color: Colors.teal,
-                        label: "Sampah Kertas",
-                        weight: "1kg",
-                      ),
-                    ],
-                  ),
+                    );
+                  }).toList(),
                 ],
               ),
             ),
+
+            // Harga estimasi
             Container(
               padding: EdgeInsets.symmetric(horizontal: 30),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
-                  Text(
+                  const Text(
                     "Estimasi Harga",
                     style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
                   ),
-                  SizedBox(width: 8),
+                  const SizedBox(width: 8),
                   Text(
-                    "Rp50.000",
-                    style: TextStyle(
+                    "Rp $totalHarga",
+                    style: const TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.normal,
                     ),
@@ -189,10 +268,12 @@ class PetugasSetorLangsungSelesai extends StatelessWidget {
                 ],
               ),
             ),
+
+            // Informasi petugas dan bank
             Container(
-              padding: EdgeInsets.all(16),
+              padding: const EdgeInsets.all(16),
               child: Row(
-                children: [
+                children: const [
                   Text(
                     "Nama Petugas",
                     style: TextStyle(
@@ -202,37 +283,22 @@ class PetugasSetorLangsungSelesai extends StatelessWidget {
                     ),
                   ),
                   Spacer(),
-                  Text(
-                    "Petugas Krisna",
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.normal,
-                    ),
-                  ),
+                  Text("Petugas Krisna", style: TextStyle(fontSize: 16)),
                 ],
               ),
             ),
             Container(
-              padding: EdgeInsets.symmetric(horizontal: 16),
-              child: Column(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: const Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
                     "Nama Bank Sampah",
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w700,
-                      color: Colors.black,
-                    ),
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
                   ),
-                  // SizedBox(height: 8),
                   Text(
-                    "Alamat Bank Sampah: Jl. Lorem ipsum dolor sit amet, consectetur adipiscing elit, Semarang",
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.normal,
-                      color: Colors.black54,
-                    ),
+                    "Alamat Bank Sampah: Jl. Lorem ipsum dolor sit amet, Semarang",
+                    style: TextStyle(fontSize: 16, color: Colors.black54),
                   ),
                 ],
               ),
@@ -273,5 +339,13 @@ class PetugasSetorLangsungSelesai extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  Color _parseHexColor(String hexColor) {
+    hexColor = hexColor.toUpperCase().replaceAll("#", "");
+    if (hexColor.length == 6) {
+      hexColor = "FF$hexColor";
+    }
+    return Color(int.parse(hexColor, radix: 16));
   }
 }

@@ -101,7 +101,6 @@ class WargaAkunPage extends StatelessWidget {
                           MaterialPageRoute(
                             builder:
                                 (context) => WargaEditProfilPage(
-                                  akunData: akunData,
                                   profilData: profilData,
                                 ),
                           ),

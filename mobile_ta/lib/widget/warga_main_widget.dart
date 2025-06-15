@@ -20,8 +20,8 @@ class WargaMainWrapper extends StatefulWidget {
 class _WargaMainWrapperState extends State<WargaMainWrapper> {
   int selectedMenu = 0;
   Map<String, dynamic>? akunData;
-  Map<String, dynamic>? saldoData;
   Map<String, dynamic>? profilData; // Tambahkan ini
+  Map<String, dynamic>? saldoData;
 
   @override
   void initState() {

@@ -15,15 +15,43 @@
                     class="flex items-center px-4 py-2 text-lg rounded-lg hover:bg-green-600 hover:text-white transition-colors border-b border-gray-700">
                     <i class="ri-user-line mr-3"></i> Akun
                 </a>
-                <a href="{{ route('Master-Data') }}"
-                    class="flex items-center px-4 py-2 text-lg rounded-lg hover:bg-green-600 hover:text-white transition-colors border-b border-gray-700">
-                    <i class="ri-database-2-line mr-3"></i> Master Data
 
-                </a>
-                <a href="{{ route('Setor-Langsung') }}"
-                    class="flex items-center px-4 py-2 text-lg rounded-lg hover:bg-green-600 hover:text-white transition-colors border-b border-gray-700">
-                    <i class="ri-recycle-line mr-3"></i> Setoran Sampah
-                </a>
+                <div class="rounded-lg border-b border-gray-700">
+                    <button onclick="toggleDropdown('dropdownButton')"
+                        class="flex items-center justify-between w-full px-4 py-2 text-lg rounded-lg hover:bg-green-600 hover:text-white transition-colors">
+                        <span><i class="ri-database-2-line mr-3"></i>Master Data</span>
+                        <i class="ri-arrow-down-s-line"></i>
+                    </button>
+                    <div id="dropdownButton" class="hidden flex-col space-y-1 pl-10 mt-2">
+                        <a href="{{ route('Jenis-Sampah') }}"
+                            class="block px-4 py-2 text-lg rounded-lg hover:bg-green-600 hover:text-white transition-colors border-b border-gray-700">
+                            Jenis Sampah
+                        </a>
+                        <a href="{{ route('Bank-Sampah') }}"
+                            class="block px-4 py-2 text-lg rounded-lg hover:bg-green-600 hover:text-white transition-colors ">
+                            Bank Sampah
+                        </a>
+                    </div>
+                </div>
+
+                <div class="rounded-lg border-b border-gray-700">
+                    <button onclick="toggleDropdown('dropdownButton2')"
+                        class="flex items-center justify-between w-full px-4 py-2 text-lg rounded-lg hover:bg-green-600 hover:text-white transition-colors">
+                        <span><i class="ri-recycle-line mr-3"></i>Setor Sampah</span>
+                        <i class="ri-arrow-down-s-line"></i>
+                    </button>
+                    <div id="dropdownButton2" class="hidden flex-col space-y-1 pl-10 mt-2">
+                        <a href="{{ route('Setor-Langsung') }}"
+                            class="block px-4 py-2 text-lg rounded-lg hover:bg-green-600 hover:text-white transition-colors border-b border-gray-700">
+                            Langsung
+                        </a>
+                        <a href="{{ route('Setor-Jemput') }}"
+                            class="block px-4 py-2 text-lg rounded-lg hover:bg-green-600 hover:text-white transition-colors ">
+                            Jemput
+                        </a>
+                    </div>
+                </div>
+
                 <a href="#"
                     class="flex items-center px-4 py-2 text-lg rounded-lg hover:bg-green-600 hover:text-white transition-colors border-b border-gray-700">
                     <i class="ri-wallet-3-line mr-3"></i> Tarik Saldo
@@ -32,6 +60,7 @@
                     class="flex items-center px-4 py-2 text-lg rounded-lg hover:bg-green-600 hover:text-white transition-colors border-b border-gray-700">
                     <i class="ri-book-open-line mr-3"></i> Edukasi
                 </a>
+
                 <a href="#"
                     class="flex items-center px-4 py-2 text-lg rounded-lg hover:bg-green-600 hover:text-white transition-colors border-b border-gray-700">
                     <i class="ri-robot-2-line mr-3"></i> Chatbot

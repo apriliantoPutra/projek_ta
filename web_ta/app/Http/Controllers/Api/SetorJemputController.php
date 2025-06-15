@@ -9,6 +9,7 @@ use App\Http\Controllers\Controller;
 use App\Models\InputDetailSetor;
 use App\Models\Saldo;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 
 class SetorJemputController extends Controller
@@ -30,35 +31,69 @@ class SetorJemputController extends Controller
             ], 422);
         }
 
-        $pengajuan_setor = PengajuanSetor::create([
-            'warga_id' => $akun_id,
-            'jenis_setor' => 'jemput',
-            'waktu_pengajuan' => $request->waktu_pengajuan,
-            'status_pengajuan' => 'menunggu',
-            'catatan_petugas' => $request->catatan_petugas
-        ]);
+        DB::beginTransaction();
+        try {
 
-        $detail_setor = InputDetailSetor::create([
-            'pengajuan_id' => $pengajuan_setor->id,
-            'setoran_sampah' => json_encode($request->setoran_sampah),
-            'total_berat' => $request->total_berat,
-            'total_harga' => $request->total_harga,
-            'status_setor' => 'Diproses'
+            $pengajuan_setor = PengajuanSetor::create([
+                'warga_id' => $akun_id,
+                'jenis_setor' => 'jemput',
+                'waktu_pengajuan' => $request->waktu_pengajuan,
+                'status_pengajuan' => 'menunggu',
+                'catatan_petugas' => $request->catatan_petugas
+            ]);
 
-        ]);
+            $detail_setor = InputDetailSetor::create([
+                'pengajuan_id' => $pengajuan_setor->id,
+                'setoran_sampah' => json_encode($request->setoran_sampah),
+                'total_berat' => $request->total_berat,
+                'total_harga' => $request->total_harga,
+                'status_setor' => 'Diproses'
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Berhasil Tambah Pengajuan Setor Jemput',
-            'pengajuan' => $pengajuan_setor,
-            'detail' => $detail_setor
-        ]);
+            ]);
+
+            DB::commit();
+            return response()->json([
+                'success' => true,
+                'message' => 'Berhasil Tambah Pengajuan Setor Jemput',
+                'pengajuan' => $pengajuan_setor,
+                'detail' => $detail_setor
+            ]);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json(
+                [
+                    "success" => false,
+                    "message" => $e->getMessage()
+
+                ]
+            );
+        }
     }
 
     // petugas melihat list pengajuan jemput
-    public function listPengajuan()
+    public function listPengajuanBaru()
     {
-        $pengajuan_setor = PengajuanSetor::where('jenis_setor', '=', 'jemput')->get();
+        $pengajuan_setor = PengajuanSetor::with(['user.profil'])->where('jenis_setor', '=', 'jemput')->where('status_pengajuan', 'menunggu')->get()->map(function ($item) {
+            $profil = $item->user->profil;
+            return [
+                'id' => $item->id,
+                'jenis_setor' => $item->jenis_setor,
+                'waktu_pengajuan' => $item->waktu_pengajuan,
+                'status_pengajuan' => $item->status_pengajuan,
+                'catatan_petugas' => $item->catatan_petugas,
+                'user' => [
+                    'username' => $item->user->username,
+                    'email' => $item->user->email,
+                    'profil' => [
+                        'nama_pengguna' => $profil->nama_pengguna,
+                        'alamat_pengguna' => $profil->alamat_pengguna,
+                        'no_hp_pengguna' => $profil->no_hp_pengguna,
+                        'gambar_pengguna' => $profil->gambar_pengguna,
+                        'gambar_url' => asset('storage/' . $profil->gambar_pengguna),
+                    ]
+                ]
+            ];
+        });
 
         return response()->json([
             'success' => true,
@@ -96,34 +131,47 @@ class SetorJemputController extends Controller
         $pengajuan_setor = PengajuanSetor::find($id);
         $detail_setor = InputDetailSetor::where('pengajuan_id', '=', $id)->first();
 
-        $pengajuan_setor->update([
-            'waktu_pengajuan' => $request->waktu_pengajuan,
-            'status_pengajuan' => 'diterima',
-            'catatan_petugas' => $request->catatan_petugas
+        DB::beginTransaction();
+        try {
+            $pengajuan_setor->update([
+                'waktu_pengajuan' => $request->waktu_pengajuan,
+                'status_pengajuan' => 'diterima',
+                'catatan_petugas' => $request->catatan_petugas
 
-        ]);
+            ]);
 
-        $detail_setor->update([
-            'petugas_id' => Auth::id(), // id petugas
-            'setoran_sampah' => $request->setoran_sampah,
-            'total_berat' => $request->total_berat,
-            'total_harga' => $request->total_harga,
-            'status_setor' => 'selesai'
+            $detail_setor->update([
+                'petugas_id' => Auth::id(), // id petugas
+                'setoran_sampah' => json_encode($request->setoran_sampah),
+                'total_berat' => $request->total_berat,
+                'total_harga' => $request->total_harga,
+                'status_setor' => 'selesai'
 
-        ]);
+            ]);
 
-        // Update jumlah saldo
-        $saldo = Saldo::where('warga_id', '=', $pengajuan_setor->warga_id)->first();
-        $saldo->update([
-            "total_saldo" => $saldo->total_saldo + $request->total_harga
-        ]);
+            // Update jumlah saldo
+            $saldo = Saldo::where('warga_id', '=', $pengajuan_setor->warga_id)->first();
+            $saldo->update([
+                "total_saldo" => $saldo->total_saldo + $request->total_harga
+            ]);
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Berhasil Edit Pengajuan Setor Jemput',
-            'pengajuan' => $pengajuan_setor,
-            'detail' => $detail_setor
-        ]);
+            DB::commit();
+            return response()->json([
+                'success' => true,
+                'message' => 'Berhasil Edit Pengajuan Setor Jemput',
+                'pengajuan' => $pengajuan_setor,
+                'detail' => $detail_setor
+            ]);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json(
+                [
+                    "success" => false,
+                    "message" => $e->getMessage()
+
+                ]
+            );
+        }
     }
 
     public function batalPengajuan(Request $request, $id)
@@ -132,16 +180,29 @@ class SetorJemputController extends Controller
         $pengajuan_setor = PengajuanSetor::find($id);
         $detail_setor = InputDetailSetor::where('pengajuan_id', '=', $id)->first();
 
-        $pengajuan_setor->update([
-            'status_pengajuan' => 'dibatalkan',
-        ]);
+        DB::beginTransaction();
+        try {
+            $pengajuan_setor->update([
+                'status_pengajuan' => 'dibatalkan',
+            ]);
 
-        $detail_setor->delete();
+            $detail_setor->delete();
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Berhasil Batalkan Pengajuan Setor Jemput',
+            DB::commit();
+            return response()->json([
+                'success' => true,
+                'message' => 'Berhasil Batalkan Pengajuan Setor Jemput',
 
-        ]);
+            ]);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json(
+                [
+                    "success" => false,
+                    "message" => $e->getMessage()
+
+                ]
+            );
+        }
     }
 }

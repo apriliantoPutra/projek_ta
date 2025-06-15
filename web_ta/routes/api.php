@@ -38,15 +38,25 @@ Route::prefix('v1')->group(function () {
             // warga
             Route::post('/', [SetorLangsungController::class, 'storePengajuan']);
             // petugas
-            Route::get('/', [SetorLangsungController::class, 'listPengajuan']); // list pengajuan
+            Route::get('/baru', [SetorLangsungController::class, 'listPengajuanBaru']); // list pengajuan Baru
+            Route::get('/selesai', [SetorLangsungController::class, 'listPengajuanSelesai']); // list pengajuan Selesai
+
             Route::get('/{id}', [SetorLangsungController::class, 'showPengajuan']); // detail pengajuan by id
             Route::put('/terima-pengajuan/{id}', [SetorLangsungController::class, 'terimaPengajuan']); // ubah status
             Route::put('/batal-pengajuan/{id}', [SetorLangsungController::class, 'batalPengajuan']); // ubah status
 
             Route::post('/detail-sampah/{id}', [SetorLangsungController::class, 'storeDetail']); // input detail sampah berdasarkan id pengajuan
+            Route::get('/selesai/{id}', [SetorLangsungController::class, 'showPengajuanDetail']); // detail pengajuan by id
         });
         Route::prefix('setor-jemput')->group(function () {
+            // warga
             Route::post('/', [SetorJemputController::class, 'storePengajuan']);
+            // petugas
+            Route::get('/baru', [SetorJemputController::class, 'listPengajuanBaru']);
+
+            Route::get('/{id}', [SetorJemputController::class, 'showPengajuan']);
+            Route::put('/terima-pengajuan/{id}', [SetorJemputController::class, 'terimaPengajuan']);
+            Route::put('/batal-pengajuan/{id}', [SetorJemputController::class, 'batalPengajuan']);
         });
 
 

@@ -7,6 +7,7 @@ use App\Models\User;
 use GrahamCampbell\ResultType\Success;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 
@@ -30,18 +31,32 @@ class LoginController extends Controller
                 'errors' => $validator->errors()
             ], 422);
         }
-        $akun = User::create([
-            'username' => $request->get('username'),
-            'email' => $request->get('email'),
-            'password' => Hash::make($request->get('password')),
-            'role' => 'warga'
-        ]);
-        $token = $akun->createToken('auth_token')->plainTextToken;
-        return response()->json([
-            'success' => true,
-            'token' => $token,
-            'data' => $akun
-        ]);
+        DB::beginTransaction();
+
+        try {
+            $akun = User::create([
+                'username' => $request->get('username'),
+                'email' => $request->get('email'),
+                'password' => Hash::make($request->get('password')),
+                'role' => 'warga'
+            ]);
+            $token = $akun->createToken('auth_token')->plainTextToken;
+            DB::commit();
+            return response()->json([
+                'success' => true,
+                'token' => $token,
+                'data' => $akun
+            ]);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json(
+                [
+                    "success" => false,
+                    "message" => $e->getMessage()
+
+                ]
+            );
+        }
     }
 
     public function authenticate(Request $request)
