@@ -47,7 +47,7 @@ class SetorJemputController extends Controller
                 'setoran_sampah' => json_encode($request->setoran_sampah),
                 'total_berat' => $request->total_berat,
                 'total_harga' => $request->total_harga,
-                'status_setor' => 'Diproses'
+                'status_setor' => 'proses'
 
             ]);
 
@@ -100,67 +100,139 @@ class SetorJemputController extends Controller
             'data' => $pengajuan_setor
         ]);
     }
+    public function listPengajuanProses()
+    {
+        $pengajuan_setor = PengajuanSetor::with(['user.profil', 'inputdetail'])
+            ->where('jenis_setor', 'jemput')
+            ->where('status_pengajuan', 'diterima')
+            ->whereHas('inputdetail', function ($query) {
+                $query->where('status_setor', 'proses');
+            })
+            ->get()
+            ->map(function ($item) {
+                $profil = $item->user->profil;
+                return [
+                    'id' => $item->id,
+                    'jenis_setor' => $item->jenis_setor,
+                    'waktu_pengajuan' => $item->waktu_pengajuan,
+                    'status_pengajuan' => $item->status_pengajuan,
+                    'catatan_petugas' => $item->catatan_petugas,
+                    'user' => [
+                        'username' => $item->user->username,
+                        'email' => $item->user->email,
+                        'profil' => [
+                            'nama_pengguna' => $profil->nama_pengguna,
+                            'alamat_pengguna' => $profil->alamat_pengguna,
+                            'no_hp_pengguna' => $profil->no_hp_pengguna,
+                            'gambar_pengguna' => $profil->gambar_pengguna,
+                            'gambar_url' => asset('storage/' . $profil->gambar_pengguna),
+                        ]
+                    ],
+
+                ];
+            });
+
+        return response()->json([
+            'success' => true,
+            'data' => $pengajuan_setor
+        ]);
+    }
+    public function listPengajuanSelesai()
+    {
+        $pengajuan_setor = PengajuanSetor::with(['user.profil', 'inputdetail'])
+            ->where('jenis_setor', 'jemput')
+            ->where('status_pengajuan', 'diterima')
+            ->whereHas('inputdetail', function ($query) {
+                $query->where('status_setor', 'selesai');
+            })
+            ->get()
+            ->map(function ($item) {
+                $profil = $item->user->profil;
+                return [
+                    'id' => $item->id,
+                    'jenis_setor' => $item->jenis_setor,
+                    'waktu_pengajuan' => $item->waktu_pengajuan,
+                    'status_pengajuan' => $item->status_pengajuan,
+                    'catatan_petugas' => $item->catatan_petugas,
+                    'user' => [
+                        'username' => $item->user->username,
+                        'email' => $item->user->email,
+                        'profil' => [
+                            'nama_pengguna' => $profil->nama_pengguna,
+                            'alamat_pengguna' => $profil->alamat_pengguna,
+                            'no_hp_pengguna' => $profil->no_hp_pengguna,
+                            'gambar_pengguna' => $profil->gambar_pengguna,
+                            'gambar_url' => asset('storage/' . $profil->gambar_pengguna),
+                        ]
+                    ],
+
+                ];
+            });
+
+        return response()->json([
+            'success' => true,
+            'data' => $pengajuan_setor
+        ]);
+    }
+
 
     // petugas melihat detail pengajuan jemput
     public function showPengajuan($id)
     {
-        $pengajuan_setor = PengajuanSetor::find($id);
-        $detail_setor = InputDetailSetor::where('pengajuan_id', '=', $id)->first();
+        $item = PengajuanSetor::with('user.profil', 'inputdetail')->find($id);
+        if (!$item) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Pengajuan tidak ditemukan',
+            ], 404);
+        }
+        $profil = $item->user->profil;
+
+        $pengajuan_setor = [
+            'id' => $item->id,
+            'jenis_setor' => $item->jenis_setor,
+            'waktu_pengajuan' => $item->waktu_pengajuan,
+            'status_pengajuan' => $item->status_pengajuan,
+            'catatan_petugas' => $item->catatan_petugas,
+            'user' => [
+                'username' => $item->user->username,
+                'email' => $item->user->email,
+                'profil' => [
+                    'nama_pengguna' => $profil->nama_pengguna,
+                    'alamat_pengguna' => $profil->alamat_pengguna,
+                    'no_hp_pengguna' => $profil->no_hp_pengguna,
+                    'gambar_pengguna' => $profil->gambar_pengguna,
+                    'gambar_url' => asset('storage/' . $profil->gambar_pengguna),
+                ]
+            ],
+            'input_detail' => [
+                'setoran_sampah' => json_decode($item->inputdetail->setoran_sampah, true),
+                'total_berat' => $item->inputdetail->total_berat,
+                'total_harga' => $item->inputdetail->total_harga,
+                'status_setor' => $item->inputdetail->status_setor,
+            ]
+        ];
 
         return response()->json([
             'success' => true,
-            'pengajuan' => $pengajuan_setor,
-            'detail' => $detail_setor
+            'data' => $pengajuan_setor,
         ]);
     }
     // edit dan menyetujui
     public function terimaPengajuan(Request $request, $id)
     {
-        $validator = Validator::make($request->all(), [
-            'waktu_pengajuan' => 'required|string',
-            'catatan_petugas' => 'nullable|string',
-
-        ]);
-        if ($validator->fails()) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Validasi gagal',
-                'errors' => $validator->errors()
-            ], 422);
-        }
         $pengajuan_setor = PengajuanSetor::find($id);
-        $detail_setor = InputDetailSetor::where('pengajuan_id', '=', $id)->first();
 
         DB::beginTransaction();
         try {
             $pengajuan_setor->update([
-                'waktu_pengajuan' => $request->waktu_pengajuan,
                 'status_pengajuan' => 'diterima',
-                'catatan_petugas' => $request->catatan_petugas
-
             ]);
-
-            $detail_setor->update([
-                'petugas_id' => Auth::id(), // id petugas
-                'setoran_sampah' => json_encode($request->setoran_sampah),
-                'total_berat' => $request->total_berat,
-                'total_harga' => $request->total_harga,
-                'status_setor' => 'selesai'
-
-            ]);
-
-            // Update jumlah saldo
-            $saldo = Saldo::where('warga_id', '=', $pengajuan_setor->warga_id)->first();
-            $saldo->update([
-                "total_saldo" => $saldo->total_saldo + $request->total_harga
-            ]);
-
             DB::commit();
             return response()->json([
                 'success' => true,
-                'message' => 'Berhasil Edit Pengajuan Setor Jemput',
+                'message' => 'Berhasil Terima Pengajuan Setor Jemput',
                 'pengajuan' => $pengajuan_setor,
-                'detail' => $detail_setor
             ]);
         } catch (\Exception $e) {
             DB::rollBack();
@@ -193,6 +265,46 @@ class SetorJemputController extends Controller
                 'success' => true,
                 'message' => 'Berhasil Batalkan Pengajuan Setor Jemput',
 
+            ]);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json(
+                [
+                    "success" => false,
+                    "message" => $e->getMessage()
+
+                ]
+            );
+        }
+    }
+    public function konfirmasiPengajuan(Request $request, $id)
+    {
+
+        $pengajuan_setor = PengajuanSetor::find($id);
+        $detail_setor = InputDetailSetor::where('pengajuan_id', '=', $id)->first();
+
+        DB::beginTransaction();
+        try {
+            $detail_setor->update([
+                'petugas_id' => Auth::id(), // id petugas
+                'setoran_sampah' => json_encode($request->setoran_sampah),
+                'total_berat' => $request->total_berat,
+                'total_harga' => $request->total_harga,
+                'status_setor' => 'selesai'
+
+            ]);
+
+            // Update jumlah saldo
+            $saldo = Saldo::where('warga_id', '=', $pengajuan_setor->warga_id)->first();
+            $saldo->update([
+                "total_saldo" => $saldo->total_saldo + $request->total_harga
+            ]);
+
+            DB::commit();
+            return response()->json([
+                'success' => true,
+                'message' => 'Berhasil Edit Pengajuan Setor Jemput',
+                'data' => $detail_setor
             ]);
         } catch (\Exception $e) {
             DB::rollBack();

@@ -53,10 +53,14 @@ Route::prefix('v1')->group(function () {
             Route::post('/', [SetorJemputController::class, 'storePengajuan']);
             // petugas
             Route::get('/baru', [SetorJemputController::class, 'listPengajuanBaru']);
+            Route::get('/proses', [SetorJemputController::class, 'listPengajuanProses']);
+            Route::get('/selesai', [SetorJemputController::class, 'listPengajuanSelesai']);
 
             Route::get('/{id}', [SetorJemputController::class, 'showPengajuan']);
-            Route::put('/terima-pengajuan/{id}', [SetorJemputController::class, 'terimaPengajuan']);
-            Route::put('/batal-pengajuan/{id}', [SetorJemputController::class, 'batalPengajuan']);
+
+            Route::patch('/terima-pengajuan/{id}', [SetorJemputController::class, 'terimaPengajuan']);
+            Route::patch('/batal-pengajuan/{id}', [SetorJemputController::class, 'batalPengajuan']);
+            Route::patch('/konfirmasi/{id}', [SetorJemputController::class, 'konfirmasiPengajuan']);
         });
 
 

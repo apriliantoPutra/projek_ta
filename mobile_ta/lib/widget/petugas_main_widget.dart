@@ -11,7 +11,8 @@ import '../petugas/beranda_page.dart';
 import '../petugas/petugas_tambah_profil_page.dart';
 
 class PetugasMainWrapper extends StatefulWidget {
-  const PetugasMainWrapper({Key? key}) : super(key: key);
+  final int initialMenu;
+  const PetugasMainWrapper({Key? key, this.initialMenu = 0}) : super(key: key);
 
   @override
   State<PetugasMainWrapper> createState() => _WargaMainWrapperState();
@@ -25,6 +26,7 @@ class _WargaMainWrapperState extends State<PetugasMainWrapper> {
   @override
   void initState() {
     super.initState();
+    selectedMenu = widget.initialMenu;
     checkInitialData();
   }
 

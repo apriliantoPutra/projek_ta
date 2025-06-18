@@ -155,62 +155,7 @@ class SetorLangsungController extends Controller
         ]);
     }
 
-    // petugas merubah status pengajuan berdasarkan id
-    public function terimaPengajuan(Request $request, $id)
-    {
-        $validator = Validator::make($request->all(), [
-            'waktu_pengajuan' => 'nullable|string',
-            'catatan_petugas' => 'nullable|string',
 
-        ]);
-        if ($validator->fails()) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Validasi gagal',
-                'errors' => $validator->errors()
-            ], 422);
-        }
-
-        $pengajuan_setor = PengajuanSetor::find($id);
-        DB::beginTransaction();
-        try {
-
-            $pengajuan_setor->update([
-                'waktu_pengajuan' => $request->waktu_pengajuan,
-                'status_pengajuan' => 'diterima',
-                'catatan_petugas' => $request->catatan_petugas
-            ]);
-
-            DB::commit();
-            return response()->json([
-                'success' => true,
-                'message' => 'Berhasil Edit Pengajuan Setor Langsung',
-                'data' => $pengajuan_setor
-            ]);
-        } catch (\Exception $e) {
-            DB::rollBack();
-            return response()->json(
-                [
-                    "success" => false,
-                    "message" => $e->getMessage()
-
-                ]
-            );
-        }
-    }
-    public function batalPengajuan(Request $request, $id)
-    {
-
-        $pengajuan_setor = PengajuanSetor::find($id);
-        $pengajuan_setor->update([
-            'status_pengajuan' => 'batalkan',
-        ]);
-        return response()->json([
-            'success' => true,
-            'message' => 'Berhasil Batal Pengajuan Setor Langsung',
-            'data' => $pengajuan_setor
-        ]);
-    }
 
     // input detail sampah oleh petugas by id pengajuan
     public function storeDetail(Request $request, $id)
@@ -291,6 +236,64 @@ class SetorLangsungController extends Controller
         ];
         return response()->json([
             'success' => true,
+            'data' => $pengajuan_setor
+        ]);
+    }
+
+
+    // petugas merubah status pengajuan berdasarkan id
+    public function terimaPengajuan(Request $request, $id)
+    {
+        $validator = Validator::make($request->all(), [
+            'waktu_pengajuan' => 'nullable|string',
+            'catatan_petugas' => 'nullable|string',
+
+        ]);
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Validasi gagal',
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        $pengajuan_setor = PengajuanSetor::find($id);
+        DB::beginTransaction();
+        try {
+
+            $pengajuan_setor->update([
+                'waktu_pengajuan' => $request->waktu_pengajuan,
+                'status_pengajuan' => 'diterima',
+                'catatan_petugas' => $request->catatan_petugas
+            ]);
+
+            DB::commit();
+            return response()->json([
+                'success' => true,
+                'message' => 'Berhasil Edit Pengajuan Setor Langsung',
+                'data' => $pengajuan_setor
+            ]);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json(
+                [
+                    "success" => false,
+                    "message" => $e->getMessage()
+
+                ]
+            );
+        }
+    }
+    public function batalPengajuan(Request $request, $id)
+    {
+
+        $pengajuan_setor = PengajuanSetor::find($id);
+        $pengajuan_setor->update([
+            'status_pengajuan' => 'batalkan',
+        ]);
+        return response()->json([
+            'success' => true,
+            'message' => 'Berhasil Batal Pengajuan Setor Langsung',
             'data' => $pengajuan_setor
         ]);
     }

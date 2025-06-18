@@ -98,7 +98,6 @@ class _PetugasSetorLangsungSelesaiState
 
     final namaPengguna = profil['nama_pengguna'] ?? 'memuat..';
     final detailSetoran = pengajuanDetailSetor!['input_detail'];
-    final totalBerat = detailSetoran['total_berat'].toString();
     final totalHarga = detailSetoran['total_harga'];
     final setoranSampah = detailSetoran['setoran_sampah'] as List;
 
@@ -113,7 +112,9 @@ class _PetugasSetorLangsungSelesaiState
           onPressed:
               () => Navigator.pushAndRemoveUntil(
                 context,
-                MaterialPageRoute(builder: (context) => PetugasMainWrapper()),
+                MaterialPageRoute(
+                  builder: (context) => PetugasMainWrapper(initialMenu: 1),
+                ),
                 (Route<dynamic> route) => false,
               ),
         ),

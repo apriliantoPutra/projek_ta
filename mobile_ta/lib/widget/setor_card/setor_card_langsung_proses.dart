@@ -69,12 +69,12 @@ class SetorCardLangsungProses extends StatelessWidget {
                 color: Colors.white,
               ), // Arah kanan
               onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => PetugasSetorJemputBaru(),
-                  ),
-                );
+                // Navigator.push(
+                //   context,
+                //   MaterialPageRoute(
+                //     builder: (context) => PetugasSetorJemputBaru(),
+                //   ),
+                // );
               },
             ),
           ],

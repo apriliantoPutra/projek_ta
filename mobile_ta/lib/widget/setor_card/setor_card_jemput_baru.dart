@@ -86,7 +86,7 @@ class SetorCardJemputBaru extends StatelessWidget {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => PetugasSetorJemputBaru(),
+                    builder: (context) => PetugasSetorJemputBaru(id: data['id']),
                   ),
                 );
               },

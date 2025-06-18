@@ -1,15 +1,16 @@
+// kode import tetap
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:mobile_ta/constants/constants.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../petugas/petugas_setor_page.dart';
 import '../widget/petugas_main_widget.dart';
 import '../petugas/petugas_setor_jemput_selesai.dart';
 
 class PetugasSetorJemputProses extends StatefulWidget {
-  const PetugasSetorJemputProses({super.key});
+  final int id;
+  const PetugasSetorJemputProses({required this.id, super.key});
 
   @override
   State<PetugasSetorJemputProses> createState() =>
@@ -17,26 +18,23 @@ class PetugasSetorJemputProses extends StatefulWidget {
 }
 
 class _PetugasSetorJemputProsesState extends State<PetugasSetorJemputProses> {
-  List<Map<String, dynamic>> _jenisSampahList = [
-    {'jenis_sampah_id': null, 'berat': null},
-  ];
+  List<Map<String, dynamic>> _jenisSampahList = [];
 
+  Map<String, dynamic>? pengajuanDetailSetor;
   List<Map<String, dynamic>> _jenisSampahOptions = [];
+  Map<int, Map<String, dynamic>> jenisSampahCache = {};
+  bool isLoading = true;
 
   @override
   void initState() {
     super.initState();
-    fetchJenisSampah();
+    fetchData();
   }
 
   Future<void> fetchJenisSampah() async {
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('token');
-
-    if (token == null) {
-      debugPrint('Token tidak ditemukan');
-      return;
-    }
+    if (token == null) return;
 
     final response = await http.get(
       Uri.parse('$baseUrl/jenis-sampah'),
@@ -48,13 +46,194 @@ class _PetugasSetorJemputProsesState extends State<PetugasSetorJemputProses> {
       setState(() {
         _jenisSampahOptions = List<Map<String, dynamic>>.from(json['data']);
       });
+    }
+  }
+
+  Future<void> fetchData() async {
+    await fetchPengajuanDetailSetor();
+    await fetchJenisSampah();
+    await fetchJenisSampahListCache();
+
+    final oldSetoran =
+        pengajuanDetailSetor?['input_detail']['setoran_sampah'] as List;
+    _jenisSampahList =
+        oldSetoran
+            .map<Map<String, dynamic>>(
+              (item) => {
+                'jenis_sampah_id': item['jenis_sampah_id'],
+                'berat': (item['berat'] as num).toDouble(),
+              },
+            )
+            .toList();
+
+    setState(() {
+      isLoading = false;
+    });
+  }
+
+  Future<void> fetchPengajuanDetailSetor() async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('token') ?? '';
+    final resp = await http.get(
+      Uri.parse('$baseUrl/setor-jemput/${widget.id}'),
+      headers: {'Authorization': 'Bearer $token', 'Accept': 'application/json'},
+    );
+    if (resp.statusCode == 200) {
+      final data = jsonDecode(resp.body)['data'];
+      pengajuanDetailSetor = data;
     } else {
-      debugPrint('Gagal ambil data jenis sampah: ${response.body}');
+      throw Exception('fetchPengajuanSetor failed');
+    }
+  }
+
+  Future<void> fetchJenisSampahById(int id) async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('token');
+    if (token == null) return;
+
+    final response = await http.get(
+      Uri.parse('$baseUrl/jenis-sampah/$id'),
+      headers: {'Authorization': 'Bearer $token', 'Accept': 'application/json'},
+    );
+
+    if (response.statusCode == 200) {
+      final data = json.decode(response.body)['data'];
+      jenisSampahCache[id] = {
+        'nama': data['nama_sampah'],
+        'harga': data['harga_per_satuan'],
+        'warna': data['warna_indikasi'],
+      };
+    }
+  }
+
+  Future<void> fetchJenisSampahListCache() async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('token');
+    if (token == null) return;
+
+    final setoran =
+        pengajuanDetailSetor?['input_detail']['setoran_sampah'] ?? [];
+
+    for (var item in setoran) {
+      final int jenisId = item['jenis_sampah_id'];
+
+      if (!jenisSampahCache.containsKey(jenisId)) {
+        final response = await http.get(
+          Uri.parse('$baseUrl/jenis-sampah/$jenisId'),
+          headers: {
+            'Authorization': 'Bearer $token',
+            'Accept': 'application/json',
+          },
+        );
+
+        if (response.statusCode == 200) {
+          final data = json.decode(response.body)['data'];
+          jenisSampahCache[jenisId] = {
+            'nama': data['nama_sampah'],
+            'harga': data['harga_per_satuan'],
+            'warna': data['warna_indikasi'],
+          };
+        }
+      }
+    }
+  }
+
+  // post
+  Future<void> konfirmasiSetoran() async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('token');
+    if (token == null) return;
+
+    // Hitung total berat & harga
+    double totalBerat = 0;
+    int totalHarga = 0;
+
+    List<Map<String, dynamic>> setoranSampah = [];
+
+    for (var item in _jenisSampahList) {
+      final int? jenisId = item['jenis_sampah_id'];
+      final double? berat = item['berat'];
+
+      if (jenisId == null || berat == null) continue;
+
+      final jenisInfo = jenisSampahCache[jenisId];
+      final hargaPerSatuan = jenisInfo != null ? (jenisInfo['harga'] ?? 0) : 0;
+
+      totalBerat += berat;
+      totalHarga += (berat * hargaPerSatuan).round();
+
+      setoranSampah.add({"jenis_sampah_id": jenisId, "berat": berat});
+    }
+
+    final url = Uri.parse('$baseUrl/setor-jemput/konfirmasi/${widget.id}');
+    final response = await http.patch(
+      url,
+      headers: {
+        'Authorization': 'Bearer $token',
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+      },
+      body: jsonEncode({
+        'setoran_sampah': setoranSampah,
+        'total_berat': totalBerat,
+        'total_harga': totalHarga,
+      }),
+    );
+
+    if (response.statusCode == 200) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Pengajuan berhasil dikonfirmasi.")),
+      );
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(
+          builder: (context) => PetugasSetorJemputSelesai(id: widget.id),
+        ),
+        (Route<dynamic> route) => false,
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Gagal mengkonfirmasi pengajuan.")),
+      );
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    if (isLoading || pengajuanDetailSetor == null) {
+      return Scaffold(
+        appBar: AppBar(title: Text("Setor Langsung Sampah")),
+        body: Center(child: CircularProgressIndicator()),
+      );
+    }
+
+    final detailSetoran = pengajuanDetailSetor!['input_detail'];
+    final int totalHarga = _jenisSampahList.fold(0, (sum, item) {
+      final int? jenisId = item['jenis_sampah_id'];
+      final double? berat = item['berat'];
+
+      if (jenisId == null || berat == null) return sum;
+
+      final jenisInfo = jenisSampahCache[jenisId];
+      final hargaPerSatuan = jenisInfo != null ? (jenisInfo['harga'] ?? 0) : 0;
+
+
+      return sum + (berat * hargaPerSatuan).round();
+    });
+
+    final double totalBerat = _jenisSampahList.fold(
+      0.0,
+      (sum, item) => sum + (item['berat'] ?? 0.0),
+    );
+
+    final profil = pengajuanDetailSetor!['user']?['profil'];
+    final gambarPengguna =
+        (profil != null && (profil['gambar_pengguna'] ?? '').isNotEmpty)
+            ? profil['gambar_url']
+            : 'https://i.pinimg.com/736x/8a/e9/e9/8ae9e92fa4e69967aa61bf2bda967b7b.jpg';
+
+    final namaPengguna = profil?['nama_pengguna'] ?? 'memuat..';
+
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
@@ -66,7 +245,9 @@ class _PetugasSetorJemputProsesState extends State<PetugasSetorJemputProses> {
           onPressed:
               () => Navigator.pushAndRemoveUntil(
                 context,
-                MaterialPageRoute(builder: (context) => PetugasSetorPage()),
+                MaterialPageRoute(
+                  builder: (context) => PetugasMainWrapper(initialMenu: 1),
+                ),
                 (Route<dynamic> route) => false,
               ),
         ),
@@ -91,22 +272,18 @@ class _PetugasSetorJemputProsesState extends State<PetugasSetorJemputProses> {
       ),
       body: SingleChildScrollView(
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Profil Penyetor
             Container(
               padding: const EdgeInsets.all(16),
               child: Row(
-                children: const [
+                children: [
                   CircleAvatar(
                     radius: 20,
-                    backgroundImage: NetworkImage(
-                      "https://www.perfocal.com/blog/content/images/2021/01/Perfocal_17-11-2019_TYWFAQ_100_standard-3.jpg",
-                    ),
+                    backgroundImage: NetworkImage(gambarPengguna),
                   ),
-                  SizedBox(width: 16),
+                  const SizedBox(width: 16),
                   Text(
-                    "Nama Penyetor",
+                    namaPengguna,
                     style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
                   ),
                 ],
@@ -122,7 +299,9 @@ class _PetugasSetorJemputProsesState extends State<PetugasSetorJemputProses> {
               ),
             ),
 
-            // Kartu Estimasi
+            const SizedBox(height: 16),
+
+            // Progress bar
             Container(
               padding: const EdgeInsets.all(16),
               margin: const EdgeInsets.all(16),
@@ -142,46 +321,32 @@ class _PetugasSetorJemputProsesState extends State<PetugasSetorJemputProses> {
                         ),
                       ),
                       Row(
-                        children: [
-                          Expanded(
-                            flex: 2,
-                            child: Container(
-                              height: 32,
-                              decoration: const BoxDecoration(
-                                color: Colors.orange,
-                                borderRadius: BorderRadius.horizontal(
-                                  left: Radius.circular(8),
+                        children:
+                            _jenisSampahList.map<Widget>((item) {
+                              final jenisId = item['jenis_sampah_id'];
+                              final berat = item['berat'] ?? 0.0;
+                              final proportion =
+                                  totalBerat > 0 ? berat / totalBerat : 0.0;
+                              final warna =
+                                  jenisSampahCache[jenisId]?['warna'] ??
+                                  '#999999';
+
+                              return Expanded(
+                                flex: (proportion * 1000).round(),
+                                child: Container(
+                                  height: 32,
+                                  decoration: BoxDecoration(
+                                    color: _parseHexColor(warna),
+                                  ),
                                 ),
-                              ),
-                            ),
-                          ),
-                          Expanded(
-                            flex: 7,
-                            child: Container(height: 32, color: Colors.blue),
-                          ),
-                          Expanded(
-                            flex: 1,
-                            child: Container(height: 32, color: Colors.green),
-                          ),
-                          Expanded(
-                            flex: 1,
-                            child: Container(
-                              height: 32,
-                              decoration: const BoxDecoration(
-                                color: Colors.teal,
-                                borderRadius: BorderRadius.horizontal(
-                                  right: Radius.circular(8),
-                                ),
-                              ),
-                            ),
-                          ),
-                        ],
+                              );
+                            }).toList(),
                       ),
-                      const Positioned.fill(
+                      Positioned.fill(
                         child: Center(
                           child: Text(
-                            '11kg',
-                            style: TextStyle(
+                            "${totalBerat.toStringAsFixed(1)} kg",
+                            style: const TextStyle(
                               fontWeight: FontWeight.bold,
                               color: Colors.white,
                             ),
@@ -190,55 +355,40 @@ class _PetugasSetorJemputProsesState extends State<PetugasSetorJemputProses> {
                       ),
                     ],
                   ),
+
                   const SizedBox(height: 16),
-                  Row(
-                    children: [
-                      _buildLegend(
-                        color: Colors.orange,
-                        label: "Sampah Kardus",
-                        weight: "2kg",
+
+                  // Legend
+                  ..._jenisSampahList.map((item) {
+                    final jenisId = item['jenis_sampah_id'];
+                    final berat = item['berat'];
+                    final jenisInfo = jenisSampahCache[jenisId];
+                    if (jenisInfo == null || berat == null)
+                      return const SizedBox();
+
+                    final Color color = _parseHexColor(jenisInfo['warna']);
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: 8.0),
+                      child: Row(
+                        children: [
+                          _buildLegend(
+                            color: color,
+                            label: jenisInfo['nama'],
+                            weight: "${berat}kg",
+                          ),
+                        ],
                       ),
-                    ],
-                  ),
-                  const SizedBox(height: 8),
-                  Row(
-                    children: [
-                      _buildLegend(
-                        color: Colors.blue,
-                        label: "Sampah Kaleng",
-                        weight: "7kg",
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 8),
-                  Row(
-                    children: [
-                      _buildLegend(
-                        color: Colors.green,
-                        label: "Sampah Botol Plastik",
-                        weight: "1kg",
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 8),
-                  Row(
-                    children: [
-                      _buildLegend(
-                        color: Colors.teal,
-                        label: "Sampah Kertas",
-                        weight: "1kg",
-                      ),
-                    ],
-                  ),
+                    );
+                  }).toList(),
                 ],
               ),
             ),
 
-            const Padding(
-              padding: EdgeInsets.symmetric(horizontal: 16),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
               child: Row(
                 children: [
-                  Text(
+                  const Text(
                     "Estimasi Harga",
                     style: TextStyle(
                       fontSize: 16,
@@ -246,70 +396,27 @@ class _PetugasSetorJemputProsesState extends State<PetugasSetorJemputProses> {
                       color: Colors.black,
                     ),
                   ),
-                  Spacer(),
+                  const Spacer(),
                   Text(
-                    "Rp50.000",
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-                  ),
-                ],
-              ),
-            ),
-
-            Container(
-              margin: const EdgeInsets.symmetric(horizontal: 16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: const [
-                  Text(
-                    "Alamat Warga",
-                    style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
-                  ),
-                  Text(
-                    "Jl. Lorem ipsum dolor sit amet, consectetur adipiscing elit, Semarang, Jawa Tengah",
-                    style: TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.normal,
-                      color: Colors.black54,
+                    "Rp $totalHarga",
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
                     ),
                   ),
                 ],
               ),
             ),
 
-            Container(
-              margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-              height: 233,
-              decoration: ShapeDecoration(
-                image: const DecorationImage(
-                  image: NetworkImage(
-                    "https://i.pinimg.com/736x/b0/79/09/b079096855c0edbaba47d93c67f18853.jpg",
-                  ),
-                  fit: BoxFit.cover,
-                ),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(20),
-                ),
-              ),
-            ),
+            const SizedBox(height: 16),
 
-            const Padding(
-              padding: EdgeInsets.symmetric(horizontal: 16),
-              child: Text(
-                "Masukkan Berat Sampah",
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                  color: Colors.black,
-                ),
-              ),
-            ),
-
+            // Form Input Edit Sampah
             Container(
-              margin: EdgeInsets.all(16),
+              margin: const EdgeInsets.all(16),
               width: double.infinity,
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: Colors.green.shade50, // Warna latar belakang hijau muda
+                color: Colors.green.shade50,
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Column(
@@ -326,7 +433,7 @@ class _PetugasSetorJemputProsesState extends State<PetugasSetorJemputProses> {
                             flex: 2,
                             child: DropdownButtonFormField<int>(
                               value: item['jenis_sampah_id'],
-                              hint: Text('Pilih jenis'),
+                              hint: const Text('Pilih jenis'),
                               items:
                                   _jenisSampahOptions.map((option) {
                                     return DropdownMenuItem<int>(
@@ -334,19 +441,28 @@ class _PetugasSetorJemputProsesState extends State<PetugasSetorJemputProses> {
                                       child: Text(option['nama_sampah']),
                                     );
                                   }).toList(),
-                              onChanged: (value) {
+                              onChanged: (int? value) async {
+                                if (value == null) return;
+
                                 setState(() {
                                   _jenisSampahList[index]['jenis_sampah_id'] =
                                       value;
                                 });
+
+                                if (!jenisSampahCache.containsKey(value)) {
+                                  await fetchJenisSampahById(value);
+                                  setState(
+                                    () {},
+                                  ); // update legend & warna progress bar
+                                }
                               },
                             ),
                           ),
-                          SizedBox(width: 8),
+                          const SizedBox(width: 8),
                           Expanded(
                             child: DropdownButtonFormField<double>(
                               value: item['berat'],
-                              hint: Text('Berat'),
+                              hint: const Text('Berat'),
                               items: List.generate(20, (i) {
                                 final val = 0.5 * (i + 1);
                                 return DropdownMenuItem<double>(
@@ -363,11 +479,23 @@ class _PetugasSetorJemputProsesState extends State<PetugasSetorJemputProses> {
                               },
                             ),
                           ),
+                          const SizedBox(width: 8),
+                          IconButton(
+                            icon: const Icon(
+                              Icons.remove_circle,
+                              color: Colors.red,
+                            ),
+                            onPressed: () {
+                              setState(() {
+                                _jenisSampahList.removeAt(index);
+                              });
+                            },
+                          ),
                         ],
                       ),
                     );
                   }).toList(),
-                  SizedBox(height: 8),
+                  const SizedBox(height: 8),
                   TextButton.icon(
                     onPressed: () {
                       setState(() {
@@ -377,8 +505,8 @@ class _PetugasSetorJemputProsesState extends State<PetugasSetorJemputProses> {
                         });
                       });
                     },
-                    icon: Icon(Icons.add, color: Colors.green),
-                    label: Text(
+                    icon: const Icon(Icons.add, color: Colors.green),
+                    label: const Text(
                       'Tambah Jenis Sampah',
                       style: TextStyle(color: Colors.green),
                     ),
@@ -391,14 +519,8 @@ class _PetugasSetorJemputProsesState extends State<PetugasSetorJemputProses> {
               child: SizedBox(
                 width: 200,
                 child: ElevatedButton(
-                  onPressed: () {
-                    Navigator.pushAndRemoveUntil(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const PetugasSetorJemputSelesai(),
-                      ),
-                      (Route<dynamic> route) => false,
-                    );
+                  onPressed: () async {
+                    await konfirmasiSetoran();
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF8FD14F),
@@ -408,7 +530,7 @@ class _PetugasSetorJemputProsesState extends State<PetugasSetorJemputProses> {
                     ),
                   ),
                   child: const Text(
-                    'Konfirmasi Ambil Sampah',
+                    'Konfirmasi Sampah',
                     style: TextStyle(
                       color: Colors.white,
                       fontSize: 16,
@@ -455,5 +577,13 @@ class _PetugasSetorJemputProsesState extends State<PetugasSetorJemputProses> {
         ],
       ),
     );
+  }
+
+  Color _parseHexColor(String hexColor) {
+    hexColor = hexColor.toUpperCase().replaceAll("#", "");
+    if (hexColor.length == 6) {
+      hexColor = "FF$hexColor";
+    }
+    return Color(int.parse(hexColor, radix: 16));
   }
 }

@@ -193,13 +193,13 @@ class PetugasBerandaPage extends StatelessWidget {
                     ],
                   ),
                   SizedBox(height: 8),
-                  Column(
-                    children: [
-                      SetorCardJemputProses(),
-                      SetorCardJemputProses(),
-                      SetorCardJemputProses(),
-                    ],
-                  ),
+                  // Column(
+                  //   children: [
+                  //     SetorCardJemputProses(),
+                  //     SetorCardJemputProses(),
+                  //     SetorCardJemputProses(),
+                  //   ],
+                  // ),
                 ],
               ),
             ),
