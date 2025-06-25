@@ -7,20 +7,29 @@ import '../widget/eduCard_widget.dart';
 class WargaEdukasiPage extends StatelessWidget {
   final Map<String, dynamic>? akunData;
   const WargaEdukasiPage({Key? key, this.akunData}) : super(key: key);
-  
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        backgroundColor: Color(0xff8fd14f),
+        elevation: 0,
+        centerTitle: true,
+        title: Text(
+          "Edukasi",
+          style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
+        ),
+      ),
       body: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Container(
               width: double.infinity,
-              height: 200,
+              height: 100,
               padding: EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: Colors.greenAccent.shade100,
+                color: Color(0xff8fd14f),
                 borderRadius: BorderRadius.only(
                   bottomLeft: Radius.circular(20),
                   bottomRight: Radius.circular(20),
@@ -28,11 +37,11 @@ class WargaEdukasiPage extends StatelessWidget {
               ),
               alignment: Alignment.center, // Menengahkan isi
               child: Text(
-                "Edukasi",
+                "Halaman edukasi ini berisi artikel dan video seputar tips dan trik seputar pengelolaan sampah",
                 style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.green.shade900,
+                  fontSize: 16,
+                  fontWeight: FontWeight.normal,
+                  color: Colors.white,
                 ),
                 textAlign: TextAlign.center,
               ),
@@ -43,7 +52,7 @@ class WargaEdukasiPage extends StatelessWidget {
               margin: EdgeInsets.only(top: 16),
               padding: EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: Colors.greenAccent.shade100,
+                color: Color(0xff8fd14f),
                 borderRadius: BorderRadius.only(
                   topLeft: Radius.circular(20),
                   topRight: Radius.circular(20),
@@ -67,7 +76,7 @@ class WargaEdukasiPage extends StatelessWidget {
                         style: TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
-                          color: Colors.green.shade800,
+                          color: Colors.white,
                         ),
                       ),
                       TextButton(
@@ -84,7 +93,7 @@ class WargaEdukasiPage extends StatelessWidget {
                           style: TextStyle(
                             fontSize: 14,
                             fontWeight: FontWeight.w500,
-                            color: Colors.green.shade600,
+                            color: Colors.white,
                           ),
                         ),
                       ),
@@ -142,7 +151,7 @@ class WargaEdukasiPage extends StatelessWidget {
                         style: TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
-                          color: Colors.green.shade800,
+                          color: Colors.white,
                         ),
                       ),
                       TextButton(
@@ -159,7 +168,7 @@ class WargaEdukasiPage extends StatelessWidget {
                           style: TextStyle(
                             fontSize: 14,
                             fontWeight: FontWeight.w500,
-                            color: Colors.green.shade600,
+                            color: Colors.white,
                           ),
                         ),
                       ),

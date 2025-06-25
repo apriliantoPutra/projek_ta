@@ -90,7 +90,7 @@ class _LoginPageState extends State<LoginPage> {
             height: 300,
             width: double.infinity,
             decoration: BoxDecoration(
-              color: Colors.greenAccent.shade400,
+              color: Color(0xff8fd14f),
               borderRadius: BorderRadius.only(
                 bottomLeft: Radius.circular(40),
                 bottomRight: Radius.circular(40),
@@ -145,7 +145,7 @@ class _LoginPageState extends State<LoginPage> {
                 ElevatedButton(
                   onPressed: _isLoading ? null : login,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.greenAccent.shade400,
+                    backgroundColor: Color(0xff8fd14f),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(20),
                     ),
@@ -154,7 +154,10 @@ class _LoginPageState extends State<LoginPage> {
                   child:
                       _isLoading
                           ? CircularProgressIndicator(color: Colors.white)
-                          : Text("Log in"),
+                          : Text(
+                            "Log in",
+                            style: TextStyle(color: Colors.white),
+                          ),
                 ),
                 SizedBox(height: 10),
                 TextButton(

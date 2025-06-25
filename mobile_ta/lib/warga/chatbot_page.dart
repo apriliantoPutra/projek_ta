@@ -41,7 +41,7 @@ class _ChatbotPageState extends State<ChatbotPage> {
         padding: const EdgeInsets.all(12),
         constraints: const BoxConstraints(maxWidth: 300),
         decoration: BoxDecoration(
-          color: isUser ? Colors.greenAccent.shade400 : Colors.grey.shade200,
+          color: isUser ? Color(0xff8fd14f) : Colors.grey.shade200,
           borderRadius: BorderRadius.circular(16),
         ),
         child: Text(
@@ -56,7 +56,7 @@ class _ChatbotPageState extends State<ChatbotPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Colors.greenAccent.shade400,
+        backgroundColor: Color(0xff8fd14f),
         elevation: 0,
         centerTitle: true,
         leading: IconButton(

@@ -51,11 +51,11 @@ class WargaBerandaPage extends StatelessWidget {
             Row(
               children: [
                 IconButton(
-                  icon: Icon(Icons.settings, color: Colors.black26),
+                  icon: Icon(Icons.settings, color: Colors.black),
                   onPressed: () {},
                 ),
                 IconButton(
-                  icon: Icon(Icons.notifications, color: Colors.black26),
+                  icon: Icon(Icons.notifications, color: Colors.black),
                   onPressed: () {},
                 ),
               ],
@@ -71,7 +71,7 @@ class WargaBerandaPage extends StatelessWidget {
               width: double.infinity,
               padding: EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: Colors.greenAccent.shade100,
+                color: Color(0xff8fd14f),
                 borderRadius: BorderRadius.only(
                   bottomLeft: Radius.circular(20),
                   bottomRight: Radius.circular(20),
@@ -82,10 +82,7 @@ class WargaBerandaPage extends StatelessWidget {
                 children: [
                   Text(
                     "Total Sampah Terkumpul",
-                    style: TextStyle(
-                      fontSize: 16,
-                      color: Colors.green.shade900,
-                    ),
+                    style: TextStyle(fontSize: 16, color: Colors.white),
                   ),
                   SizedBox(height: 4),
                   Text(
@@ -93,16 +90,13 @@ class WargaBerandaPage extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 22,
                       fontWeight: FontWeight.bold,
-                      color: Colors.green.shade800,
+                      color: Colors.white,
                     ),
                   ),
                   SizedBox(height: 12),
                   Text(
                     "Total Saldo",
-                    style: TextStyle(
-                      fontSize: 16,
-                      color: Colors.green.shade900,
-                    ),
+                    style: TextStyle(fontSize: 16, color: Colors.white),
                   ),
                   Text(
                     saldoData != null
@@ -111,7 +105,7 @@ class WargaBerandaPage extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 22,
                       fontWeight: FontWeight.bold,
-                      color: Colors.green.shade800,
+                      color: Colors.white,
                     ),
                   ),
                 ],
@@ -128,7 +122,7 @@ class WargaBerandaPage extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
-                      color: Colors.green.shade800,
+                      color: Colors.black,
                     ),
                   ),
                   SizedBox(height: 12),
@@ -158,7 +152,7 @@ class WargaBerandaPage extends StatelessWidget {
               margin: EdgeInsets.only(top: 16),
               padding: EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: Colors.greenAccent.shade100,
+                color: Color(0xff8fd14f),
                 borderRadius: BorderRadius.only(
                   topLeft: Radius.circular(20),
                   topRight: Radius.circular(20),
@@ -182,7 +176,7 @@ class WargaBerandaPage extends StatelessWidget {
                         style: TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
-                          color: Colors.green.shade800,
+                          color: Colors.white,
                         ),
                       ),
                       TextButton(
@@ -194,7 +188,7 @@ class WargaBerandaPage extends StatelessWidget {
                           style: TextStyle(
                             fontSize: 14,
                             fontWeight: FontWeight.w500,
-                            color: Colors.green.shade600,
+                            color: Colors.white,
                           ),
                         ),
                       ),
@@ -311,7 +305,7 @@ class WargaBerandaPage extends StatelessWidget {
             height: 60,
             width: 60,
             decoration: BoxDecoration(
-              color: Colors.greenAccent,
+              color: Color(0xff8fd14f),
               borderRadius: BorderRadius.circular(12),
             ),
             child: Icon(icon, size: 30),

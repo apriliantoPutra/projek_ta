@@ -51,12 +51,12 @@ class WargaAkunPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Colors.greenAccent.shade400,
+        backgroundColor: Colors.white,
         elevation: 0,
         centerTitle: true,
         title: Text(
           'Akun Saya',
-          style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
+          style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black),
         ),
       ),
       body: SingleChildScrollView(
@@ -93,16 +93,15 @@ class WargaAkunPage extends StatelessWidget {
                         color: Colors.grey.shade700,
                       ),
                     ),
-                    SizedBox(height: 8),
+                    SizedBox(height: 16),
                     ElevatedButton(
                       onPressed: () {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
                             builder:
-                                (context) => WargaEditProfilPage(
-                                  profilData: profilData,
-                                ),
+                                (context) =>
+                                    WargaEditProfilPage(profilData: profilData),
                           ),
                         );
                       },
@@ -118,13 +117,13 @@ class WargaAkunPage extends StatelessWidget {
                   ],
                 ),
               ),
-              SizedBox(height: 24),
+              SizedBox(height: 16),
 
               // Saldo Card
               Container(
                 padding: EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: Colors.lightGreen,
+                  color: Color(0xff8fd14f),
                   borderRadius: BorderRadius.circular(16),
                 ),
                 child: Column(
@@ -213,22 +212,19 @@ class WargaAkunPage extends StatelessWidget {
       padding: const EdgeInsets.only(bottom: 16.0),
       child: Container(
         decoration: BoxDecoration(
-          color: Colors.greenAccent.shade100,
+          color: Color(0xff8fd14f),
           borderRadius: BorderRadius.circular(16),
         ),
         child: ListTile(
           leading: Icon(icon, color: iconColor ?? Colors.green.shade900),
           title: Text(
             title,
-            style: TextStyle(
-              fontWeight: FontWeight.bold,
-              color: Colors.green.shade900,
-            ),
+            style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
           ),
           trailing: Icon(
             Icons.arrow_forward_ios,
             size: 16,
-            color: Colors.green.shade900,
+            color: Colors.white,
           ),
           onTap: onTap,
         ),

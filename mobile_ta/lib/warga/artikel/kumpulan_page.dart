@@ -19,9 +19,7 @@ class _WargaKumpulanArtikelPageState extends State<WargaKumpulanArtikelPage> {
   late Future<List<dynamic>> _artikelList;
 
   Future<List<dynamic>> fetchArtikel() async {
-    final response = await http.get(
-      Uri.parse('$baseUrl/artikel'),
-    );
+    final response = await http.get(Uri.parse('$baseUrl/artikel'));
 
     if (response.statusCode == 200) {
       final jsonData = json.decode(response.body);
@@ -46,7 +44,7 @@ class _WargaKumpulanArtikelPageState extends State<WargaKumpulanArtikelPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Colors.greenAccent.shade400,
+        backgroundColor: Color(0xff8fd14f),
         elevation: 0,
         centerTitle: true,
         leading: IconButton(
@@ -77,7 +75,7 @@ class _WargaKumpulanArtikelPageState extends State<WargaKumpulanArtikelPage> {
                   width: double.infinity,
                   padding: EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    color: Colors.greenAccent.shade100,
+                    color: Colors.white,
                     borderRadius: BorderRadius.only(
                       bottomLeft: Radius.circular(20),
                       bottomRight: Radius.circular(20),

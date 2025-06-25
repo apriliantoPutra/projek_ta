@@ -55,7 +55,7 @@ class _WargaSetorJemputState extends State<WargaSetorJemput> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Colors.greenAccent.shade400,
+        backgroundColor: Color(0xff8fd14f),
         elevation: 0,
         centerTitle: true,
         leading: IconButton(
@@ -68,7 +68,7 @@ class _WargaSetorJemputState extends State<WargaSetorJemput> {
         ),
       ),
       body: Padding(
-        padding: EdgeInsets.all(11),
+        padding: EdgeInsets.all(16),
         child: SingleChildScrollView(
           child: Column(
             children: [
@@ -76,7 +76,7 @@ class _WargaSetorJemputState extends State<WargaSetorJemput> {
                 padding: EdgeInsets.all(16),
                 margin: EdgeInsets.only(bottom: 16),
                 decoration: BoxDecoration(
-                  color: Colors.greenAccent.shade400,
+                  color: Color(0xff8fd14f),
                   borderRadius: BorderRadius.circular(16),
                 ),
                 child: Column(
@@ -98,11 +98,24 @@ class _WargaSetorJemputState extends State<WargaSetorJemput> {
                   ],
                 ),
               ),
-              SizedBox(height: 20),
+              SizedBox(height: 8),
               Container(
-                padding: const EdgeInsets.all(12),
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  "Mohon isi perkiraan berat sampah anda, petugas akan mengukur lagi saat penjemputan",
+                  style: TextStyle(
+                    color: Colors.black,
+                    fontSize: 14,
+                    fontWeight: FontWeight.normal,
+                    height: 1.2,
+                  ),
+                ),
+              ),
+              SizedBox(height: 8),
+              Container(
+                padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: Colors.greenAccent.shade100,
+                  color: Color(0xff8fd14f).withOpacity(0.5),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Column(
@@ -189,10 +202,10 @@ class _WargaSetorJemputState extends State<WargaSetorJemput> {
                           });
                         });
                       },
-                      icon: Icon(Icons.add, color: Colors.green),
+                      icon: Icon(Icons.add, color: Colors.green.shade900),
                       label: Text(
                         'Tambah Jenis Sampah',
-                        style: TextStyle(color: Colors.green),
+                        style: TextStyle(color: Colors.green.shade900),
                       ),
                     ),
                     SizedBox(height: 10),
@@ -252,7 +265,7 @@ class _WargaSetorJemputState extends State<WargaSetorJemput> {
               Center(
                 child: ElevatedButton(
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.greenAccent.shade400,
+                    backgroundColor: Color(0xff8fd14f),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),
@@ -296,7 +309,10 @@ class _WargaSetorJemputState extends State<WargaSetorJemput> {
                   },
                   child: Text(
                     'Selanjutnya',
-                    style: TextStyle(fontWeight: FontWeight.bold),
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
                   ),
                 ),
               ),

@@ -74,17 +74,17 @@ class _RegisterPageState extends State<RegisterPage> {
         children: [
           // Header dengan warna hijau dan logo
           Container(
-            height: 250,
+            height: 300,
             width: double.infinity,
             decoration: BoxDecoration(
-              color: Colors.greenAccent.shade400,
+              color: Color(0xff8fd14f),
               borderRadius: const BorderRadius.only(
                 bottomLeft: Radius.circular(40),
                 bottomRight: Radius.circular(40),
               ),
             ),
             child: Center(
-              child: Image.asset('assets/logo_bank_sampah.png', height: 100),
+              child: Image.asset('assets/logo_bank_sampah.png', height: 120),
             ),
           ),
 
@@ -150,7 +150,7 @@ class _RegisterPageState extends State<RegisterPage> {
                 ElevatedButton(
                   onPressed: _isLoading ? null : registerUser,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.greenAccent.shade400,
+                    backgroundColor: Color(0xff8fd14f),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(20),
                     ),
@@ -159,7 +159,10 @@ class _RegisterPageState extends State<RegisterPage> {
                   child:
                       _isLoading
                           ? const CircularProgressIndicator(color: Colors.white)
-                          : const Text("Sign up"),
+                          : const Text(
+                            "Sign up",
+                            style: TextStyle(color: Colors.white),
+                          ),
                 ),
                 const SizedBox(height: 10),
                 TextButton(

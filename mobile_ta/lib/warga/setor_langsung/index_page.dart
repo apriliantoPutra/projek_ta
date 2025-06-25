@@ -16,7 +16,7 @@ class _WargaSetorLangsungState extends State<WargaSetorLangsung> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Colors.greenAccent.shade400,
+        backgroundColor: Color(0xff8fd14f),
         elevation: 0,
         centerTitle: true,
         leading: IconButton(
@@ -38,7 +38,7 @@ class _WargaSetorLangsungState extends State<WargaSetorLangsung> {
                 padding: EdgeInsets.all(16),
                 margin: EdgeInsets.only(bottom: 16),
                 decoration: BoxDecoration(
-                  color: Colors.greenAccent.shade400,
+                  color: Color(0xff8fd14f),
                   borderRadius: BorderRadius.circular(16),
                 ),
                 child: Column(
@@ -73,7 +73,7 @@ class _WargaSetorLangsungState extends State<WargaSetorLangsung> {
               // Input tanggal
               Container(
                 decoration: BoxDecoration(
-                  color: Colors.greenAccent.shade100,
+                  color: Color(0xff8fd14f).withOpacity(0.5),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 padding: const EdgeInsets.symmetric(horizontal: 12),
@@ -115,7 +115,7 @@ class _WargaSetorLangsungState extends State<WargaSetorLangsung> {
               Container(
                 height: 120,
                 decoration: BoxDecoration(
-                  color: Colors.greenAccent.shade100,
+                  color: Color(0xff8fd14f).withOpacity(0.5),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 padding: const EdgeInsets.symmetric(horizontal: 12),
@@ -154,13 +154,16 @@ class _WargaSetorLangsungState extends State<WargaSetorLangsung> {
                   );
                 },
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.greenAccent.shade400,
+                  backgroundColor: Color(0xff8fd14f),
                   padding: const EdgeInsets.all(12),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
                 ),
-                child: const Text("Selanjutnya"),
+                child: const Text(
+                  "Selanjutnya",
+                  style: TextStyle(color: Colors.white),
+                ),
               ),
             ],
           ),

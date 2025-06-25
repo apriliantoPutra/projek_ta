@@ -200,14 +200,21 @@ class _PetugasSetorPageState extends State<PetugasSetorPage>
                     child: Container(
                       height: 40,
                       alignment: Alignment.center,
-                      child: Text("Setor Langsung"),
+                      child: Text("Setor Baru"),
                     ),
                   ),
                   Tab(
                     child: Container(
                       height: 40,
                       alignment: Alignment.center,
-                      child: Text("Setor Jemput"),
+                      child: Text("Setor Proses"),
+                    ),
+                  ),
+                  Tab(
+                    child: Container(
+                      height: 40,
+                      alignment: Alignment.center,
+                      child: Text("Setor Selesai"),
                     ),
                   ),
                 ],

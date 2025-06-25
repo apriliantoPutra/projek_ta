@@ -10,7 +10,7 @@ class WargaSetorPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Colors.greenAccent.shade400,
+        backgroundColor: Color(0xff8fd14f),
         elevation: 0,
         centerTitle: true,
         title: Text(
@@ -44,7 +44,7 @@ class WargaSetorPage extends StatelessWidget {
                 padding: EdgeInsets.all(16),
                 margin: EdgeInsets.only(bottom: 16),
                 decoration: BoxDecoration(
-                  color: Colors.greenAccent.shade400,
+                  color: Color(0xff8fd14f),
                   borderRadius: BorderRadius.circular(16),
                 ),
                 child: Column(
@@ -80,7 +80,7 @@ class WargaSetorPage extends StatelessWidget {
               child: Container(
                 padding: EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: Colors.greenAccent.shade400,
+                  color: Color(0xff8fd14f),
                   borderRadius: BorderRadius.circular(16),
                 ),
                 child: Column(

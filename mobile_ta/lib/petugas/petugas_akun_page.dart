@@ -90,15 +90,15 @@ class PetugasAkunPage extends StatelessWidget {
                     style: TextStyle(fontSize: 14, color: Colors.black),
                   ),
 
-                  SizedBox(height: 8),
+                  SizedBox(height: 16),
                   ElevatedButton(
                     onPressed: () {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => PetugasEditProfilPage(
-                            profilData: profilData
-                          ),
+                          builder:
+                              (context) =>
+                                  PetugasEditProfilPage(profilData: profilData),
                         ),
                       );
                     },
@@ -114,7 +114,7 @@ class PetugasAkunPage extends StatelessWidget {
                 ],
               ),
             ),
-            SizedBox(height: 24),
+            SizedBox(height: 16),
 
             //menu menu
             Padding(
@@ -149,22 +149,19 @@ class PetugasAkunPage extends StatelessWidget {
       padding: const EdgeInsets.only(bottom: 16.0),
       child: Container(
         decoration: BoxDecoration(
-          color: Colors.greenAccent.shade100,
+          color: Color(0xff8fd14f),
           borderRadius: BorderRadius.circular(16),
         ),
         child: ListTile(
-          leading: Icon(icon, color: iconColor ?? Colors.green.shade900),
+          leading: Icon(icon, color: iconColor ?? Colors.white),
           title: Text(
             title,
-            style: TextStyle(
-              fontWeight: FontWeight.bold,
-              color: Colors.green.shade900,
-            ),
+            style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
           ),
           trailing: Icon(
             Icons.arrow_forward_ios,
             size: 16,
-            color: Colors.green.shade900,
+            color: Colors.white,
           ),
           onTap: onTap,
         ),
