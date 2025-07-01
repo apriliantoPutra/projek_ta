@@ -11,7 +11,8 @@ import '../warga/beranda_page.dart';
 import '../warga/tambah_profil_page.dart';
 
 class WargaMainWrapper extends StatefulWidget {
-  const WargaMainWrapper({Key? key}) : super(key: key);
+  final int initialMenu;
+  const WargaMainWrapper({Key? key, this.initialMenu = 0}) : super(key: key);
 
   @override
   State<WargaMainWrapper> createState() => _WargaMainWrapperState();
@@ -26,6 +27,7 @@ class _WargaMainWrapperState extends State<WargaMainWrapper> {
   @override
   void initState() {
     super.initState();
+    selectedMenu = widget.initialMenu;
     checkInitialData();
   }
 
@@ -140,7 +142,11 @@ class _WargaMainWrapperState extends State<WargaMainWrapper> {
     }
 
     List<Widget> menu = [
-      WargaBerandaPage(akunData: akunData, profilData: profilData, saldoData: saldoData),
+      WargaBerandaPage(
+        akunData: akunData,
+        profilData: profilData,
+        saldoData: saldoData,
+      ),
       WargaSetorPage(akunData: akunData),
       WargaEdukasiPage(akunData: akunData),
       WargaAkunPage(

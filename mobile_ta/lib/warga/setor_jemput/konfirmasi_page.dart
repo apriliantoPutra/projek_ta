@@ -26,6 +26,16 @@ class WargaKonfirmasiSetorJemputPage extends StatefulWidget {
 
 class _WargaKonfirmasiSetorJemputPageState
     extends State<WargaKonfirmasiSetorJemputPage> {
+  final String namaBank = "Bank Sampah Tembalang Berseri";
+  final String deskripsiBank =
+      "Tempat pengelolaan sampah ramah lingkungan dengan sistem tabungan.";
+  final String alamatBank = "Jl. Tembalang Raya No.12, Semarang";
+  final String mapUrl =
+      "https://maps.googleapis.com/maps/api/staticmap?center=-7.05055837482239,110.44114708764991&zoom=16&size=600x300&markers=color:red%7C-7.05055837482239,110.44114708764991&key=YOUR_API_KEY";
+  final String namaAdmin = "Ahmad Fathoni";
+  final String emailAdmin = "ahmad@example.com";
+  final String noHpAdmin = "0812-3456-7890";
+
   final Map<int, Map<String, dynamic>> jenisSampahCache = {};
   List<Map<String, dynamic>> processedSetoran = [];
   double totalBerat = 0.0;
@@ -38,7 +48,7 @@ class _WargaKonfirmasiSetorJemputPageState
   void initState() {
     super.initState();
     processSetoran();
-
+    // Konversi tanggal input ke format yyyy-MM-dd
     try {
       final inputDate = DateFormat('dd/MM/yyyy').parse(widget.tanggal);
       formattedDate = DateFormat('yyyy-MM-dd').format(inputDate);
@@ -50,21 +60,13 @@ class _WargaKonfirmasiSetorJemputPageState
   Future<void> processSetoran() async {
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('token');
-
-    if (token == null) {
-      debugPrint('Token tidak ditemukan');
-      return;
-    }
+    if (token == null) return;
 
     for (var item in widget.dataSetoran) {
       final int jenisId = item['jenis_sampah_id'];
-      final double berat = item['berat'] * 1.0;
+      final double berat = item['berat'];
 
-      // Cek cache dulu
-      Map<String, dynamic> jenisData;
-      if (jenisSampahCache.containsKey(jenisId)) {
-        jenisData = jenisSampahCache[jenisId]!;
-      } else {
+      if (!jenisSampahCache.containsKey(jenisId)) {
         final response = await http.get(
           Uri.parse('$baseUrl/jenis-sampah/$jenisId'),
           headers: {
@@ -75,36 +77,33 @@ class _WargaKonfirmasiSetorJemputPageState
 
         if (response.statusCode == 200) {
           final data = json.decode(response.body)['data'];
-          jenisData = {
+          jenisSampahCache[jenisId] = {
             'nama': data['nama_sampah'],
             'harga': data['harga_per_satuan'],
             'warna': data['warna_indikasi'],
           };
-          jenisSampahCache[jenisId] = jenisData; // simpan di cache
-        } else {
-          debugPrint('Gagal ambil data jenis sampah id: $jenisId');
-          continue;
         }
       }
 
-      final int harga = jenisData['harga'];
-      final int subtotal = (berat * harga).round();
+      final jenisData = jenisSampahCache[jenisId];
+      if (jenisData != null) {
+        final int harga = jenisData['harga'];
+        final int subtotal = (berat * harga).round();
 
-      processedSetoran.add({
-        'nama': jenisData['nama'],
-        'berat': berat,
-        'harga': harga,
-        'subtotal': subtotal,
-        'warna': jenisData['warna'],
-      });
+        processedSetoran.add({
+          'nama': jenisData['nama'],
+          'berat': berat,
+          'harga': harga,
+          'subtotal': subtotal,
+          'warna': jenisData['warna'],
+        });
 
-      totalBerat += berat;
-      totalHarga += subtotal;
+        totalBerat += berat;
+        totalHarga += subtotal;
+      }
     }
 
-    setState(() {
-      isLoading = false;
-    });
+    setState(() => isLoading = false);
   }
 
   Future<void> storePengajuanSetorJemput() async {
@@ -191,292 +190,309 @@ class _WargaKonfirmasiSetorJemputPageState
 
   @override
   Widget build(BuildContext context) {
-    if (isLoading) {
-      return const Scaffold(body: Center(child: CircularProgressIndicator()));
-    }
-
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.greenAccent.shade400,
         elevation: 0,
         centerTitle: true,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          icon: Icon(Icons.arrow_back, color: Colors.white),
           onPressed: () => Navigator.pop(context),
         ),
-        title: const Text(
+        title: Text(
           'Setor Jemput',
           style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
         ),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(10),
-        child: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Informasi Layanan
-              Container(
-                padding: const EdgeInsets.all(16),
-                margin: const EdgeInsets.only(bottom: 16),
-                decoration: BoxDecoration(
-                  color: Colors.greenAccent.shade400,
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                child: Column(
-                  children: const [
-                    Text(
-                      'Setor Jemput',
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
-                      ),
+      body:
+          isLoading
+              ? const Center(child: CircularProgressIndicator())
+              : LayoutBuilder(
+                builder: (context, constraints) {
+                  final isWide = constraints.maxWidth > 600;
+                  return SingleChildScrollView(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 20,
                     ),
-                    SizedBox(height: 8),
-                    Text(
-                      'Setor Jemput adalah layanan penjemputan sampah ke rumah pengguna oleh petugas Bank Sampah, dengan tambahan biaya sebesar Rp4.000 per kilometer.',
-                      style: TextStyle(color: Colors.white),
-                      textAlign: TextAlign.center,
-                    ),
-                  ],
-                ),
-              ),
-
-              // Judul Jenis dan Berat
-              const Text(
-                'Jenis dan Berat Sampah',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 10),
-
-              // Box jenis dan berat + indikator
-              Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: Colors.greenAccent.shade100,
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Stack(
-                      children: [
-                        Container(
-                          height: 24,
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(12),
-                            color: Colors.grey[300],
-                          ),
-                        ),
-                        Row(
-                          children:
-                              processedSetoran.map((item) {
-                                final double proportion =
-                                    item['berat'] / totalBerat;
-                                return Expanded(
-                                  flex: (proportion * 1000).round(),
-                                  child: Container(
-                                    height: 24,
-                                    decoration: BoxDecoration(
-                                      color: Color(
-                                        int.parse(
-                                          item['warna'].toString().replaceAll(
-                                            '#',
-                                            '0xff',
+                    child: Center(
+                      child: ConstrainedBox(
+                        constraints: const BoxConstraints(maxWidth: 600),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            // Visualisasi Jenis Sampah
+                            _buildCard(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  const Text(
+                                    "Komposisi Sampah",
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 12),
+                                  Stack(
+                                    children: [
+                                      Container(
+                                        height: 24,
+                                        decoration: BoxDecoration(
+                                          borderRadius: BorderRadius.circular(
+                                            12,
+                                          ),
+                                          color: Colors.grey[300],
+                                        ),
+                                      ),
+                                      Row(
+                                        children:
+                                            processedSetoran.map((item) {
+                                              final proportion =
+                                                  item['berat'] / totalBerat;
+                                              return Expanded(
+                                                flex:
+                                                    (proportion * 1000).round(),
+                                                child: Container(
+                                                  height: 24,
+                                                  decoration: BoxDecoration(
+                                                    color: Color(
+                                                      int.parse(
+                                                        item['warna']
+                                                            .toString()
+                                                            .replaceAll(
+                                                              '#',
+                                                              '0xff',
+                                                            ),
+                                                      ),
+                                                    ),
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                          4,
+                                                        ),
+                                                  ),
+                                                ),
+                                              );
+                                            }).toList(),
+                                      ),
+                                      Positioned.fill(
+                                        child: Center(
+                                          child: Text(
+                                            '${totalBerat.toStringAsFixed(1)} kg',
+                                            style: const TextStyle(
+                                              fontWeight: FontWeight.bold,
+                                              color: Colors.white,
+                                            ),
                                           ),
                                         ),
                                       ),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 12),
+                                  ...processedSetoran.map(
+                                    (item) => Padding(
+                                      padding: const EdgeInsets.only(bottom: 8),
+                                      child: Row(
+                                        children: [
+                                          Icon(
+                                            Icons.square,
+                                            color: Color(
+                                              int.parse(
+                                                item['warna']
+                                                    .toString()
+                                                    .replaceAll('#', '0xff'),
+                                              ),
+                                            ),
+                                          ),
+                                          const SizedBox(width: 8),
+                                          Expanded(child: Text(item['nama'])),
+                                          Text('${item['berat']} kg'),
+                                          const SizedBox(width: 16),
+                                          Text('Rp${item['subtotal']}'),
+                                        ],
+                                      ),
                                     ),
                                   ),
-                                );
-                              }).toList(),
-                        ),
-                        Positioned.fill(
-                          child: Center(
-                            child: Text(
-                              '${totalBerat.toStringAsFixed(1)}kg',
-                              style: const TextStyle(
-                                fontWeight: FontWeight.bold,
-                                color: Colors.white,
+                                ],
                               ),
                             ),
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 12),
-                    ...processedSetoran.map((item) {
-                      return Row(
-                        children: [
-                          Icon(
-                            Icons.square,
-                            color: Color(
-                              int.parse(
-                                item['warna'].toString().replaceAll(
-                                  '#',
-                                  '0xff',
-                                ),
-                              ),
-                            ),
-                          ),
-                          const SizedBox(width: 6),
-                          Expanded(child: Text(item['nama'])),
-                          Text('${item['berat']}kg'),
-                        ],
-                      );
-                    }).toList(),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 20),
 
-              // Estimasi Insentif
-              const Text(
-                'Estimasi Insentif',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 10),
-              Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: Colors.greenAccent.shade100,
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        const Text('Estimasi harga sampah anda'),
-                        Text('Rp $totalHarga'),
-                      ],
-                    ),
-                    const SizedBox(height: 4),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        const Text('Biaya Layanan'),
-                        Text('-Rp $biayaLayanan'),
-                      ],
-                    ),
-                    const Divider(),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        const Text(
-                          'Perkiraan Insentif',
-                          style: TextStyle(fontWeight: FontWeight.bold),
-                        ),
-                        Text(
-                          'Rp ${totalHarga - biayaLayanan}',
-                          style: const TextStyle(fontWeight: FontWeight.bold),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 20),
-              const Text(
-                'Informasi Penyetoran',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 6),
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: Colors.greenAccent.shade100,
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text("Tanggal: ${widget.tanggal}"),
-                    Text("Catatan: ${widget.catatan ?? "-"}"),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 20),
-
-              // Bank Sampah
-              const Text(
-                'Nama Bank Sampah',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 6),
-              const Text(
-                'Alamat Bank Sampah: Jl. Lorem ipsum dolor sit amet, consectetur adipiscing elit, Semarang',
-                style: TextStyle(color: Colors.black54),
-              ),
-              const SizedBox(height: 10),
-              ClipRRect(
-                borderRadius: BorderRadius.circular(10),
-                child: Image.network(
-                  'https://i.pinimg.com/736x/b0/79/09/b079096855c0edbaba47d93c67f18853.jpg',
-                  height: 140,
-                  width: double.infinity,
-                  fit: BoxFit.cover,
-                ),
-              ),
-              const SizedBox(height: 30),
-
-              Row(
-                children: [
-                  Expanded(
-                    child: ElevatedButton(
-                      onPressed: isLoading ? null : storePengajuanSetorJemput,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.greenAccent.shade400,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        padding: const EdgeInsets.symmetric(vertical: 14),
-                      ),
-                      child:
-                          isLoading
-                              ? const SizedBox(
-                                height: 20,
-                                width: 20,
-                                child: CircularProgressIndicator(
-                                  valueColor: AlwaysStoppedAnimation<Color>(
-                                    Colors.white,
+                            _buildCard(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  const Text(
+                                    "Estimasi Insentif",
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold,
+                                    ),
                                   ),
-                                  strokeWidth: 2,
-                                ),
-                              )
-                              : const Text(
-                                "Konfirmasi Setoran",
-                                style: TextStyle(fontSize: 16),
+                                  const SizedBox(height: 12),
+                                  Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      const Text("Total Sampah"),
+                                      Text('Rp$totalHarga'),
+                                    ],
+                                  ),
+                                  const Divider(),
+                                  Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      const Text(
+                                        "Total Insentif",
+                                        style: TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                      Text(
+                                        'Rp${totalHarga - biayaLayanan}',
+                                        style: const TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ],
                               ),
-                    ),
-                  ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: ElevatedButton(
-                      onPressed: () => Navigator.pop(context),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.orange,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10),
+                            ),
+
+                            _buildCard(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  const Text(
+                                    "Detail Penyetoran",
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 16,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 8),
+                                  Text("Tanggal: ${widget.tanggal}"),
+                                  Text("Catatan: ${widget.catatan ?? "-"}"),
+                                ],
+                              ),
+                            ),
+
+                            _buildCard(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  const Text(
+                                    "Informasi Bank Sampah",
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 16,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 8),
+                                  Text(
+                                    "Nama: $namaBank",
+                                    style: const TextStyle(
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                  Text("Deskripsi: $deskripsiBank"),
+                                  Text("Alamat: $alamatBank"),
+                                  const SizedBox(height: 12),
+                                  ClipRRect(
+                                    borderRadius: BorderRadius.circular(8),
+                                    child: Image.network(
+                                      mapUrl,
+                                      height: 180,
+                                      width: double.infinity,
+                                      fit: BoxFit.cover,
+                                      errorBuilder:
+                                          (
+                                            context,
+                                            error,
+                                            stackTrace,
+                                          ) => Image.network(
+                                            "https://i.pinimg.com/736x/b0/79/09/b079096855c0edbaba47d93c67f18853.jpg",
+                                            height: 150,
+                                            width: double.infinity,
+                                            fit: BoxFit.cover,
+                                          ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+
+                            _buildCard(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  const Text(
+                                    "Kontak Admin",
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 16,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 8),
+                                  Text("Nama: $namaAdmin"),
+                                  Text("Email: $emailAdmin"),
+                                  Text("No HP: $noHpAdmin"),
+                                ],
+                              ),
+                            ),
+
+                            const SizedBox(height: 32),
+
+                            SizedBox(
+                              width: double.infinity,
+                              child: ElevatedButton(
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.greenAccent.shade400,
+                                  padding: const EdgeInsets.symmetric(
+                                    vertical: 14,
+                                  ),
+                                  textStyle: const TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 16,
+                                  ),
+                                ),
+                                onPressed:
+                                    isLoading
+                                        ? null
+                                        : storePengajuanSetorJemput,
+                                child:
+                                    isLoading
+                                        ? const CircularProgressIndicator()
+                                        : const Text('KONFIRMASI SETORAN'),
+                              ),
+                            ),
+                          ],
                         ),
-                        padding: const EdgeInsets.symmetric(vertical: 14),
-                      ),
-                      child: const Text(
-                        'Batalkan',
-                        style: TextStyle(fontWeight: FontWeight.bold),
                       ),
                     ),
-                  ),
-                ],
+                  );
+                },
               ),
-              const SizedBox(height: 20),
-            ],
+    );
+  }
+
+  Widget _buildCard({required Widget child}) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 20),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.greenAccent.shade100,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.1),
+            blurRadius: 6,
+            offset: const Offset(0, 4),
           ),
-        ),
+        ],
       ),
+      child: child,
     );
   }
 }

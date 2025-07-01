@@ -11,8 +11,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class WargaEditProfilPage extends StatefulWidget {
   final Map<String, dynamic>? profilData;
-  const WargaEditProfilPage({Key? key, this.profilData})
-    : super(key: key);
+  const WargaEditProfilPage({Key? key, this.profilData}) : super(key: key);
 
   @override
   State<WargaEditProfilPage> createState() => _WargaEditProfilPageState();
@@ -241,15 +240,10 @@ class _WargaEditProfilPageState extends State<WargaEditProfilPage> {
                   _buildTextField("Titik Koordinat", _koordinatController),
                   const SizedBox(height: 12),
 
-                  // Peta (Dummy)
+                  // Peta (Google Maps Static atau Dummy)
                   ClipRRect(
                     borderRadius: BorderRadius.circular(12),
-                    child: Image.network(
-                      "https://i.pinimg.com/736x/b0/79/09/b079096855c0edbaba47d93c67f18853.jpg",
-                      height: 150,
-                      width: double.infinity,
-                      fit: BoxFit.cover,
-                    ),
+                    child: _buildMapImage(),
                   ),
                 ],
               ),
@@ -290,5 +284,46 @@ class _WargaEditProfilPageState extends State<WargaEditProfilPage> {
         const SizedBox(height: 12),
       ],
     );
+  }
+
+  Widget _buildMapImage() {
+    final rawKoordinat = _koordinatController.text.trim();
+    final cleanedKoordinat = rawKoordinat.replaceAll(
+      ' ',
+      '',
+    ); // ← HILANGKAN SPASI
+
+    final apiKey = "AIzaSyCd4DakGg-LtmIW9VqDhXG6-yG0rMlzrQE";
+
+    final isValid = RegExp(
+      r'^-?\d+(\.\d+)?,-?\d+(\.\d+)?$',
+    ).hasMatch(cleanedKoordinat);
+
+    if (isValid) {
+      final mapUrl =
+          "https://maps.googleapis.com/maps/api/staticmap"
+          "?center=$cleanedKoordinat"
+          "&zoom=15"
+          "&size=600x300"
+          "&markers=color:red%7C$cleanedKoordinat"
+          "&key=$apiKey";
+
+      return Image.network(
+        mapUrl,
+        height: 150,
+        width: double.infinity,
+        fit: BoxFit.cover,
+        errorBuilder: (context, error, stackTrace) {
+          return const Center(child: Text("Gagal memuat peta"));
+        },
+      );
+    } else {
+      return Image.network(
+        "https://i.pinimg.com/736x/b0/79/09/b079096855c0edbaba47d93c67f18853.jpg",
+        height: 150,
+        width: double.infinity,
+        fit: BoxFit.cover,
+      );
+    }
   }
 }

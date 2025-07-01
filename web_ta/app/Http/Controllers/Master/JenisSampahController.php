@@ -4,7 +4,9 @@ namespace App\Http\Controllers\Master;
 
 use App\Http\Controllers\Controller;
 use App\Models\Master\JenisSampah;
+use App\Models\TotalSampah;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class JenisSampahController extends Controller
 {
@@ -28,8 +30,26 @@ class JenisSampahController extends Controller
             'warna_indikasi' => 'required|string',
         ]);
 
-        JenisSampah::create($validated);
-        return redirect()->route('Jenis-Sampah');
+        DB::beginTransaction();
+        try {
+
+            $jenis_sampah = JenisSampah::create($validated);
+            TotalSampah::create([
+                'sampah_id' => $jenis_sampah->id,
+                'total_berat' => 0
+            ]);
+
+            DB::commit();
+            return redirect()->route('Jenis-Sampah');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json(
+                [
+                    "success" => false,
+                    "message" => $e->getMessage()
+                ]
+            );
+        }
     }
     public function edit($id)
     {
@@ -47,13 +67,46 @@ class JenisSampahController extends Controller
         ]);
         $datas = JenisSampah::find($id);
 
-        $datas->update($validated);
-        return redirect()->route('Jenis-Sampah');
+        DB::beginTransaction();
+        try {
+
+            $datas->update($validated);
+
+            DB::commit();
+            return redirect()->route('Jenis-Sampah');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json(
+                [
+                    "success" => false,
+                    "message" => $e->getMessage()
+
+                ]
+            );
+        }
     }
     public function destroy($id)
     {
         $datas = JenisSampah::findOrFail($id);
-        $datas->delete();
-        return redirect()->back();
+        $total_sampah = TotalSampah::where('sampah_id', '=', $id)->first();
+
+        DB::beginTransaction();
+        try {
+
+            $datas->delete();
+            $total_sampah->delete();
+
+            DB::commit();
+            return redirect()->back();
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json(
+                [
+                    "success" => false,
+                    "message" => $e->getMessage()
+
+                ]
+            );
+        }
     }
 }

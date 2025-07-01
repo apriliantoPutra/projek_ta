@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:mobile_ta/warga/chatbot_page.dart';
 import 'package:mobile_ta/warga/histori_setor_page.dart';
+import 'package:mobile_ta/warga/kalkulator/kalkulator_setor_sampah_page.dart';
 import 'package:mobile_ta/widget/videoCard_widget.dart';
 import '../widget/eduCard_widget.dart';
 
@@ -135,7 +136,18 @@ class WargaBerandaPage extends StatelessWidget {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceAround,
                     children: [
-                      _menuItem(Icons.calculate, "Kalkulator"),
+                      _menuItem(
+                        Icons.calculate,
+                        "Kalkulator",
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => KalkulatorSetorSampahPage(),
+                            ),
+                          );
+                        },
+                      ),
                       _menuItem(
                         Icons.history,
                         "Histori",

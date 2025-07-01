@@ -2,12 +2,15 @@
 
 use App\Http\Controllers\Api\ApiAkunController;
 use App\Http\Controllers\Api\ArtikelController;
+use App\Http\Controllers\Api\HistoriController;
+use App\Http\Controllers\Api\KumpulanSetorController;
 use App\Http\Controllers\Api\LoginController as ApiLoginController;
 use App\Http\Controllers\Api\MasterDataController;
 use App\Http\Controllers\Api\ProfilController as ApiProfilController;
 use App\Http\Controllers\Api\SaldoController;
 use App\Http\Controllers\Api\SetorJemputController;
 use App\Http\Controllers\Api\SetorLangsungController;
+use App\Http\Controllers\Api\TarikSaldoController as ApiTarikSaldoController;
 use App\Http\Controllers\Api\VideoController;
 use App\Http\Controllers\PengajuanPetugasController;
 use Illuminate\Support\Facades\Route;
@@ -33,6 +36,10 @@ Route::prefix('v1')->group(function () {
 
         Route::get('/akun', [ApiAkunController::class, 'show']);
         Route::get('/saldo', [SaldoController::class, 'show']);
+
+        Route::get('/setor-baru', [KumpulanSetorController::class, 'baru']);
+        Route::get('/setor-proses', [KumpulanSetorController::class, 'proses']);
+        Route::get('/setor-selesai', [KumpulanSetorController::class, 'selesai']);
 
         Route::prefix('setor-langsung')->group(function () {
             // warga
@@ -62,8 +69,14 @@ Route::prefix('v1')->group(function () {
             Route::patch('/batal-pengajuan/{id}', [SetorJemputController::class, 'batalPengajuan']);
             Route::patch('/konfirmasi/{id}', [SetorJemputController::class, 'konfirmasiPengajuan']);
         });
+        //tarik saldo
+        Route::post('/pengajuan-tarik-saldo', [ApiTarikSaldoController::class, 'pengajuanTarikSaldo']);
+        Route::get('/permintaan-tarik-saldo', [ApiTarikSaldoController::class, 'permintaanTarikSaldo']);
+        Route::get('histori-tarik-saldo', [HistoriController::class, 'listSaldo']);
+        Route::get('histori-tarik-saldo/{id}', [HistoriController::class, 'detailSaldo']);
 
 
+        // tidak dipakai
         Route::post('/setor-sampah', [PengajuanPetugasController::class, 'store']);
         Route::get('/setor-sampah/{id}', [PengajuanPetugasController::class, 'show']);
 

@@ -7,6 +7,7 @@ use App\Http\Controllers\Controller;
 use App\Models\InputDetailSetor;
 use App\Models\PengajuanSetor;
 use App\Models\Saldo;
+use App\Models\TotalSampah;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
@@ -92,7 +93,11 @@ class SetorLangsungController extends Controller
     }
     public function listPengajuanSelesai()
     {
-        $pengajuan_setor = PengajuanSetor::with(['user.profil'])->where('jenis_setor', '=', 'langsung')->where('status_pengajuan', 'diterima')->get()->map(function ($item) {
+        $userId = Auth::id();
+
+        $pengajuan_setor = PengajuanSetor::with(['user.profil', 'inputdetail.user'])->where('jenis_setor', '=', 'langsung')->where('status_pengajuan', 'diterima')->whereHas('inputdetail.user', function ($query) use ($userId) {
+            $query->where('petugas_id', $userId);
+        })->get()->map(function ($item) {
             $profil = $item->user->profil;
             return [
                 'id' => $item->id,
@@ -177,6 +182,20 @@ class SetorLangsungController extends Controller
                 "total_harga" => $request->total_harga,
                 "status_setor" => "selesai"
             ]);
+
+            // perulangan update tiap jenis sampah
+            foreach ($request->setoran_sampah as $item) {
+                $jenisId = $item['jenis_sampah_id'];
+                $berat = $item['berat'];
+
+                $total_sampah = TotalSampah::where('sampah_id', $jenisId)->first();
+
+                if ($total_sampah) {
+                    $total_sampah->update([
+                        'total_berat' => $total_sampah->total_berat + $berat
+                    ]);
+                }
+            }
 
             $saldo = Saldo::where('warga_id', '=', $pengajuan->warga_id)->first();
             $saldo->update([

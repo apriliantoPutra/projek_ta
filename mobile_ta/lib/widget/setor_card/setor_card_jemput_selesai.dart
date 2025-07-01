@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:mobile_ta/petugas/petugas_setor_jemput_selesai.dart';
+import 'package:mobile_ta/petugas/setor_jemput/petugas_setor_jemput_selesai.dart';
 
 class SetorCardJemputSelesai extends StatelessWidget {
   final Map<String, dynamic> data;
@@ -8,11 +8,15 @@ class SetorCardJemputSelesai extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final width = MediaQuery.of(context).size.width;
+
     final waktuPengajuan = data['waktu_pengajuan'];
     final tanggal =
         waktuPengajuan != null
-            ? DateFormat('EEEE, dd-MM-yyyy', 'id_ID') // format lengkap + lokal
-            .format(DateTime.parse(waktuPengajuan))
+            ? DateFormat(
+              'EEEE, dd-MM-yyyy',
+              'id_ID',
+            ).format(DateTime.parse(waktuPengajuan))
             : "-";
 
     final profil = data['user']?['profil'];
@@ -24,77 +28,65 @@ class SetorCardJemputSelesai extends StatelessWidget {
     final namaPengguna = profil['nama_pengguna'] ?? 'memuat..';
 
     return Container(
-      margin: EdgeInsets.symmetric(vertical: 4),
+      width: width * 0.95,
+      margin: const EdgeInsets.symmetric(vertical: 6, horizontal: 8),
+      padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 12),
       decoration: BoxDecoration(
-        color: Color(0xff8fd14f),
-        borderRadius: BorderRadius.circular(12),
+        color: const Color(0xff8fd14f),
+        borderRadius: BorderRadius.circular(16),
       ),
-      child: Container(
-        margin: EdgeInsets.symmetric(vertical: 6), // Jarak antar box
-        padding: EdgeInsets.symmetric(
-          vertical: 4,
-          horizontal: 10,
-        ), // Jarak antara border dan konten
-        decoration: BoxDecoration(
-          color: Color(0xFF8fd14f),
-          borderRadius: BorderRadius.circular(20),
-        ),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.center, // Avatar di tengah
-          children: [
-            CircleAvatar(
-              radius: 20, // Perbesar avatar
-              backgroundImage: NetworkImage(gambarPengguna),
-            ),
-            SizedBox(width: 10), // Jarak antara avatar dan teks
-            Column(
-              mainAxisAlignment: MainAxisAlignment.center, // Teks di tengah
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          CircleAvatar(
+            radius: width * 0.07,
+            backgroundImage: NetworkImage(gambarPengguna),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   namaPengguna,
                   style: TextStyle(
-                    fontSize: 22,
+                    fontSize: width * 0.045,
                     fontWeight: FontWeight.w600,
                     color: Colors.white,
                   ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
                 Text(
                   "Setor Jemput",
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.normal,
-                    color: Colors.white,
-                  ),
+                  style: TextStyle(fontSize: width * 0.04, color: Colors.white),
                 ),
               ],
             ),
-            Spacer(), // Memberi jarak fleksibel antara teks dan tanggal
-            Text(
-              tanggal,
-              style: TextStyle(
-                fontSize: 16,
-                color: Colors.white, // Mengubah warna teks menjadi putih
+          ),
+          const SizedBox(width: 10),
+          Column(
+            children: [
+              Text(
+                tanggal,
+                style: TextStyle(fontSize: width * 0.035, color: Colors.white),
               ),
-            ),
-            SizedBox(width: 5), // Jarak sebelum icon
-            IconButton(
-              icon: Icon(
-                Icons.arrow_forward,
-                color: Colors.white,
-              ), // Arah kanan
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder:
-                        (context) => PetugasSetorJemputSelesai(id: data['id']),
-                  ),
-                );
-              },
-            ),
-          ],
-        ),
+              IconButton(
+                icon: const Icon(Icons.arrow_forward, color: Colors.white),
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder:
+                          (context) =>
+                              PetugasSetorJemputSelesai(id: data['id']),
+                    ),
+                  );
+                },
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }

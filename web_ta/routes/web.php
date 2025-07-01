@@ -11,6 +11,7 @@ use App\Http\Controllers\Master\JenisSampahController;
 use App\Http\Controllers\ProfilController;
 use App\Http\Controllers\Setoran\SetorJemputController;
 use App\Http\Controllers\Setoran\SetorLangsungController;
+use App\Http\Controllers\TarikSaldoController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', [LoginController::class, 'index']);
@@ -72,6 +73,14 @@ Route::middleware(['authorization', 'admin'])->group(function () {
     Route::delete('/video-hapus/{id}', [VideoController::class, 'destroy',])->name('Video-Hapus');
 
     Route::get('/setor-langsung', [SetorLangsungController::class, 'index',])->name('Setor-Langsung');
+    Route::get('/setor-langsung-detail/{id}', [SetorLangsungController::class, 'show',])->name('Setor-Langsung-Detail');
 
     Route::get('/setor-jemput', [SetorJemputController::class, 'index',])->name('Setor-Jemput');
+    Route::get('/setor-jemput-detail/{id}', [SetorJemputController::class, 'show',])->name('Setor-Jemput-Detail');
+
+    Route::get('/tarik-saldo', [TarikSaldoController::class, 'index'])->name('Tarik-Saldo');
+    Route::get('/tarik-saldo/{id}', [TarikSaldoController::class, 'show'])->name('Tarik-Saldo-Detail');
+    Route::put('/tarik-saldo-terima/{id}', [TarikSaldoController::class, 'terimaTarikSaldo'])->name('Tarik-Saldo-Terima');
+    Route::put('/tarik-saldo-tolak/{id}', [TarikSaldoController::class, 'tolakTarikSaldo'])->name('Tarik-Saldo-Tolak');
 });
+
