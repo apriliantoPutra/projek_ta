@@ -43,8 +43,12 @@ dependencies:
   image_picker: ^1.1.2
   provider: ^6.1.5
   path: ^1.9.1
-  video_player: ^2.9.5
+  media_kit: ^1.1.10
+  media_kit_video: ^1.1.10
+  media_kit_libs_android_video: ^1.0.7   # Android support
+  media_kit_libs_windows_video: ^1.0.7   # Windows support
   google_maps_flutter: ^2.5.0
+  flutter_dotenv: ^5.1.0
 
 dev_dependencies:
   flutter_test:
@@ -70,6 +74,7 @@ flutter:
   # To add assets to your application, add an assets section, like this:
   assets:
     - assets/logo_bank_sampah.png
+    - .env
   #   - images/a_dot_burr.jpeg
   #   - images/a_dot_ham.jpeg
 

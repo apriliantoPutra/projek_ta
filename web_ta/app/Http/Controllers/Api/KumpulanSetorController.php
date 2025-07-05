@@ -38,6 +38,35 @@ class KumpulanSetorController extends Controller
             'data' => $pengajuan_setor
         ]);
     }
+    public function terbaru()
+    {
+        $pengajuan_setor = PengajuanSetor::with(['user.profil'])->where('status_pengajuan', 'menunggu')->take(5)->get()->map(function ($item) {
+            $profil = $item->user->profil;
+            return [
+                'id' => $item->id,
+                'jenis_setor' => 'Setor ' . ucfirst($item->jenis_setor),
+                'waktu_pengajuan' => $item->waktu_pengajuan,
+                'status_pengajuan' => 'Setor ' . ucfirst($item->status_pengajuan),
+                'catatan_petugas' => $item->catatan_petugas,
+                'user' => [
+                    'username' => $item->user->username,
+                    'email' => $item->user->email,
+                    'profil' => [
+                        'nama_pengguna' => $profil->nama_pengguna,
+                        'alamat_pengguna' => $profil->alamat_pengguna,
+                        'no_hp_pengguna' => $profil->no_hp_pengguna,
+                        'gambar_pengguna' => $profil->gambar_pengguna,
+                        'gambar_url' => asset('storage/' . $profil->gambar_pengguna),
+                    ]
+                ]
+            ];
+        });
+
+        return response()->json([
+            'success' => true,
+            'data' => $pengajuan_setor
+        ]);
+    }
     public function proses()
     {
         $petugasId = Auth::id(); // Ambil ID petugas yang sedang login

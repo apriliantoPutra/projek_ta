@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:intl/intl.dart';
-import 'package:mobile_ta/constants/constants.dart';
+import 'package:mobile_ta/constants/constants.dart' as constants;
+
 import 'package:mobile_ta/warga/video/detail_page.dart';
 import 'package:mobile_ta/widget/videoCard_widget.dart';
 
@@ -17,9 +18,7 @@ class _WargaKumpulanVideoPageState extends State<WargaKumpulanVideoPage> {
   late Future<List<dynamic>> _videoList;
 
   Future<List<dynamic>> fetchVideo() async {
-    final response = await http.get(
-      Uri.parse('$baseUrl/video'),
-    );
+    final response = await http.get(Uri.parse('${constants.baseUrl}/video'));
 
     if (response.statusCode == 200) {
       final jsonData = json.decode(response.body);

@@ -150,6 +150,7 @@ class SetorLangsungController extends Controller
                     'nama_pengguna' => $profil->nama_pengguna,
                     'alamat_pengguna' => $profil->alamat_pengguna,
                     'no_hp_pengguna' => $profil->no_hp_pengguna,
+                    'gambar_pengguna' => $profil->gambar_pengguna,
                     'gambar_url' => asset('storage/' . $profil->gambar_pengguna),
                 ]
             ]

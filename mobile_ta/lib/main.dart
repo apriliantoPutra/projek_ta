@@ -1,14 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:media_kit/media_kit.dart';
 import 'auth/login_page.dart';
 import 'package:intl/date_symbol_data_local.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await initializeDateFormatting(
-    'id_ID',
-    null,
-  ); // Inisialisasi locale Indonesia
-  runApp(MyApp());
+
+  await initializeDateFormatting('id_ID', null);
+  await dotenv.load(fileName: ".env");
+  MediaKit.ensureInitialized();
+
+  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
@@ -23,7 +26,7 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.green),
         useMaterial3: true,
       ),
-      home: LoginPage(),
+      home: const LoginPage(), // kalau LoginPage juga pakai const
     );
   }
 }

@@ -10,7 +10,19 @@ class VideoController extends Controller
 {
     public function index()
     {
-        $videos = Video::all()->map(function ($videos) {
+        $videos = Video::orderBy('created_at', 'desc')->get()->map(function ($videos) {
+            $videos->video_url = asset('storage/' . $videos->video);
+            return $videos;
+        });
+
+        return response()->json([
+            'success' => true,
+            'data' => $videos
+        ]);
+    }
+    public function terbaru()
+    {
+        $videos = Video::orderBy('created_at', 'desc')->take(5)->get()->map(function ($videos) {
             $videos->video_url = asset('storage/' . $videos->video);
             return $videos;
         });

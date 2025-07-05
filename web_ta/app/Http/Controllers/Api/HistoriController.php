@@ -11,28 +11,18 @@ use Illuminate\Support\Facades\Auth;
 class HistoriController extends Controller
 {
     // warga
-    public function listSetor()
+    public function listSetorBaru()
     {
         $warga_id = Auth::id();
-        $pengajuan_setor = PengajuanSetor::with('user.profil')->where('warga_id', '=', $warga_id)->get()->map(function ($item) {
+        $pengajuan_setor = PengajuanSetor::with('user.profil')->where('warga_id', '=', $warga_id)->where('status_pengajuan', 'menunggu')->get()->map(function ($item) {
             $profil = $item->user->profil;
             return [
                 'id' => $item->id,
-                'jenis_setor' => $item->jenis_setor,
+                'jenis_setor' => 'Setor ' . ucfirst($item->jenis_setor),
                 'waktu_pengajuan' => $item->waktu_pengajuan,
                 'status_pengajuan' => $item->status_pengajuan,
                 'catatan_petugas' => $item->catatan_petugas,
-                'user' => [
-                    'username' => $item->user->username,
-                    'email' => $item->user->email,
-                    'profil' => [
-                        'nama_pengguna' => $profil->nama_pengguna,
-                        'alamat_pengguna' => $profil->alamat_pengguna,
-                        'no_hp_pengguna' => $profil->no_hp_pengguna,
-                        'gambar_pengguna' => $profil->gambar_pengguna,
-                        'gambar_url' => asset('storage/' . $profil->gambar_pengguna),
-                    ]
-                ]
+
             ];
         });
 
@@ -41,6 +31,87 @@ class HistoriController extends Controller
             'data' => $pengajuan_setor
         ]);
     }
+    public function listSetorProses()
+    {
+        $warga_id = Auth::id();
+        $pengajuan_setor = PengajuanSetor::with(['user.profil', 'inputdetail'])
+            ->where('warga_id', '=', $warga_id)
+            ->where('jenis_setor', 'jemput')
+            ->where('status_pengajuan', 'diterima')
+            ->whereHas('inputdetail', function ($query) {
+                $query->where('status_setor', 'proses');
+            })
+            ->get()
+            ->map(function ($item) {
+                $profil = $item->user->profil;
+                return [
+                    'id' => $item->id,
+                    'jenis_setor' => 'Setor ' . ucfirst($item->jenis_setor),
+                    'waktu_pengajuan' => $item->waktu_pengajuan,
+                    'status_pengajuan' => $item->status_pengajuan,
+                    'catatan_petugas' => $item->catatan_petugas,
+
+                ];
+            });
+
+        return response()->json([
+            'success' => true,
+            'data' => $pengajuan_setor
+        ]);
+    }
+
+    public function listSetorSelesai()
+    {
+        $warga_id = Auth::id();
+        $pengajuan_setor = PengajuanSetor::with(['user.profil', 'inputdetail'])
+            ->where('warga_id', '=', $warga_id)
+            ->where('status_pengajuan', 'diterima')
+            ->whereHas('inputdetail', function ($query) {
+                $query->where('status_setor', 'selesai');
+            })
+            ->get()
+            ->map(function ($item) {
+                $profil = $item->user->profil;
+                return [
+                    'id' => $item->id,
+                    'jenis_setor' => 'Setor ' . ucfirst($item->jenis_setor),
+                    'waktu_pengajuan' => $item->waktu_pengajuan,
+                    'status_pengajuan' => $item->status_pengajuan,
+                    'catatan_petugas' => $item->catatan_petugas,
+
+                ];
+            });
+
+        return response()->json([
+            'success' => true,
+            'data' => $pengajuan_setor
+        ]);
+    }
+    public function listSetorBatal()
+    {
+        $warga_id = Auth::id();
+        $pengajuan_setor = PengajuanSetor::with(['user.profil'])
+            ->where('warga_id', '=', $warga_id)
+            ->where('status_pengajuan', 'batalkan')
+            ->get()
+            ->map(function ($item) {
+                $profil = $item->user->profil;
+                return [
+                    'id' => $item->id,
+                    'jenis_setor' => 'Setor ' . ucfirst($item->jenis_setor),
+                    'waktu_pengajuan' => $item->waktu_pengajuan,
+                    'status_pengajuan' => $item->status_pengajuan,
+                    'catatan_petugas' => $item->catatan_petugas,
+
+                ];
+            });
+
+        return response()->json([
+            'success' => true,
+            'data' => $pengajuan_setor
+        ]);
+    }
+
     public function detailSetor($id)
     {
         $item = PengajuanSetor::with('user.profil', 'inputdetail')->find($id);
@@ -82,6 +153,7 @@ class HistoriController extends Controller
             'data' => $pengajuan_setor,
         ]);
     }
+
     public function listSaldo()
     {
         $warga_id = Auth::id();

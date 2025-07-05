@@ -37,6 +37,7 @@ Route::prefix('v1')->group(function () {
         Route::get('/akun', [ApiAkunController::class, 'show']);
         Route::get('/saldo', [SaldoController::class, 'show']);
 
+        Route::get('/setor-terbaru', [KumpulanSetorController::class, 'terbaru']);
         Route::get('/setor-baru', [KumpulanSetorController::class, 'baru']);
         Route::get('/setor-proses', [KumpulanSetorController::class, 'proses']);
         Route::get('/setor-selesai', [KumpulanSetorController::class, 'selesai']);
@@ -75,6 +76,14 @@ Route::prefix('v1')->group(function () {
         Route::get('histori-tarik-saldo', [HistoriController::class, 'listSaldo']);
         Route::get('histori-tarik-saldo/{id}', [HistoriController::class, 'detailSaldo']);
 
+        // histori setor warga
+        Route::get('histori-setor-baru', [HistoriController::class, 'listSetorBaru']);
+        Route::get('histori-setor-proses', [HistoriController::class, 'listSetorProses']);
+        Route::get('histori-setor-selesai', [HistoriController::class, 'listSetorSelesai']);
+        Route::get('histori-setor-batal', [HistoriController::class, 'listSetorBatal']);
+
+        Route::get('histori-setor-detai/{id}', [HistoriController::class, 'detailSetor']);
+
 
         // tidak dipakai
         Route::post('/setor-sampah', [PengajuanPetugasController::class, 'store']);
@@ -88,11 +97,13 @@ Route::prefix('v1')->group(function () {
 
     Route::prefix('artikel')->group(function () {
         Route::get('/', [ArtikelController::class, 'index']);
+        Route::get('/terbaru', [ArtikelController::class, 'terbaru']);
         Route::get('{id}', [ArtikelController::class, 'show']);
     });
 
     Route::prefix('video')->group(function () {
         Route::get('/', [VideoController::class, 'index']);
+        Route::get('/terbaru', [VideoController::class, 'terbaru']);
         Route::get('{id}', [VideoController::class, 'show']);
     });
 });

@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:mobile_ta/constants/constants.dart';
-import 'package:video_player/video_player.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:intl/intl.dart';
+import 'package:media_kit/media_kit.dart';
+import 'package:media_kit_video/media_kit_video.dart';
+import 'package:mobile_ta/constants/constants.dart' as constants;
 
 class WargaDetailVideoPage extends StatefulWidget {
   final int videoId;
@@ -15,9 +16,10 @@ class WargaDetailVideoPage extends StatefulWidget {
 }
 
 class _WargaDetailVideoPageState extends State<WargaDetailVideoPage> {
-  VideoPlayerController? _controller;
-  bool _isPlaying = false;
+  late final Player _player;
+  late final VideoController _controller;
   bool _isLoading = true;
+  bool _videoReady = false;
   bool _hasError = false;
 
   String _judul = '';
@@ -25,10 +27,24 @@ class _WargaDetailVideoPageState extends State<WargaDetailVideoPage> {
   String _tanggal = '';
   String _videoUrl = '';
 
+  @override
+  void initState() {
+    super.initState();
+    _player = Player();
+    _controller = VideoController(_player);
+    fetchVideoDetail();
+  }
+
+  @override
+  void dispose() {
+    _player.dispose();
+    super.dispose();
+  }
+
   Future<void> fetchVideoDetail() async {
     try {
       final response = await http.get(
-        Uri.parse('$baseUrl/video/${widget.videoId}'),
+        Uri.parse('${constants.baseUrl}/video/${widget.videoId}'),
       );
 
       if (response.statusCode == 200) {
@@ -42,58 +58,26 @@ class _WargaDetailVideoPageState extends State<WargaDetailVideoPage> {
         ).format(DateTime.parse(data['created_at']));
         _videoUrl = data['video_url'];
 
-        print('✅ Video URL: $_videoUrl');
-
         if (_videoUrl.isEmpty || !_videoUrl.startsWith('http')) {
           throw Exception("Invalid video URL: $_videoUrl");
         }
 
-        _controller = VideoPlayerController.networkUrl(Uri.parse(_videoUrl));
+        await _player.open(Media(_videoUrl));
+        await _player.pause(); // 🔴 Agar tidak autoplay
 
-        await _controller!.initialize();
-
-        _controller!.setLooping(true);
         setState(() {
           _isLoading = false;
+          _videoReady = true;
         });
-
-        // Jangan auto-play
       } else {
         throw Exception('Gagal memuat detail video');
       }
     } catch (e) {
-      print('❌ Gagal inisialisasi video: $e');
       setState(() {
         _hasError = true;
         _isLoading = false;
       });
     }
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    fetchVideoDetail();
-  }
-
-  @override
-  void dispose() {
-    _controller?.dispose();
-    super.dispose();
-  }
-
-  void _togglePlay() {
-    if (_controller == null) return;
-
-    setState(() {
-      if (_controller!.value.isPlaying) {
-        _controller!.pause();
-        _isPlaying = false;
-      } else {
-        _controller!.play();
-        _isPlaying = true;
-      }
-    });
   }
 
   @override
@@ -130,48 +114,15 @@ class _WargaDetailVideoPageState extends State<WargaDetailVideoPage> {
                 padding: const EdgeInsets.all(16),
                 child: Column(
                   children: [
-                    if (_controller != null && _controller!.value.isInitialized)
-                      AspectRatio(
-                        aspectRatio: _controller!.value.aspectRatio,
-                        child: Stack(
-                          alignment: Alignment.center,
-                          children: [
-                            VideoPlayer(_controller!),
-                            if (!_isPlaying)
-                              GestureDetector(
-                                onTap: _togglePlay,
-                                child: Container(
-                                  color: Colors.black45,
-                                  child: const Icon(
-                                    Icons.play_circle_fill,
-                                    size: 64,
-                                    color: Colors.white,
-                                  ),
-                                ),
+                    AspectRatio(
+                      aspectRatio: 16 / 9,
+                      child:
+                          _videoReady
+                              ? Video(controller: _controller)
+                              : const Center(
+                                child: CircularProgressIndicator(),
                               ),
-                            Positioned(
-                              bottom: 0,
-                              left: 0,
-                              right: 0,
-                              child: VideoProgressIndicator(
-                                _controller!,
-                                allowScrubbing: true,
-                              ),
-                            ),
-                          ],
-                        ),
-                      )
-                    else
-                      Container(
-                        height: 200,
-                        color: Colors.black12,
-                        child: const Center(
-                          child: Text(
-                            "Video tidak tersedia",
-                            style: TextStyle(color: Colors.grey),
-                          ),
-                        ),
-                      ),
+                    ),
                     const SizedBox(height: 20),
 
                     // Judul

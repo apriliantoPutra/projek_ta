@@ -159,7 +159,7 @@ class _PetugasSetorJemputBaruState extends State<PetugasSetorJemputBaru> {
 
     final profil = pengajuanDetailSetor!['user']?['profil'];
     final gambarPengguna =
-        (profil != null && (profil['gambar_url'] ?? '').isNotEmpty)
+        (profil != null && (profil['gambar_pengguna'] ?? '').isNotEmpty)
             ? profil['gambar_url']
             : 'https://i.pinimg.com/736x/8a/e9/e9/8ae9e92fa4e69967aa61bf2bda967b7b.jpg';
 

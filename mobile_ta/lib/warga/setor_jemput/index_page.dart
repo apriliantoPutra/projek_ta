@@ -6,7 +6,8 @@ import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class WargaSetorJemput extends StatefulWidget {
-  const WargaSetorJemput({super.key});
+  final Map<String, dynamic>? bankSampah;
+  const WargaSetorJemput({this.bankSampah, super.key});
 
   @override
   State<WargaSetorJemput> createState() => _WargaSetorJemputState();
@@ -324,10 +325,18 @@ class _WargaSetorJemputState extends State<WargaSetorJemput> {
                             dataSetoran: validData,
                             tanggal: _tanggalController.text,
                             catatan: _catatanController.text,
+                            bankSampah: widget.bankSampah,
                           ),
                     ),
                   );
                 },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.greenAccent.shade400,
+                  padding: const EdgeInsets.all(12),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
                 child: Text('Selanjutnya'),
               ),
             ],

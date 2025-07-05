@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 import 'package:mobile_ta/constants/constants.dart';
@@ -11,9 +12,11 @@ class WargaKonfirmasiSetorJemputPage extends StatefulWidget {
   final List<Map<String, dynamic>> dataSetoran;
   final String tanggal;
   final String? catatan;
+  final Map<String, dynamic>? bankSampah;
 
   const WargaKonfirmasiSetorJemputPage({
     super.key,
+    this.bankSampah,
     required this.dataSetoran,
     required this.tanggal,
     required this.catatan,
@@ -26,15 +29,14 @@ class WargaKonfirmasiSetorJemputPage extends StatefulWidget {
 
 class _WargaKonfirmasiSetorJemputPageState
     extends State<WargaKonfirmasiSetorJemputPage> {
-  final String namaBank = "Bank Sampah Tembalang Berseri";
-  final String deskripsiBank =
-      "Tempat pengelolaan sampah ramah lingkungan dengan sistem tabungan.";
-  final String alamatBank = "Jl. Tembalang Raya No.12, Semarang";
-  final String mapUrl =
-      "https://maps.googleapis.com/maps/api/staticmap?center=-7.05055837482239,110.44114708764991&zoom=16&size=600x300&markers=color:red%7C-7.05055837482239,110.44114708764991&key=YOUR_API_KEY";
-  final String namaAdmin = "Ahmad Fathoni";
-  final String emailAdmin = "ahmad@example.com";
-  final String noHpAdmin = "0812-3456-7890";
+  late Map<String, dynamic>? bankSampah;
+  late String namaBank;
+  late String deskripsiBank;
+  late String alamatBank;
+  late String namaAdmin;
+  late String emailAdmin;
+  late String noHpAdmin;
+  late String mapUrl;
 
   final Map<int, Map<String, dynamic>> jenisSampahCache = {};
   List<Map<String, dynamic>> processedSetoran = [];
@@ -48,7 +50,17 @@ class _WargaKonfirmasiSetorJemputPageState
   void initState() {
     super.initState();
     processSetoran();
-    // Konversi tanggal input ke format yyyy-MM-dd
+    bankSampah = widget.bankSampah;
+
+    namaBank = bankSampah?['nama_bank_sampah'] ?? 'Memuat...';
+    mapUrl = bankSampah?['koordinat_bank_sampah'] ?? 'Memuat...';
+    deskripsiBank = bankSampah?['deskripsi_bank_sampah'] ?? 'Memuat...';
+    alamatBank = bankSampah?['alamat_bank_sampah'] ?? 'Memuat...';
+    namaAdmin = bankSampah?['user']?['profil']?['nama_pengguna'] ?? 'Memuat...';
+    emailAdmin = bankSampah?['user']?['email'] ?? 'Memuat...';
+    noHpAdmin =
+        bankSampah?['user']?['profil']?['no_hp_pengguna'] ?? 'Memuat...';
+
     try {
       final inputDate = DateFormat('dd/MM/yyyy').parse(widget.tanggal);
       formattedDate = DateFormat('yyyy-MM-dd').format(inputDate);
@@ -266,10 +278,6 @@ class _WargaKonfirmasiSetorJemputPageState
                                                             ),
                                                       ),
                                                     ),
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                          4,
-                                                        ),
                                                   ),
                                                 ),
                                               );
@@ -399,26 +407,7 @@ class _WargaKonfirmasiSetorJemputPageState
                                   Text("Deskripsi: $deskripsiBank"),
                                   Text("Alamat: $alamatBank"),
                                   const SizedBox(height: 12),
-                                  ClipRRect(
-                                    borderRadius: BorderRadius.circular(8),
-                                    child: Image.network(
-                                      mapUrl,
-                                      height: 180,
-                                      width: double.infinity,
-                                      fit: BoxFit.cover,
-                                      errorBuilder:
-                                          (
-                                            context,
-                                            error,
-                                            stackTrace,
-                                          ) => Image.network(
-                                            "https://i.pinimg.com/736x/b0/79/09/b079096855c0edbaba47d93c67f18853.jpg",
-                                            height: 150,
-                                            width: double.infinity,
-                                            fit: BoxFit.cover,
-                                          ),
-                                    ),
-                                  ),
+                                  _buildMapImage(mapUrl),
                                 ],
                               ),
                             ),
@@ -464,7 +453,7 @@ class _WargaKonfirmasiSetorJemputPageState
                                 child:
                                     isLoading
                                         ? const CircularProgressIndicator()
-                                        : const Text('KONFIRMASI SETORAN'),
+                                        : const Text('Konfirmasi Setoran'),
                               ),
                             ),
                           ],
@@ -493,6 +482,46 @@ class _WargaKonfirmasiSetorJemputPageState
         ],
       ),
       child: child,
+    );
+  }
+
+  Widget _buildMapImage(String koordinat) {
+    final cleanedKoordinat = koordinat.trim().replaceAll(' ', '');
+
+    final isValid = RegExp(
+      r'^-?\d+(\.\d+)?,-?\d+(\.\d+)?$',
+    ).hasMatch(cleanedKoordinat);
+
+    if (!isValid) {
+      return _buildFallbackMapImage();
+    }
+
+    final apiKey = dotenv.env['GOOGLE_MAPS_API_KEY'];
+    if (apiKey == null || apiKey.isEmpty) {
+      return _buildFallbackMapImage();
+    }
+
+    final staticMapUrl =
+        "https://maps.googleapis.com/maps/api/staticmap?center=$cleanedKoordinat&zoom=15&size=600x300&markers=color:red%7C$cleanedKoordinat&key=$apiKey";
+
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(8),
+      child: Image.network(
+        staticMapUrl,
+        height: 180,
+        width: double.infinity,
+        fit: BoxFit.cover,
+        errorBuilder: (context, error, stackTrace) => _buildFallbackMapImage(),
+      ),
+    );
+  }
+
+  Widget _buildFallbackMapImage() {
+    return Image.network(
+      "https://i.pinimg.com/736x/b0/79/09/b079096855c0edbaba47d93c67f18853.jpg",
+      height: 150,
+      width: double.infinity,
+      fit: BoxFit.cover,
     );
   }
 }

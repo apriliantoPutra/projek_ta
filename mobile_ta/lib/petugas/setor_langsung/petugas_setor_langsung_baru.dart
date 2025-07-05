@@ -6,6 +6,7 @@ import 'package:intl/intl.dart';
 import 'package:mobile_ta/constants/constants.dart';
 import 'package:mobile_ta/petugas/setor_langsung/petugas_setor_langsung_konfirmasi.dart';
 import 'package:mobile_ta/petugas/setor_langsung/petugas_setor_langsung_selesai.dart';
+import 'package:mobile_ta/widget/petugas_main_widget.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class PetugasSetorLangsungBaru extends StatefulWidget {
@@ -89,7 +90,7 @@ class _PetugasSetorLangsungBaruState extends State<PetugasSetorLangsungBaru> {
       );
     }
 
-    final profil = pengajuanSetor!['user']['profil'];
+    final profil = pengajuanSetor!['user']?['profil'];
     final gambarPengguna =
         (profil != null && (profil['gambar_pengguna'] ?? '').isNotEmpty)
             ? profil['gambar_url']
@@ -101,7 +102,19 @@ class _PetugasSetorLangsungBaruState extends State<PetugasSetorLangsungBaru> {
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
-        title: Text(
+        centerTitle: true,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.black),
+          onPressed:
+              () => Navigator.pushAndRemoveUntil(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => PetugasMainWrapper(initialMenu: 1),
+                ),
+                (Route<dynamic> route) => false,
+              ),
+        ),
+        title: const Text(
           "Setor Langsung Sampah",
           style: TextStyle(
             fontWeight: FontWeight.w600,
