@@ -22,6 +22,9 @@ class _WargaMainWrapperState extends State<PetugasMainWrapper> {
   int selectedMenu = 0;
   Map<String, dynamic>? akunData;
   Map<String, dynamic>? profilData;
+  List<dynamic> artikelList = [];
+  List<dynamic> videoList = [];
+  List<dynamic> setorTerbaruList = [];
 
   @override
   void initState() {
@@ -43,10 +46,69 @@ class _WargaMainWrapperState extends State<PetugasMainWrapper> {
   Future<void> checkInitialData() async {
     await loadAkunData();
     await cekProfil();
-
+    if (profilDitemukan) {
+      await loadArtikel();
+      await loadVideo();
+      await loadSetorTerbaru();
+    }
     setState(() {
       isLoading = false;
     });
+  }
+
+  Future<void> loadArtikel() async {
+    try {
+      final response = await http.get(Uri.parse('$baseUrl/artikel/terbaru'));
+      if (response.statusCode == 200) {
+        final jsonData = json.decode(response.body);
+        setState(() {
+          artikelList = jsonData['data'];
+        });
+      }
+    } catch (e) {
+      debugPrint('Gagal load artikel: $e');
+    }
+  }
+
+  Future<void> loadVideo() async {
+    try {
+      final response = await http.get(Uri.parse('$baseUrl/video/terbaru'));
+      if (response.statusCode == 200) {
+        final jsonData = json.decode(response.body);
+        setState(() {
+          videoList = jsonData['data'];
+        });
+      }
+    } catch (e) {
+      debugPrint('Gagal load video: $e');
+    }
+  }
+
+  Future<void> loadSetorTerbaru() async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('token');
+
+    if (token == null) {
+      debugPrint('Token tidak ditemukan');
+      return;
+    }
+    try {
+      final response = await http.get(
+        Uri.parse('$baseUrl/setor-baru'),
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Accept': 'application/json',
+        },
+      );
+      if (response.statusCode == 200) {
+        final jsonData = json.decode(response.body);
+        setState(() {
+          setorTerbaruList = jsonData['data'];
+        });
+      }
+    } catch (e) {
+      debugPrint('Gagal load setor terbaru: $e');
+    }
   }
 
   Future<void> cekProfil() async {
@@ -107,9 +169,15 @@ class _WargaMainWrapperState extends State<PetugasMainWrapper> {
       return const PetugasTambahProfilPage(); // redirect ke tambah profil jika tidak ditemukan
     }
     List menu = [
-      PetugasBerandaPage(akunData: akunData, profilData: profilData),
+      PetugasBerandaPage(
+        akunData: akunData,
+        profilData: profilData,
+        artikelList: artikelList,
+        videoList: videoList,
+        setorTerbaruList: setorTerbaruList,
+      ),
       PetugasSetorPage(),
-      PetugasKontenPage(),
+      PetugasKontenPage(artikelList: artikelList, videoList: videoList),
       PetugasAkunPage(akunData: akunData, profilData: profilData),
     ];
 

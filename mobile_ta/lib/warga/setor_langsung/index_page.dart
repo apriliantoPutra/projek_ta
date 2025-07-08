@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:mobile_ta/warga/setor_langsung/detail_page.dart';
 
 class WargaSetorLangsung extends StatefulWidget {
-  const WargaSetorLangsung({super.key});
+  final Map<String, dynamic>? bankSampah;
+  const WargaSetorLangsung({this.bankSampah ,super.key});
 
   @override
   State<WargaSetorLangsung> createState() => _WargaSetorLangsungState();
@@ -149,6 +150,7 @@ class _WargaSetorLangsungState extends State<WargaSetorLangsung> {
                                 _catatanController.text.isNotEmpty
                                     ? _catatanController.text
                                     : null,
+                            bankSampah: widget.bankSampah,
                           ),
                     ),
                   );

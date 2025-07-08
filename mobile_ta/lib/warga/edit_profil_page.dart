@@ -2,17 +2,18 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
 import 'package:mobile_ta/constants/constants.dart';
+import 'package:mobile_ta/utils/api_key_loader.dart';
 import 'package:mobile_ta/widget/warga_main_widget.dart';
 import 'package:path/path.dart' as Path;
 import 'package:shared_preferences/shared_preferences.dart';
 
 class WargaEditProfilPage extends StatefulWidget {
   final Map<String, dynamic>? profilData;
-  const WargaEditProfilPage({Key? key, this.profilData})
-    : super(key: key);
+  const WargaEditProfilPage({Key? key, this.profilData}) : super(key: key);
 
   @override
   State<WargaEditProfilPage> createState() => _WargaEditProfilPageState();
@@ -241,16 +242,7 @@ class _WargaEditProfilPageState extends State<WargaEditProfilPage> {
                   _buildTextField("Titik Koordinat", _koordinatController),
                   const SizedBox(height: 12),
 
-                  // Peta (Dummy)
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(12),
-                    child: Image.network(
-                      "https://i.pinimg.com/736x/b0/79/09/b079096855c0edbaba47d93c67f18853.jpg",
-                      height: 150,
-                      width: double.infinity,
-                      fit: BoxFit.cover,
-                    ),
-                  ),
+                  _buildMapImage(_koordinatController.text),
                 ],
               ),
             ),
@@ -289,6 +281,46 @@ class _WargaEditProfilPageState extends State<WargaEditProfilPage> {
         ),
         const SizedBox(height: 12),
       ],
+    );
+  }
+
+  Widget _buildMapImage(String koordinat) {
+    final cleanedKoordinat = koordinat.trim().replaceAll(' ', '');
+
+    final isValid = RegExp(
+      r'^-?\d+(\.\d+)?,-?\d+(\.\d+)?$',
+    ).hasMatch(cleanedKoordinat);
+
+    if (!isValid) {
+      return _buildFallbackMapImage();
+    }
+
+    final apiKey = dotenv.env['GOOGLE_MAPS_API_KEY'];
+    if (apiKey == null || apiKey.isEmpty) {
+      return _buildFallbackMapImage();
+    }
+
+    final staticMapUrl =
+        "https://maps.googleapis.com/maps/api/staticmap?center=$cleanedKoordinat&zoom=15&size=600x300&markers=color:red%7C$cleanedKoordinat&key=$apiKey";
+
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(8),
+      child: Image.network(
+        staticMapUrl,
+        height: 180,
+        width: double.infinity,
+        fit: BoxFit.cover,
+        errorBuilder: (context, error, stackTrace) => _buildFallbackMapImage(),
+      ),
+    );
+  }
+
+  Widget _buildFallbackMapImage() {
+    return Image.network(
+      "https://i.pinimg.com/736x/b0/79/09/b079096855c0edbaba47d93c67f18853.jpg",
+      height: 150,
+      width: double.infinity,
+      fit: BoxFit.cover,
     );
   }
 }

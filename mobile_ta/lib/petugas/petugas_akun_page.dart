@@ -4,7 +4,6 @@ import 'package:http/http.dart' as http;
 import 'package:mobile_ta/constants/constants.dart';
 import 'package:mobile_ta/petugas/petugas_edit_profil_page.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-// import 'edit_profil_page.dart';
 import '../auth/login_page.dart';
 
 class PetugasAkunPage extends StatelessWidget {
@@ -46,14 +45,18 @@ class PetugasAkunPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      // backgroundColor: Colors.white,
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
         centerTitle: true,
         title: Text(
           "Akun Saya",
-          style: TextStyle(fontWeight: FontWeight.w500, color: Colors.black),
+          style: TextStyle(
+            fontWeight: FontWeight.w500,
+            color: Colors.black,
+            fontSize: 24,
+          ),
         ),
       ),
 

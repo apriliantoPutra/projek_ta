@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:mobile_ta/petugas/petugas_setor_jemput_baru.dart';
+import 'package:mobile_ta/petugas/setor_jemput/petugas_setor_jemput_baru.dart';
 
 class SetorCardLangsungProses extends StatelessWidget {
   const SetorCardLangsungProses({super.key});
@@ -13,7 +13,7 @@ class SetorCardLangsungProses extends StatelessWidget {
         borderRadius: BorderRadius.circular(12),
       ),
       child: Container(
-        margin: EdgeInsets.symmetric(vertical: 6), // Jarak antar box
+        margin: EdgeInsets.symmetric(vertical: 6), 
         padding: EdgeInsets.symmetric(
           vertical: 4,
           horizontal: 10,
@@ -23,7 +23,7 @@ class SetorCardLangsungProses extends StatelessWidget {
           borderRadius: BorderRadius.circular(20),
         ),
         child: Row(
-          crossAxisAlignment: CrossAxisAlignment.center, // Avatar di tengah
+          crossAxisAlignment: CrossAxisAlignment.center, 
           children: [
             CircleAvatar(
               radius: 20, // Perbesar avatar

@@ -27,8 +27,8 @@
                 <!-- Filter Role -->
                 <div>
                     <span class="font-medium mr-2">Filter Status:</span>
-                    <button class=" text-sm px-3 py-1 rounded bg-green-500 text-white">Langsung</button>
-                    <button class="bg-gray-200 text-sm px-3 py-1 rounded hover:bg-green-500 hover:text-white transition">
+                    <button class=" text-sm px-3 py-1 rounded hover:bg-green-500 hover:text-white">Langsung</button>
+                    <button class="text-white text-sm px-3 py-1 rounded bg-green-500 transition">
                         Jemput</button>
 
                 </div>
@@ -51,12 +51,32 @@
                         @forelse ($datas as $data)
                             <tr class="hover:bg-gray-50">
                                 <td class="px-5 py-3">{{ $loop->iteration }}</td>
-                                <td class="px-5 py-3">Ahmad Rudi</td>
-                                <td class="px-5 py-3">{{ $data->waktu_pengajuan }}</td>
-                                <td class="px-5 py-3 text-green-600">Selesai</td>
-                                <td class="px-5 py-3 space-x-2">
-                                    <a href="#" class="text-blue-600 hover:underline">Detail</a>
+                                <td class="px-5 py-3">{{ $data['user']['username'] }}</td>
+                                <td class="px-5 py-3">{{ $data['waktu_pengajuan'] }}</td>
+                                <td
+                                    class="px-5 py-3 font-semibold
+                                        @if ($data['status_pengajuan'] === 'menunggu') text-yellow-600
+                                        @elseif ($data['status_pengajuan'] === 'diterima') text-green-600
+                                        @elseif ($data['status_pengajuan'] === 'batalkan') text-red-600 @endif
+                                    ">
+                                    @if ($data['status_pengajuan'] === 'menunggu')
+                                        Proses
+                                    @elseif ($data['status_pengajuan'] === 'diterima')
+                                        Diterima
+                                    @elseif ($data['status_pengajuan'] === 'batalkan')
+                                        Ditolak
+                                    @endif
                                 </td>
+
+                                <td class="px-5 py-3 space-x-2">
+                                    @if ($data['status_pengajuan'] === 'batalkan')
+                                        <span class="text-gray-400 cursor-not-allowed">Detail</span>
+                                    @else
+                                        <a href="{{ route('Setor-Jemput-Detail', $data['id']) }}"
+                                            class="text-blue-600 hover:underline">Detail</a>
+                                    @endif
+                                </td>
+
                             </tr>
                         @empty
                             <tr>

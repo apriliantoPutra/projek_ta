@@ -4,7 +4,9 @@ import '../warga/setor_langsung/index_page.dart';
 
 class WargaSetorPage extends StatelessWidget {
   final Map<String, dynamic>? akunData;
-  const WargaSetorPage({Key? key, this.akunData}) : super(key: key);
+  final Map<String, dynamic>? bankSampah;
+  const WargaSetorPage({Key? key, this.bankSampah, this.akunData})
+    : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -30,13 +32,12 @@ class WargaSetorPage extends StatelessWidget {
               textAlign: TextAlign.center,
             ),
             SizedBox(height: 24),
-            // Kartu Setor Langsung
-            // Kartu Setor Langsung sebagai tombol
+            
             InkWell(
               onTap: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => WargaSetorLangsung()),
+                  MaterialPageRoute(builder: (context) => WargaSetorLangsung(bankSampah: bankSampah)),
                 );
               },
               borderRadius: BorderRadius.circular(16),
@@ -73,7 +74,7 @@ class WargaSetorPage extends StatelessWidget {
               onTap: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => WargaSetorJemput()),
+                  MaterialPageRoute(builder: (context) => WargaSetorJemput(bankSampah: bankSampah)),
                 );
               },
               borderRadius: BorderRadius.circular(16),

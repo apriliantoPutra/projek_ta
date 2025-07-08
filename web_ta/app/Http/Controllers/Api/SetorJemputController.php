@@ -8,6 +8,7 @@ use App\Models\PengajuanSetor;
 use App\Http\Controllers\Controller;
 use App\Models\InputDetailSetor;
 use App\Models\Saldo;
+use App\Models\TotalSampah;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
@@ -102,11 +103,14 @@ class SetorJemputController extends Controller
     }
     public function listPengajuanProses()
     {
+        $petugasId = Auth::id(); // Ambil ID petugas yang sedang login
+
         $pengajuan_setor = PengajuanSetor::with(['user.profil', 'inputdetail'])
             ->where('jenis_setor', 'jemput')
             ->where('status_pengajuan', 'diterima')
-            ->whereHas('inputdetail', function ($query) {
-                $query->where('status_setor', 'proses');
+            ->whereHas('inputdetail', function ($query) use ($petugasId) {
+                $query->where('status_setor', 'proses')
+                    ->where('petugas_id', $petugasId); // Tambahan kondisi sesuai permintaan
             })
             ->get()
             ->map(function ($item) {
@@ -128,7 +132,6 @@ class SetorJemputController extends Controller
                             'gambar_url' => asset('storage/' . $profil->gambar_pengguna),
                         ]
                     ],
-
                 ];
             });
 
@@ -137,13 +140,19 @@ class SetorJemputController extends Controller
             'data' => $pengajuan_setor
         ]);
     }
+
     public function listPengajuanSelesai()
     {
-        $pengajuan_setor = PengajuanSetor::with(['user.profil', 'inputdetail'])
+        $petugasId = Auth::id(); // Ambil ID petugas yang sedang login
+
+        $pengajuan_setor = PengajuanSetor::with(['user.profil', 'inputdetail.user'])
             ->where('jenis_setor', 'jemput')
             ->where('status_pengajuan', 'diterima')
-            ->whereHas('inputdetail', function ($query) {
-                $query->where('status_setor', 'selesai');
+            ->whereHas('inputdetail', function ($query) use ($petugasId) {
+                $query->where('status_setor', 'selesai')
+                    ->whereHas('user', function ($q) use ($petugasId) {
+                        $q->where('petugas_id', $petugasId);
+                    });
             })
             ->get()
             ->map(function ($item) {
@@ -165,7 +174,6 @@ class SetorJemputController extends Controller
                             'gambar_url' => asset('storage/' . $profil->gambar_pengguna),
                         ]
                     ],
-
                 ];
             });
 
@@ -174,6 +182,7 @@ class SetorJemputController extends Controller
             'data' => $pengajuan_setor
         ]);
     }
+
 
 
     // petugas melihat detail pengajuan jemput
@@ -222,12 +231,18 @@ class SetorJemputController extends Controller
     public function terimaPengajuan(Request $request, $id)
     {
         $pengajuan_setor = PengajuanSetor::find($id);
+        $detail_setor = InputDetailSetor::where('pengajuan_id', '=', $id)->first();
 
         DB::beginTransaction();
         try {
             $pengajuan_setor->update([
                 'status_pengajuan' => 'diterima',
             ]);
+
+            $detail_setor->update([
+                'petugas_id' => Auth::id(), // id petugas
+            ]);
+
             DB::commit();
             return response()->json([
                 'success' => true,
@@ -255,7 +270,7 @@ class SetorJemputController extends Controller
         DB::beginTransaction();
         try {
             $pengajuan_setor->update([
-                'status_pengajuan' => 'dibatalkan',
+                'status_pengajuan' => 'batalkan',
             ]);
 
             $detail_setor->delete();
@@ -286,13 +301,25 @@ class SetorJemputController extends Controller
         DB::beginTransaction();
         try {
             $detail_setor->update([
-                'petugas_id' => Auth::id(), // id petugas
                 'setoran_sampah' => json_encode($request->setoran_sampah),
                 'total_berat' => $request->total_berat,
                 'total_harga' => $request->total_harga,
                 'status_setor' => 'selesai'
 
             ]);
+            // perulangan update tiap jenis sampah
+            foreach ($request->setoran_sampah as $item) {
+                $jenisId = $item['jenis_sampah_id'];
+                $berat = $item['berat'];
+
+                $total_sampah = TotalSampah::where('sampah_id', $jenisId)->first();
+
+                if ($total_sampah) {
+                    $total_sampah->update([
+                        'total_berat' => $total_sampah->total_berat + $berat
+                    ]);
+                }
+            }
 
             // Update jumlah saldo
             $saldo = Saldo::where('warga_id', '=', $pengajuan_setor->warga_id)->first();

@@ -2,6 +2,9 @@ import 'dart:collection';
 
 import 'package:flutter/material.dart';
 import 'package:material_color_utilities/material_color_utilities.dart';
+import 'package:mobile_ta/petugas/artikel/petugas_detail_artikel_page.dart';
+import 'package:mobile_ta/petugas/video/petugas_detail_video_page.dart';
+import 'package:mobile_ta/widget/setor_card/setor_card_jemput_baru.dart';
 import 'package:mobile_ta/widget/setor_card/setor_card_jemput_proses.dart';
 import 'package:mobile_ta/widget/setor_card/setor_card_langsung_baru.dart';
 import 'package:mobile_ta/widget/videoCard_widget.dart';
@@ -10,10 +13,19 @@ import '../widget/eduCard_widget.dart';
 class PetugasBerandaPage extends StatelessWidget {
   final Map<String, dynamic>? akunData;
   final Map<String, dynamic>? profilData;
-  const PetugasBerandaPage({Key? key, this.akunData, this.profilData})
-    : super(key: key);
+  final List<dynamic> artikelList;
+  final List<dynamic> videoList;
+  final List<dynamic> setorTerbaruList;
+  const PetugasBerandaPage({
+    Key? key,
+    required this.artikelList,
+    required this.videoList,
+    required this.setorTerbaruList,
+    this.akunData,
+    this.profilData,
+  }) : super(key: key);
   @override
-  Widget build(BuildContext) {
+  Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
@@ -38,7 +50,7 @@ class PetugasBerandaPage extends StatelessWidget {
                   style: const TextStyle(
                     color: Colors.black,
                     fontSize: 16,
-                    fontWeight: FontWeight.w600,
+                    fontWeight: FontWeight.w700,
                   ),
                 ),
               ],
@@ -74,6 +86,14 @@ class PetugasBerandaPage extends StatelessWidget {
                   bottomLeft: Radius.circular(20),
                   bottomRight: Radius.circular(20),
                 ),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.2), // Warna bayangan
+                    spreadRadius: 2, // Menyebar keluar
+                    blurRadius: 8, // Seberapa kabur/sharp
+                    offset: Offset(0, 4),
+                  ),
+                ],
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -81,9 +101,9 @@ class PetugasBerandaPage extends StatelessWidget {
                   Text(
                     'Total Sampah Terkumpul',
                     style: TextStyle(
-                      fontSize: 16,
+                      fontSize: 24,
                       color: Colors.white,
-                      fontWeight: FontWeight.normal,
+                      fontWeight: FontWeight.w600,
                     ),
                   ),
 
@@ -193,13 +213,7 @@ class PetugasBerandaPage extends StatelessWidget {
                     ],
                   ),
                   SizedBox(height: 8),
-                  // Column(
-                  //   children: [
-                  //     SetorCardJemputProses(),
-                  //     SetorCardJemputProses(),
-                  //     SetorCardJemputProses(),
-                  //   ],
-                  // ),
+                  _buildSetorBaru(),
                 ],
               ),
             ),
@@ -215,11 +229,12 @@ class PetugasBerandaPage extends StatelessWidget {
                   topLeft: Radius.circular(20),
                   topRight: Radius.circular(20),
                 ),
+
                 boxShadow: [
                   BoxShadow(
                     color: Colors.black12,
                     blurRadius: 6,
-                    offset: Offset(0, 3),
+                    offset: Offset(0, -4),
                   ),
                 ],
               ),
@@ -227,100 +242,82 @@ class PetugasBerandaPage extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
                         "Edukasi Terbaru",
                         style: TextStyle(
-                          color: Colors.white,
                           fontSize: 20,
                           fontWeight: FontWeight.bold,
+                          color: Colors.white,
                         ),
                       ),
-                      Spacer(),
-                      Text(
-                        "Lainnya",
-                        style: TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.normal,
-                          color: Colors.white,
+                      TextButton(
+                        onPressed: () {
+                          // Aksi saat ditekan
+                        },
+                        child: Text(
+                          "Lainnya",
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w500,
+                            color: Colors.white,
+                          ),
                         ),
                       ),
                     ],
                   ),
-                  SizedBox(height: 8),
+                  SizedBox(height: 12),
                   SizedBox(
-                    height: 250,
+                    height: 280,
                     child: ListView.builder(
                       scrollDirection: Axis.horizontal,
-                      itemCount: 5,
+                      itemCount: videoList.length,
                       itemBuilder: (context, index) {
-                        final imageUrls = [
-                          'https://i.pinimg.com/736x/89/5c/c5/895cc5d9dcf9bcc8fa4a717ffbf9b9b1.jpg',
-                          'https://i.pinimg.com/736x/65/f7/86/65f7860b848ee36cb272962ca0b540b2.jpg',
-                          'https://i.pinimg.com/736x/2d/d3/79/2dd379968693700ec12af8f1974b491e.jpg',
-                          'https://i.pinimg.com/736x/d8/a8/16/d8a816495548996b07e824a9d93fc951.jpg',
-                          'https://i.pinimg.com/736x/dd/02/48/dd024873e1a51d05f8ce95776fda8ca1.jpg',
-                        ];
-                        final title = [
-                          'Video Edukasi 1',
-                          'Video Edukasi 2',
-                          'Video Edukasi 3',
-                          'Video Edukasi 4',
-                          'Video Edukasi 5',
-                        ];
-
-                        final dates = [
-                          'Mei 2025',
-                          'April 2025',
-                          'Maret 2025',
-                          'Februari 2025',
-                          'Januari 2025',
-                        ];
-
+                        final video = videoList[index];
                         return VideoCard(
-                          imageUrl: imageUrls[index],
-                          title: title[index],
-                          date: dates[index],
+                          imageUrl:
+                              'https://i.pinimg.com/736x/2d/d3/79/2dd379968693700ec12af8f1974b491e.jpg',
+                          title: video['judul_video'] ?? '',
+                          date: video['tanggal_format'] ?? '',
                           onTap: () {
-                            print("Menonton : ${title[index]}");
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder:
+                                    (_) => PetugasDetailVideoPage(
+                                      videoId: video['id'],
+                                    ),
+                              ),
+                            );
                           },
                         );
                       },
                     ),
                   ),
-                  SizedBox(height: 8),
+                  SizedBox(height: 12),
                   Wrap(
-                    // spacing: 2, // Jarak horizontal antar card
-                    // runSpacing: 2, // Jarak vertikal antar baris
-                    children: [
-                      EduCard(
-                        imageUrl:
-                            'https://i.pinimg.com/736x/89/5c/c5/895cc5d9dcf9bcc8fa4a717ffbf9b9b1.jpg',
-                        title: 'Menjaga Lingkungan',
-                        date: '12 Mei 2025',
-                        onTap: () {
-                          // Aksi ketika artikel dibaca
-                        },
-                      ),
-                      EduCard(
-                        imageUrl:
-                            'https://i.pinimg.com/736x/2d/d3/79/2dd379968693700ec12af8f1974b491e.jpg',
-                        title: 'Pentingnya Daur Ulang',
-                        date: '10 Mei 2025',
-                        onTap: () {
-                          // Aksi ketika artikel dibaca
-                        },
-                      ),
-                      EduCard(
-                        imageUrl:
-                            'https://i.pinimg.com/736x/2d/d3/79/2dd379968693700ec12af8f1974b491e.jpg',
-                        title: 'Sampah Anorganik',
-                        date: '6 Mei 2025',
-                        onTap: () {
-                          // Aksi ketika artikel dibaca
-                        },
-                      ),
-                    ],
+                    spacing: 5, // Jarak horizontal antar card
+                    runSpacing: 5, // Jarak vertikal antar baris
+                    children:
+                        artikelList.map((artikel) {
+                          return EduCard(
+                            imageUrl: artikel['gambar_url'],
+                            title: artikel['judul_artikel'],
+                            date: artikel['tanggal_format'],
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder:
+                                      (context) => PetugasDetailArtikelPage(
+                                        id: artikel['id'],
+                                      ),
+                                ),
+                              );
+                            },
+                          );
+                        }).toList(),
                   ),
                 ],
               ),
@@ -328,6 +325,48 @@ class PetugasBerandaPage extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildSetorBaru() {
+    if (setorTerbaruList.isEmpty) {
+      return Container(
+        width: double.infinity,
+        margin: EdgeInsets.only(top: 12),
+        padding: EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          color: Colors.grey.shade100,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: Colors.grey.shade300),
+        ),
+        child: Row(
+          children: [
+            Icon(Icons.inbox, size: 36, color: Colors.grey),
+            SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                "Belum ada pengajuan setor terbaru.",
+                style: TextStyle(fontSize: 16, color: Colors.grey.shade700),
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    return Column(
+      children:
+          setorTerbaruList.map<Widget>((data) {
+            final jenisSetor =
+                data['jenis_setor']?.toString().toLowerCase() ?? '';
+            if (jenisSetor.contains('langsung')) {
+              return SetorCardLangsungBaru(data: data);
+            } else if (jenisSetor.contains('jemput')) {
+              return SetorCardJemputBaru(data: data);
+            } else {
+              return SizedBox.shrink();
+            }
+          }).toList(),
     );
   }
 }

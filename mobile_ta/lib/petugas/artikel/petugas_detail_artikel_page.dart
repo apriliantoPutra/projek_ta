@@ -5,16 +5,16 @@ import 'package:intl/intl.dart';
 import 'package:flutter_html/flutter_html.dart';
 import 'package:mobile_ta/constants/constants.dart';
 
-class PetugasDetailKontenPage extends StatefulWidget {
+class PetugasDetailArtikelPage extends StatefulWidget {
   final int id;
 
-  const PetugasDetailKontenPage({super.key, required this.id});
+  const PetugasDetailArtikelPage({super.key, required this.id});
 
   @override
-  State<PetugasDetailKontenPage> createState() => _PetugasDetailKontenPage();
+  State<PetugasDetailArtikelPage> createState() => _PetugasDetailArtikelPage();
 }
 
-class _PetugasDetailKontenPage extends State<PetugasDetailKontenPage> {
+class _PetugasDetailArtikelPage extends State<PetugasDetailArtikelPage> {
   Map<String, dynamic>? artikel;
 
   Future<void> fetchArtikelDetail() async {
@@ -45,7 +45,7 @@ class _PetugasDetailKontenPage extends State<PetugasDetailKontenPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Colors.greenAccent.shade400,
+        backgroundColor: Color(0xFF8fd14f),
         elevation: 0,
         centerTitle: true,
         leading: IconButton(
@@ -53,7 +53,7 @@ class _PetugasDetailKontenPage extends State<PetugasDetailKontenPage> {
           onPressed: () => Navigator.pop(context),
         ),
         title: const Text(
-          'Artikel Edukasi',
+          'Edukasi Artikel',
           style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
         ),
       ),

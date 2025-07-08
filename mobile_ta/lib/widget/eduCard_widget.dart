@@ -18,13 +18,18 @@ class EduCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       width: 195,
-      
+
       margin: EdgeInsets.only(right: 12),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
-          BoxShadow(color: Colors.black12, blurRadius: 6, offset: Offset(0, 4)),
+          BoxShadow(
+            color: Colors.black12,
+            blurRadius: 4,
+            spreadRadius: 4,
+            offset: Offset(0, 0),
+          ),
         ],
       ),
       child: Column(
@@ -50,8 +55,7 @@ class EduCard extends StatelessWidget {
                   style: TextStyle(
                     fontWeight: FontWeight.bold,
                     fontSize: 16,
-                    color: Colors.green.shade800,
-                    
+                    color: Colors.black,
                   ),
                 ),
                 SizedBox(height: 4),

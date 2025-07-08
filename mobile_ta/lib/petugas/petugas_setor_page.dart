@@ -3,7 +3,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:mobile_ta/constants/constants.dart';
-import 'package:mobile_ta/petugas/petugas_setor_langsung_baru.dart';
+import 'package:mobile_ta/petugas/setor_langsung/petugas_setor_langsung_baru.dart';
 import 'package:mobile_ta/petugas/petugas_setor_langsung_pengajuan.dart';
 import 'package:mobile_ta/widget/setor_card/setor_card_jemput_baru.dart';
 import 'package:mobile_ta/widget/setor_card/setor_card_jemput_proses.dart';
@@ -22,14 +22,11 @@ class _PetugasSetorPageState extends State<PetugasSetorPage>
   late TabController _tabController;
 
   // Data
-  late Future<List<dynamic>> _setorLangsungBaruList;
-  late Future<List<dynamic>> _setorLangsungSelesaiList;
+  late Future<List<dynamic>> _setorBaruList;
+  late Future<List<dynamic>> _setorProsesList;
+  late Future<List<dynamic>> _setorSelesaiList;
 
-  late Future<List<dynamic>> _setorJemputBaruList;
-  late Future<List<dynamic>> _setorJemputProsesList;
-  late Future<List<dynamic>> _setorJemputSelesaiList;
-
-  Future<List<dynamic>> fetchSetorLangsungBaru() async {
+  Future<List<dynamic>> fetchSetorBaru() async {
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('token');
 
@@ -38,7 +35,7 @@ class _PetugasSetorPageState extends State<PetugasSetorPage>
       return [];
     }
     final response = await http.get(
-      Uri.parse('$baseUrl/setor-langsung/baru'),
+      Uri.parse('$baseUrl/setor-baru'),
       headers: {'Authorization': 'Bearer $token', 'Accept': 'application/json'},
     );
 
@@ -46,11 +43,11 @@ class _PetugasSetorPageState extends State<PetugasSetorPage>
       final jsonData = json.decode(response.body);
       return jsonData['data'];
     } else {
-      throw Exception('Gagal memuat data setor langsung baru');
+      throw Exception('Gagal memuat data setor baru');
     }
   }
 
-  Future<List<dynamic>> fetchSetorLangsungSelesai() async {
+  Future<List<dynamic>> fetchSetorProses() async {
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('token');
 
@@ -59,7 +56,7 @@ class _PetugasSetorPageState extends State<PetugasSetorPage>
       return [];
     }
     final response = await http.get(
-      Uri.parse('$baseUrl/setor-langsung/selesai'),
+      Uri.parse('$baseUrl/setor-proses'),
       headers: {'Authorization': 'Bearer $token', 'Accept': 'application/json'},
     );
 
@@ -67,11 +64,11 @@ class _PetugasSetorPageState extends State<PetugasSetorPage>
       final jsonData = json.decode(response.body);
       return jsonData['data'];
     } else {
-      throw Exception('Gagal memuat data setor langsung baru');
+      throw Exception('Gagal memuat data setor proses');
     }
   }
 
-  Future<List<dynamic>> fetchSetorJemputBaru() async {
+  Future<List<dynamic>> fetchSetorSelesai() async {
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('token');
 
@@ -80,7 +77,7 @@ class _PetugasSetorPageState extends State<PetugasSetorPage>
       return [];
     }
     final response = await http.get(
-      Uri.parse('$baseUrl/setor-jemput/baru'),
+      Uri.parse('$baseUrl/setor-selesai'),
       headers: {'Authorization': 'Bearer $token', 'Accept': 'application/json'},
     );
 
@@ -88,62 +85,17 @@ class _PetugasSetorPageState extends State<PetugasSetorPage>
       final jsonData = json.decode(response.body);
       return jsonData['data'];
     } else {
-      throw Exception('Gagal memuat data setor jemput baru');
-    }
-  }
-
-  Future<List<dynamic>> fetchSetorJemputProses() async {
-    final prefs = await SharedPreferences.getInstance();
-    final token = prefs.getString('token');
-
-    if (token == null) {
-      debugPrint('Token tidak ditemukan');
-      return [];
-    }
-    final response = await http.get(
-      Uri.parse('$baseUrl/setor-jemput/proses'),
-      headers: {'Authorization': 'Bearer $token', 'Accept': 'application/json'},
-    );
-
-    if (response.statusCode == 200) {
-      final jsonData = json.decode(response.body);
-      return jsonData['data'];
-    } else {
-      throw Exception('Gagal memuat data setor jemput baru');
-    }
-  }
-
-  Future<List<dynamic>> fetchSetorJemputSelesai() async {
-    final prefs = await SharedPreferences.getInstance();
-    final token = prefs.getString('token');
-
-    if (token == null) {
-      debugPrint('Token tidak ditemukan');
-      return [];
-    }
-    final response = await http.get(
-      Uri.parse('$baseUrl/setor-jemput/selesai'),
-      headers: {'Authorization': 'Bearer $token', 'Accept': 'application/json'},
-    );
-
-    if (response.statusCode == 200) {
-      final jsonData = json.decode(response.body);
-      return jsonData['data'];
-    } else {
-      throw Exception('Gagal memuat data setor jemput baru');
+      throw Exception('Gagal memuat data setor selesai');
     }
   }
 
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 2, vsync: this);
-    _setorLangsungBaruList = fetchSetorLangsungBaru();
-    _setorLangsungSelesaiList = fetchSetorLangsungSelesai();
-
-    _setorJemputBaruList = fetchSetorJemputBaru();
-    _setorJemputProsesList = fetchSetorJemputProses();
-    _setorJemputSelesaiList = fetchSetorJemputSelesai();
+    _tabController = TabController(length: 3, vsync: this);
+    _setorBaruList = fetchSetorBaru();
+    _setorProsesList = fetchSetorProses();
+    _setorSelesaiList = fetchSetorSelesai();
   }
 
   @override
@@ -224,7 +176,11 @@ class _PetugasSetorPageState extends State<PetugasSetorPage>
           Expanded(
             child: TabBarView(
               controller: _tabController,
-              children: [_buildSetorLangsung(), _buildSetorJemput()],
+              children: [
+                _buildSetorBaru(),
+                _buildSetorProses(),
+                _buildSetorSelesai(),
+              ],
             ),
           ),
         ],
@@ -232,9 +188,9 @@ class _PetugasSetorPageState extends State<PetugasSetorPage>
     );
   }
 
-  Widget _buildSetorLangsung() {
+  Widget _buildSetorBaru() {
     return FutureBuilder<List<List<dynamic>>>(
-      future: Future.wait([_setorLangsungBaruList, _setorLangsungSelesaiList]),
+      future: Future.wait([_setorBaruList]),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return Center(child: CircularProgressIndicator());
@@ -243,7 +199,6 @@ class _PetugasSetorPageState extends State<PetugasSetorPage>
         }
 
         final baruData = snapshot.data?[0] ?? [];
-        final selesaiData = snapshot.data?[1] ?? [];
 
         return SingleChildScrollView(
           padding: EdgeInsets.all(16),
@@ -252,19 +207,22 @@ class _PetugasSetorPageState extends State<PetugasSetorPage>
               _buildSection(
                 "Setor Terbaru",
                 baruData.isNotEmpty
-                    ? baruData
-                        .map((data) => SetorCardLangsungBaru(data: data))
-                        .toList()
-                    : [_buildEmptyState("Belum ada setoran langsung baru")],
-              ),
-              SizedBox(height: 16),
-              _buildSection(
-                "Setor Selesai",
-                selesaiData.isNotEmpty
-                    ? selesaiData
-                        .map((data) => SetorCardLangsungSelesai(data: data))
-                        .toList()
-                    : [_buildEmptyState("Belum ada setoran selesai")],
+                    ? baruData.map<Widget>((data) {
+                      final jenisSetor =
+                          data['jenis_setor']?.toString()?.toLowerCase();
+                      if (jenisSetor == 'setor langsung') {
+                        return SetorCardLangsungBaru(data: data);
+                      } else if (jenisSetor == 'setor jemput') {
+                        return SetorCardJemputBaru(data: data);
+                      } else {
+                        return SizedBox.shrink(); // fallback jika jenis_setor tidak dikenali
+                      }
+                    }).toList()
+                    : [
+                      _buildEmptyState(
+                        "Belum ada setoran langsung/jemput baru",
+                      ),
+                    ],
               ),
             ],
           ),
@@ -273,13 +231,9 @@ class _PetugasSetorPageState extends State<PetugasSetorPage>
     );
   }
 
-  Widget _buildSetorJemput() {
+  Widget _buildSetorProses() {
     return FutureBuilder<List<dynamic>>(
-      future: Future.wait([
-        _setorJemputBaruList,
-        _setorJemputProsesList,
-        _setorJemputSelesaiList,
-      ]),
+      future: Future.wait([_setorProsesList]),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return Center(child: CircularProgressIndicator());
@@ -288,42 +242,62 @@ class _PetugasSetorPageState extends State<PetugasSetorPage>
         }
 
         final baruList = snapshot.data?[0] ?? [];
-        final prosesList = snapshot.data?[1] ?? [];
-        final selesaiList = snapshot.data?[2] ?? [];
 
         return SingleChildScrollView(
           padding: EdgeInsets.all(16),
           child: Column(
             children: [
               _buildSection(
-                "Setor Terbaru",
+                "Setor Proses",
                 baruList.isNotEmpty
                     ? List<Widget>.from(
-                      baruList.map((data) => SetorCardJemputBaru(data: data)),
-                    )
-                    : [_buildEmptyState("Tidak ada data setor jemput baru")],
-              ),
-              SizedBox(height: 16),
-              _buildSection(
-                "Setor Proses",
-                prosesList.isNotEmpty
-                    ? List<Widget>.from(
-                      prosesList.map(
-                        (data) => SetorCardJemputProses(data: data),
-                      ),
+                      baruList.map((data) => SetorCardJemputProses(data: data)),
                     )
                     : [_buildEmptyState("Tidak ada data setor proses")],
               ),
               SizedBox(height: 16),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildSetorSelesai() {
+    return FutureBuilder<List<List<dynamic>>>(
+      future: Future.wait([_setorSelesaiList]),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return Center(child: CircularProgressIndicator());
+        } else if (snapshot.hasError) {
+          return Center(child: Text("Terjadi kesalahan saat memuat data"));
+        }
+
+        final baruData = snapshot.data?[0] ?? [];
+
+        return SingleChildScrollView(
+          padding: EdgeInsets.all(16),
+          child: Column(
+            children: [
               _buildSection(
                 "Setor Selesai",
-                selesaiList.isNotEmpty
-                    ? List<Widget>.from(
-                      selesaiList.map(
-                        (data) => SetorCardJemputSelesai(data: data),
+                baruData.isNotEmpty
+                    ? baruData.map<Widget>((data) {
+                      final jenisSetor =
+                          data['jenis_setor']?.toString()?.toLowerCase();
+                      if (jenisSetor == 'setor langsung') {
+                        return SetorCardLangsungSelesai(data: data);
+                      } else if (jenisSetor == 'setor jemput') {
+                        return SetorCardJemputSelesai(data: data);
+                      } else {
+                        return SizedBox.shrink(); // fallback jika jenis_setor tidak dikenali
+                      }
+                    }).toList()
+                    : [
+                      _buildEmptyState(
+                        "Belum ada setoran langsung/jemput baru",
                       ),
-                    )
-                    : [_buildEmptyState("Belum ada setoran selesai")],
+                    ],
               ),
             ],
           ),
@@ -334,7 +308,7 @@ class _PetugasSetorPageState extends State<PetugasSetorPage>
 
   Widget _buildSection(String title, List<Widget> cards) {
     return Container(
-      padding: EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+      padding: EdgeInsets.symmetric(vertical: 0, horizontal: 16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -349,10 +323,10 @@ class _PetugasSetorPageState extends State<PetugasSetorPage>
                   fontWeight: FontWeight.w700,
                 ),
               ),
-              Text(
-                "Lainnya",
-                style: TextStyle(fontSize: 16, color: Colors.black),
-              ),
+              // Text(
+              //   "Lainnya",
+              //   style: TextStyle(fontSize: 16, color: Colors.black),
+              // ),
             ],
           ),
           SizedBox(height: 8),

@@ -70,121 +70,130 @@ class _RegisterPageState extends State<RegisterPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      body: Column(
-        children: [
-          // Header dengan warna hijau dan logo
-          Container(
-            height: 300,
-            width: double.infinity,
-            decoration: BoxDecoration(
-              color: Color(0xff8fd14f),
-              borderRadius: const BorderRadius.only(
-                bottomLeft: Radius.circular(40),
-                bottomRight: Radius.circular(40),
+      body: SingleChildScrollView(
+        child: Column(
+          children: [
+            // Header dengan warna hijau dan logo
+            Container(
+              height: 250,
+              width: double.infinity,
+              decoration: BoxDecoration(
+                color: Colors.greenAccent.shade400,
+                borderRadius: const BorderRadius.only(
+                  bottomLeft: Radius.circular(40),
+                  bottomRight: Radius.circular(40),
+                ),
+              ),
+              child: Center(
+                child: Image.asset('assets/logo_bank_sampah.png', height: 100),
               ),
             ),
-            child: Center(
-              child: Image.asset('assets/logo_bank_sampah.png', height: 120),
+
+            const SizedBox(height: 30),
+
+            const Text(
+              "Daftar",
+              style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
             ),
-          ),
 
-          const SizedBox(height: 30),
+            const SizedBox(height: 20),
 
-          const Text(
-            "Daftar",
-            style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
-          ),
-
-          const SizedBox(height: 20),
-
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 32),
-            child: Column(
-              children: [
-                TextField(
-                  controller: _usernameController,
-                  decoration: InputDecoration(
-                    hintText: "Username",
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(30),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 32),
+              child: Column(
+                children: [
+                  TextField(
+                    controller: _usernameController,
+                    decoration: InputDecoration(
+                      hintText: "Username",
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(30),
+                      ),
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 20,
+                      ),
                     ),
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 20),
                   ),
-                ),
-                const SizedBox(height: 15),
-                TextField(
-                  controller: _emailController,
-                  decoration: InputDecoration(
-                    hintText: "Email",
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(30),
+                  const SizedBox(height: 15),
+                  TextField(
+                    controller: _emailController,
+                    decoration: InputDecoration(
+                      hintText: "Email",
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(30),
+                      ),
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 20,
+                      ),
                     ),
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 20),
                   ),
-                ),
-                const SizedBox(height: 15),
-                TextField(
-                  controller: _passwordController,
-                  obscureText: true,
-                  decoration: InputDecoration(
-                    hintText: "Password",
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(30),
+                  const SizedBox(height: 15),
+                  TextField(
+                    controller: _passwordController,
+                    obscureText: true,
+                    decoration: InputDecoration(
+                      hintText: "Password",
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(30),
+                      ),
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 20,
+                      ),
                     ),
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 20),
                   ),
-                ),
-                const SizedBox(height: 15),
-                TextField(
-                  controller: _konfirmasiPasswordController,
-                  obscureText: true,
-                  decoration: InputDecoration(
-                    hintText: "Konfirmasi Password",
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(30),
+                  const SizedBox(height: 15),
+                  TextField(
+                    controller: _konfirmasiPasswordController,
+                    obscureText: true,
+                    decoration: InputDecoration(
+                      hintText: "Konfirmasi Password",
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(30),
+                      ),
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 20,
+                      ),
                     ),
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 20),
                   ),
-                ),
-                const SizedBox(height: 20),
-                ElevatedButton(
-                  onPressed: _isLoading ? null : registerUser,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Color(0xff8fd14f),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(20),
+                  const SizedBox(height: 20),
+                  ElevatedButton(
+                    onPressed: _isLoading ? null : registerUser,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.greenAccent.shade400,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      minimumSize: const Size(double.infinity, 45),
                     ),
-                    minimumSize: const Size(double.infinity, 45),
+                    child:
+                        _isLoading
+                            ? const CircularProgressIndicator(
+                              color: Colors.white,
+                            )
+                            : const Text("Sign up"),
                   ),
-                  child:
-                      _isLoading
-                          ? const CircularProgressIndicator(color: Colors.white)
-                          : const Text(
-                            "Sign up",
-                            style: TextStyle(color: Colors.white),
+                  const SizedBox(height: 10),
+                  TextButton(
+                    onPressed: () {
+                      Navigator.pop(context); // kembali ke halaman login
+                    },
+                    child: const Text.rich(
+                      TextSpan(
+                        text: "Sudah punya akun? ",
+                        children: [
+                          TextSpan(
+                            text: "Masuk",
+                            style: TextStyle(fontWeight: FontWeight.bold),
                           ),
-                ),
-                const SizedBox(height: 10),
-                TextButton(
-                  onPressed: () {
-                    Navigator.pop(context); // kembali ke halaman login
-                  },
-                  child: const Text.rich(
-                    TextSpan(
-                      text: "Sudah punya akun? ",
-                      children: [
-                        TextSpan(
-                          text: "Masuk",
-                          style: TextStyle(fontWeight: FontWeight.bold),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

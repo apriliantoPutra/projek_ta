@@ -29,9 +29,7 @@ class _PetugasSetorJemputSelesaiState extends State<PetugasSetorJemputSelesai> {
   Future<void> fetchData() async {
     await fetchPengajuanDetailSetor();
     await fetchJenisSampah();
-    setState(() {
-      isLoading = false;
-    });
+    setState(() => isLoading = false);
   }
 
   Future<void> fetchPengajuanDetailSetor() async {
@@ -42,24 +40,22 @@ class _PetugasSetorJemputSelesaiState extends State<PetugasSetorJemputSelesai> {
       headers: {'Authorization': 'Bearer $token', 'Accept': 'application/json'},
     );
     if (resp.statusCode == 200) {
-      final data = jsonDecode(resp.body)['data'];
-      pengajuanDetailSetor = data;
-    } else {
-      throw Exception('fetchPengajuanSetor failed');
+      setState(() {
+        pengajuanDetailSetor = jsonDecode(resp.body)['data'];
+      });
     }
   }
 
   Future<void> fetchJenisSampah() async {
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('token');
-    if (token == null) return;
+    if (token == null || pengajuanDetailSetor == null) return;
 
     final setoran =
-        pengajuanDetailSetor?['input_detail']['setoran_sampah'] ?? [];
+        pengajuanDetailSetor!['input_detail']['setoran_sampah'] ?? [];
 
     for (var item in setoran) {
       final int jenisId = item['jenis_sampah_id'];
-
       if (!jenisSampahCache.containsKey(jenisId)) {
         final response = await http.get(
           Uri.parse('$baseUrl/jenis-sampah/$jenisId'),
@@ -97,9 +93,29 @@ class _PetugasSetorJemputSelesaiState extends State<PetugasSetorJemputSelesai> {
 
     final namaPengguna = profil?['nama_pengguna'] ?? 'memuat..';
     final detailSetoran = pengajuanDetailSetor!['input_detail'];
-    final totalBerat = detailSetoran['total_berat'].toString();
-    final totalHarga = detailSetoran['total_harga'];
     final setoranSampah = detailSetoran['setoran_sampah'] as List;
+
+    // Calculate total berat and harga
+    double totalBerat = 0;
+    int totalHarga = 0;
+    int biayaLayanan = 0;
+    final processedSetoran =
+        setoranSampah.map((item) {
+          final jenisId = item['jenis_sampah_id'];
+          final berat = (item['berat'] as num).toDouble();
+          final jenisInfo = jenisSampahCache[jenisId];
+          final subtotal = (berat * (jenisInfo?['harga'] ?? 0)).round();
+
+          totalBerat += berat;
+          totalHarga += subtotal;
+
+          return {
+            'nama': jenisInfo?['nama'] ?? 'Unknown',
+            'berat': berat,
+            'subtotal': subtotal,
+            'warna': jenisInfo?['warna'] ?? '#999999',
+          };
+        }).toList();
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -170,15 +186,14 @@ class _PetugasSetorJemputSelesaiState extends State<PetugasSetorJemputSelesai> {
 
             // Kartu Estimasi
             Container(
-              padding: const EdgeInsets.all(16),
-              margin: const EdgeInsets.all(16),
+              padding: EdgeInsets.all(16),
+              margin: EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: const Color(0xFF8FD14F),
+                color: Color(0xFF8FD14F),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Column(
                 children: [
-                  // Bar total berat
                   Stack(
                     children: [
                       Container(
@@ -190,95 +205,89 @@ class _PetugasSetorJemputSelesaiState extends State<PetugasSetorJemputSelesai> {
                       ),
                       Row(
                         children:
-                            pengajuanDetailSetor!['input_detail']['setoran_sampah']
-                                .map<Widget>((item) {
-                                  final jenisId = item['jenis_sampah_id'];
-                                  final berat = item['berat'] * 1.0;
-                                  final totalBerat =
-                                      pengajuanDetailSetor!['input_detail']['total_berat'] *
-                                      1.0;
-                                  final proportion = berat / totalBerat;
-
-                                  final warna =
-                                      jenisSampahCache[jenisId]?['warna'] ??
-                                      '#999999';
-
-                                  return Expanded(
-                                    flex:
-                                        (proportion * 1000)
-                                            .round(), // agar fleksibel
-                                    child: Container(
-                                      height: 32,
-                                      decoration: BoxDecoration(
-                                        color: Color(
-                                          int.parse(
-                                            warna.replaceAll('#', '0xff'),
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                  );
-                                })
-                                .toList(),
+                            processedSetoran.map((item) {
+                              final proportion = item['berat'] / totalBerat;
+                              return Expanded(
+                                flex: (proportion * 1000).round(),
+                                child: Container(
+                                  height: 32,
+                                  decoration: BoxDecoration(
+                                    color: _parseHexColor(item['warna']),
+                                  ),
+                                ),
+                              );
+                            }).toList(),
                       ),
-                      Positioned.fill(
-                        child: Center(
-                          child: Text(
-                            "$totalBerat kg",
-                            style: const TextStyle(
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white,
-                            ),
+                      Center(
+                        child: Text(
+                          "${totalBerat.toStringAsFixed(1)}kg",
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
                           ),
                         ),
                       ),
                     ],
                   ),
-
-                  const SizedBox(height: 16),
-
-                  // Legend dari data setoran
-                  ...setoranSampah.map((item) {
-                    final jenisId = item['jenis_sampah_id'];
-                    final berat = item['berat'];
-                    final jenisInfo = jenisSampahCache[jenisId];
-
-                    if (jenisInfo == null) return SizedBox();
-
-                    final Color color = _parseHexColor(jenisInfo['warna']);
-
-                    return Padding(
-                      padding: const EdgeInsets.only(bottom: 8.0),
+                  SizedBox(height: 16),
+                  ...processedSetoran.map(
+                    (item) => Padding(
+                      padding: EdgeInsets.only(bottom: 8),
                       child: Row(
                         children: [
-                          _buildLegend(
-                            color: color,
-                            label: jenisInfo['nama'],
-                            weight: "${berat}kg",
+                          Icon(
+                            Icons.square,
+                            color: _parseHexColor(item['warna']),
                           ),
+                          SizedBox(width: 8),
+                          Expanded(child: Text(item['nama'])),
+                          Text("${item['berat']}kg"),
+                          SizedBox(width: 16),
+                          Text("Rp${item['subtotal']}"),
                         ],
                       ),
-                    );
-                  }).toList(),
+                    ),
+                  ),
                 ],
               ),
             ),
-            Padding(
-              padding: EdgeInsets.symmetric(horizontal: 16),
-              child: Row(
+            const SizedBox(height: 10),
+
+            // Estimasi Insentif
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Colors.greenAccent.shade100,
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    "Estimasi Harga",
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.black,
-                    ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text('Estimasi harga sampah anda'),
+                      Text('Rp $totalHarga'),
+                    ],
                   ),
-                  Spacer(),
-                  Text(
-                    "Rp $totalHarga",
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                  const SizedBox(height: 4),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: const [Text('Biaya Layanan'), Text('-Rp 0')],
+                  ),
+                  const Divider(),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text(
+                        'Perkiraan Insentif',
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                      Text(
+                        'Rp ${totalHarga - biayaLayanan}',
+                        style: const TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                    ],
                   ),
                 ],
               ),
@@ -352,43 +361,9 @@ class _PetugasSetorJemputSelesaiState extends State<PetugasSetorJemputSelesai> {
     );
   }
 
-  Widget _buildLegend({
-    required Color color,
-    required String label,
-    required String weight,
-  }) {
-    return Expanded(
-      child: Row(
-        children: [
-          Container(
-            width: 24,
-            height: 24,
-            decoration: BoxDecoration(
-              color: color,
-              borderRadius: BorderRadius.circular(4),
-            ),
-          ),
-          const SizedBox(width: 8),
-          Expanded(
-            child: Text(
-              label,
-              style: const TextStyle(color: Colors.white, fontSize: 16),
-            ),
-          ),
-          Text(
-            weight,
-            style: const TextStyle(color: Colors.white, fontSize: 16),
-          ),
-        ],
-      ),
-    );
-  }
-
   Color _parseHexColor(String hexColor) {
-    hexColor = hexColor.toUpperCase().replaceAll("#", "");
-    if (hexColor.length == 6) {
-      hexColor = "FF$hexColor";
-    }
+    hexColor = hexColor.replaceAll("#", "");
+    if (hexColor.length == 6) hexColor = "FF$hexColor";
     return Color(int.parse(hexColor, radix: 16));
   }
 }

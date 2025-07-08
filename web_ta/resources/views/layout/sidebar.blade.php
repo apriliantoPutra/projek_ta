@@ -52,7 +52,7 @@
                     </div>
                 </div>
 
-                <a href="#"
+                <a href="{{ route('Tarik-Saldo') }}"
                     class="flex items-center px-4 py-2 text-lg rounded-lg hover:bg-green-600 hover:text-white transition-colors border-b border-gray-700">
                     <i class="ri-wallet-3-line mr-3"></i> Tarik Saldo
                 </a>
@@ -61,10 +61,10 @@
                     <i class="ri-book-open-line mr-3"></i> Edukasi
                 </a>
 
-                <a href="#"
+                {{-- <a href="#"
                     class="flex items-center px-4 py-2 text-lg rounded-lg hover:bg-green-600 hover:text-white transition-colors border-b border-gray-700">
                     <i class="ri-robot-2-line mr-3"></i> Chatbot
-                </a>
+                </a> --}}
             </nav>
         </div>
 

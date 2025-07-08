@@ -169,7 +169,7 @@ class _PetugasEditProfilPageState extends State<PetugasEditProfilPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Colors.greenAccent.shade400,
+        backgroundColor: Color(0xFF8fd14f),
         elevation: 0,
         centerTitle: true,
         leading: IconButton(
@@ -227,7 +227,7 @@ class _PetugasEditProfilPageState extends State<PetugasEditProfilPage> {
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: Colors.greenAccent.shade400,
+                color: Color(0xFF8fd14f),
                 borderRadius: BorderRadius.circular(20),
               ),
               child: Column(

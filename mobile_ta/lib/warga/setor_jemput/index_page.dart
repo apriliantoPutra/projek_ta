@@ -6,7 +6,8 @@ import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class WargaSetorJemput extends StatefulWidget {
-  const WargaSetorJemput({super.key});
+  final Map<String, dynamic>? bankSampah;
+  const WargaSetorJemput({this.bankSampah, super.key});
 
   @override
   State<WargaSetorJemput> createState() => _WargaSetorJemputState();
@@ -14,21 +15,16 @@ class WargaSetorJemput extends StatefulWidget {
 
 class _WargaSetorJemputState extends State<WargaSetorJemput> {
   List<Map<String, dynamic>> _jenisSampahList = [
-    {'jenis_sampah_id': null, 'berat': null},
+    {'jenis_sampah_id': null, 'berat': null, 'error': null},
   ];
   final TextEditingController _tanggalController = TextEditingController();
   final TextEditingController _catatanController = TextEditingController();
-
   List<Map<String, dynamic>> _jenisSampahOptions = [];
 
   Future<void> fetchJenisSampah() async {
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('token');
-
-    if (token == null) {
-      debugPrint('Token tidak ditemukan');
-      return;
-    }
+    if (token == null) return;
 
     final response = await http.get(
       Uri.parse('$baseUrl/jenis-sampah'),
@@ -40,8 +36,14 @@ class _WargaSetorJemputState extends State<WargaSetorJemput> {
       setState(() {
         _jenisSampahOptions = List<Map<String, dynamic>>.from(json['data']);
       });
-    } else {
-      debugPrint('Gagal ambil data jenis sampah: ${response.body}');
+    }
+  }
+
+  void _removeJenisSampah(int index) {
+    if (_jenisSampahList.length > 1) {
+      setState(() {
+        _jenisSampahList.removeAt(index);
+      });
     }
   }
 
@@ -98,7 +100,6 @@ class _WargaSetorJemputState extends State<WargaSetorJemput> {
                   ],
                 ),
               ),
-              SizedBox(height: 8),
               Container(
                 alignment: Alignment.centerLeft,
                 child: Text(
@@ -137,6 +138,7 @@ class _WargaSetorJemputState extends State<WargaSetorJemput> {
                             style: TextStyle(fontWeight: FontWeight.bold),
                           ),
                         ),
+                        SizedBox(width: 40),
                       ],
                     ),
                     SizedBox(height: 8),
@@ -167,38 +169,59 @@ class _WargaSetorJemputState extends State<WargaSetorJemput> {
                                 },
                               ),
                             ),
-                            SizedBox(width: 8),
+                            SizedBox(width: 5),
                             Expanded(
-                              child: DropdownButtonFormField<double>(
-                                value: item['berat'],
-                                hint: Text('Berat'),
-                                items: List.generate(20, (i) {
-                                  final val = 0.5 * (i + 1);
-                                  return DropdownMenuItem<double>(
-                                    value: val,
-                                    child: Text(
-                                      val.toString().replaceAll('.', ','),
-                                    ),
-                                  );
-                                }),
+                              child: TextFormField(
+                                keyboardType: TextInputType.numberWithOptions(
+                                  decimal: true,
+                                ),
+                                decoration: InputDecoration(
+                                  hintText: 'Berat',
+                                  errorText: item['error'],
+                                ),
                                 onChanged: (value) {
+                                  final parsed = double.tryParse(value);
+                                  String? error;
+
+                                  if (parsed == null) {
+                                    error = 'Harus berupa angka';
+                                  } else if (parsed < 0.5) {
+                                    error = 'Minimum 0.5 kg';
+                                  } else if (parsed > 50) {
+                                    error = 'Maksimum 50 kg';
+                                  } else if (!RegExp(
+                                    r'^\d+(\.\d)?$',
+                                  ).hasMatch(value)) {
+                                    error = 'Maksimal 1 angka desimal';
+                                  }
+
                                   setState(() {
-                                    _jenisSampahList[index]['berat'] = value;
+                                    if (error != null) {
+                                      _jenisSampahList[index]['berat'] = null;
+                                      _jenisSampahList[index]['error'] = error;
+                                    } else {
+                                      _jenisSampahList[index]['berat'] = parsed;
+                                      _jenisSampahList[index]['error'] = null;
+                                    }
                                   });
                                 },
                               ),
+                            ),
+                            IconButton(
+                              icon: Icon(Icons.delete, color: Colors.red),
+                              onPressed: () => _removeJenisSampah(index),
                             ),
                           ],
                         ),
                       );
                     }).toList(),
-                    SizedBox(height: 8),
                     TextButton.icon(
                       onPressed: () {
                         setState(() {
                           _jenisSampahList.add({
                             'jenis_sampah_id': null,
                             'berat': null,
+                            'error': null,
                           });
                         });
                       },
@@ -208,113 +231,126 @@ class _WargaSetorJemputState extends State<WargaSetorJemput> {
                         style: TextStyle(color: Colors.green.shade900),
                       ),
                     ),
-                    SizedBox(height: 10),
-                    Container(
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      padding: const EdgeInsets.symmetric(horizontal: 12),
-                      child: TextFormField(
-                        controller: _tanggalController,
-                        readOnly: true,
-                        onTap: () async {
-                          final pickedDate = await showDatePicker(
-                            context: context,
-                            initialDate: DateTime.now(),
-                            firstDate: DateTime(2024),
-                            lastDate: DateTime(2030),
-                          );
-                          if (pickedDate != null) {
-                            // Format tanggal: dd/MM/yyyy
-                            String formattedDate =
-                                "${pickedDate.day.toString().padLeft(2, '0')}/"
-                                "${pickedDate.month.toString().padLeft(2, '0')}/"
-                                "${pickedDate.year}";
-                            _tanggalController.text = formattedDate;
-                          }
-                        },
-                        decoration: InputDecoration(
-                          border: InputBorder.none,
-                          hintText: "Tanggal",
-                        ),
-                      ),
-                    ),
-                    SizedBox(height: 15),
-                    Container(
-                      height: 120,
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      padding: const EdgeInsets.symmetric(horizontal: 12),
-                      child: TextFormField(
-                        controller: _catatanController,
-                        maxLines: null,
-                        keyboardType: TextInputType.multiline,
-                        decoration: InputDecoration(
-                          border: InputBorder.none,
-                          hintText: "Masukkan catatan untuk petugas...",
-                        ),
-                      ),
-                    ),
                   ],
                 ),
               ),
-              SizedBox(height: 20),
-              Center(
-                child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Color(0xff8fd14f),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    padding: EdgeInsets.symmetric(horizontal: 30, vertical: 14),
-                  ),
-                  onPressed: () {
-                    final dataSetor =
-                        _jenisSampahList
-                            .where(
-                              (item) =>
-                                  item['jenis_sampah_id'] != null &&
-                                  item['berat'] != null,
-                            )
-                            .toList();
+              SizedBox(height: 15),
+              // ... (rest of your existing code for date picker and notes)
+              Text(
+                "Tanggal Penyetoran",
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
 
-                    if (dataSetor.isEmpty) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text(
-                            'Harap isi semua jenis sampah dan berat.',
-                          ),
-                        ),
-                      );
-                      return;
-                    }
+              const SizedBox(height: 8),
 
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder:
-                            (context) => WargaKonfirmasiSetorJemputPage(
-                              dataSetoran: dataSetor,
-                              tanggal: _tanggalController.text,
-                              catatan:
-                                  _catatanController.text.isNotEmpty
-                                      ? _catatanController.text
-                                      : null,
-                            ),
-                      ),
+              // Input tanggal
+              Container(
+                decoration: BoxDecoration(
+                  color: Colors.greenAccent.shade100,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                padding: const EdgeInsets.symmetric(horizontal: 12),
+                child: TextFormField(
+                  controller: _tanggalController,
+                  readOnly: true,
+                  onTap: () async {
+                    final pickedDate = await showDatePicker(
+                      context: context,
+                      initialDate: DateTime.now(),
+                      firstDate: DateTime(2024),
+                      lastDate: DateTime(2030),
                     );
+                    if (pickedDate != null) {
+                      // Format tanggal: dd/MM/yyyy
+                      String formattedDate =
+                          "${pickedDate.day.toString().padLeft(2, '0')}/"
+                          "${pickedDate.month.toString().padLeft(2, '0')}/"
+                          "${pickedDate.year}";
+                      _tanggalController.text = formattedDate;
+                    }
                   },
-                  child: Text(
-                    'Selanjutnya',
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                    ),
+                  decoration: InputDecoration(
+                    border: InputBorder.none,
+                    hintText: "Tanggal",
                   ),
                 ),
+              ),
+
+              const SizedBox(height: 24),
+              Text(
+                "Catatan Petugas (Opsional)",
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+
+              const SizedBox(height: 8),
+
+              // Input catatan
+              Container(
+                height: 120,
+                decoration: BoxDecoration(
+                  color: Colors.greenAccent.shade100,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                padding: const EdgeInsets.symmetric(horizontal: 12),
+                child: TextFormField(
+                  controller: _catatanController,
+                  maxLines: null,
+                  keyboardType: TextInputType.multiline,
+                  decoration: InputDecoration(
+                    border: InputBorder.none,
+                    hintText: "Masukkan catatan untuk petugas...",
+                  ),
+                ),
+              ),
+              const SizedBox(height: 24),
+              ElevatedButton(
+                onPressed: () {
+                  final hasError = _jenisSampahList.any(
+                    (item) => item['error'] != null,
+                  );
+                  final isAnyEmpty = _jenisSampahList.any(
+                    (item) =>
+                        item['jenis_sampah_id'] == null ||
+                        item['berat'] == null,
+                  );
+
+                  if (hasError || isAnyEmpty) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('Harap periksa input Anda')),
+                    );
+                    return;
+                  }
+
+                  final validData =
+                      _jenisSampahList
+                          .where(
+                            (item) =>
+                                item['jenis_sampah_id'] != null &&
+                                item['berat'] != null,
+                          )
+                          .toList();
+
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder:
+                          (context) => WargaKonfirmasiSetorJemputPage(
+                            dataSetoran: validData,
+                            tanggal: _tanggalController.text,
+                            catatan: _catatanController.text,
+                            bankSampah: widget.bankSampah,
+                          ),
+                    ),
+                  );
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.greenAccent.shade400,
+                  padding: const EdgeInsets.all(12),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                child: Text('Selanjutnya'),
               ),
             ],
           ),
