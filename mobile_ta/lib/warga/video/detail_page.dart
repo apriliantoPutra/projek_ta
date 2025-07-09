@@ -84,7 +84,7 @@ class _WargaDetailVideoPageState extends State<WargaDetailVideoPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Colors.greenAccent.shade400,
+        backgroundColor: Color(0xFF8fd14f),
         elevation: 0,
         centerTitle: true,
         leading: IconButton(
@@ -92,7 +92,7 @@ class _WargaDetailVideoPageState extends State<WargaDetailVideoPage> {
           onPressed: () => Navigator.pop(context),
         ),
         title: const Text(
-          'Edukasi Video',
+          'Video Edukasi',
           style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
         ),
       ),

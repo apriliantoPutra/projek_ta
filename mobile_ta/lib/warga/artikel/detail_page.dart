@@ -18,9 +18,7 @@ class _WargaDetailArtikelPageState extends State<WargaDetailArtikelPage> {
   Map<String, dynamic>? artikel;
 
   Future<void> fetchArtikelDetail() async {
-    final response = await http.get(
-      Uri.parse('$baseUrl/artikel/${widget.id}'),
-    );
+    final response = await http.get(Uri.parse('$baseUrl/artikel/${widget.id}'));
 
     if (response.statusCode == 200) {
       final data = json.decode(response.body)['data'];
@@ -47,7 +45,7 @@ class _WargaDetailArtikelPageState extends State<WargaDetailArtikelPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Colors.greenAccent.shade400,
+        backgroundColor: Color(0xFF8fd14f),
         elevation: 0,
         centerTitle: true,
         leading: IconButton(

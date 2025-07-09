@@ -12,12 +12,16 @@ class WargaSetorPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Color(0xff8fd14f),
+        backgroundColor: Colors.white,
         elevation: 0,
         centerTitle: true,
         title: Text(
           'Setor Sampah',
-          style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
+          style: TextStyle(
+            fontWeight: FontWeight.w500,
+            color: Colors.black,
+            fontSize: 24,
+          ),
         ),
       ),
       body: SingleChildScrollView(
@@ -32,12 +36,15 @@ class WargaSetorPage extends StatelessWidget {
               textAlign: TextAlign.center,
             ),
             SizedBox(height: 24),
-            
+
             InkWell(
               onTap: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => WargaSetorLangsung(bankSampah: bankSampah)),
+                  MaterialPageRoute(
+                    builder:
+                        (context) => WargaSetorLangsung(bankSampah: bankSampah),
+                  ),
                 );
               },
               borderRadius: BorderRadius.circular(16),
@@ -47,6 +54,14 @@ class WargaSetorPage extends StatelessWidget {
                 decoration: BoxDecoration(
                   color: Color(0xff8fd14f),
                   borderRadius: BorderRadius.circular(16),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.2),
+                      offset: Offset(0, 1),
+                      spreadRadius: 2,
+                      blurRadius: 3,
+                    ),
+                  ],
                 ),
                 child: Column(
                   children: [
@@ -74,7 +89,10 @@ class WargaSetorPage extends StatelessWidget {
               onTap: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => WargaSetorJemput(bankSampah: bankSampah)),
+                  MaterialPageRoute(
+                    builder:
+                        (context) => WargaSetorJemput(bankSampah: bankSampah),
+                  ),
                 );
               },
               borderRadius: BorderRadius.circular(16),
@@ -83,6 +101,14 @@ class WargaSetorPage extends StatelessWidget {
                 decoration: BoxDecoration(
                   color: Color(0xff8fd14f),
                   borderRadius: BorderRadius.circular(16),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.2),
+                      offset: Offset(0, 1),
+                      spreadRadius: 2,
+                      blurRadius: 3,
+                    ),
+                  ],
                 ),
                 child: Column(
                   children: [

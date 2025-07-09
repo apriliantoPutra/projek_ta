@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:material_color_utilities/quantize/quantizer_wu.dart';
 import 'package:mobile_ta/warga/artikel/detail_page.dart';
 import 'package:mobile_ta/warga/artikel/kumpulan_page.dart';
 import 'package:mobile_ta/warga/video/detail_page.dart';
@@ -21,47 +22,71 @@ class WargaEdukasiPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Color(0xff8fd14f),
+        automaticallyImplyLeading: false,
+        backgroundColor: Colors.white,
         elevation: 0,
         centerTitle: true,
         title: Text(
-          "Edukasi",
-          style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
+          "Konten Edukasi",
+          style: TextStyle(
+            fontWeight: FontWeight.w500,
+            color: Colors.black,
+            fontSize: 24,
+          ),
         ),
       ),
       body: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            SizedBox(height: 8),
             Container(
+              margin: EdgeInsets.symmetric(horizontal: 16),
               width: double.infinity,
-              height: 100,
+              // height: 100,
               padding: EdgeInsets.all(16),
               decoration: BoxDecoration(
                 color: Color(0xff8fd14f),
-                borderRadius: BorderRadius.only(
-                  bottomLeft: Radius.circular(20),
-                  bottomRight: Radius.circular(20),
-                ),
+                borderRadius: BorderRadius.all(Radius.circular(16)),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.15),
+                    offset: Offset(0, 4),
+                    blurRadius: 4,
+                    spreadRadius: 1,
+                  ),
+                ],
               ),
               alignment: Alignment.center, // Menengahkan isi
-              child: Text(
-                "Halaman edukasi ini berisi artikel dan video seputar tips dan trik seputar pengelolaan sampah",
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.normal,
-                  color: Colors.white,
+              child: Text.rich(
+                TextSpan(
+                  text:
+                      "Baca artikel dan tonton video seru tentang cara mudah mengelola sampah. Siap jadi ",
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w500,
+                    color: Colors.white,
+                  ),
+                  children: [
+                    TextSpan(
+                      text: "#PahlawanLingkungan?",
+                      style: TextStyle(
+                        color: Colors.green.shade800,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
                 ),
                 textAlign: TextAlign.center,
               ),
             ),
 
-            SizedBox(height: 10),
+            SizedBox(height: 16),
             Container(
-              margin: EdgeInsets.only(top: 16),
+              // margin: EdgeInsets.only(top: 16),
               padding: EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: Color(0xff8fd14f),
+                color: Colors.white,
                 borderRadius: BorderRadius.only(
                   topLeft: Radius.circular(20),
                   topRight: Radius.circular(20),
@@ -70,7 +95,7 @@ class WargaEdukasiPage extends StatelessWidget {
                   BoxShadow(
                     color: Colors.black12,
                     blurRadius: 6,
-                    offset: Offset(0, 3),
+                    offset: Offset(0, -4),
                   ),
                 ],
               ),
@@ -83,9 +108,9 @@ class WargaEdukasiPage extends StatelessWidget {
                       Text(
                         "Video Terbaru",
                         style: TextStyle(
-                          fontSize: 18,
+                          fontSize: 20,
                           fontWeight: FontWeight.bold,
-                          color: Colors.white,
+                          color: Color(0xFF8fd14f),
                         ),
                       ),
                       TextButton(
@@ -102,16 +127,17 @@ class WargaEdukasiPage extends StatelessWidget {
                           style: TextStyle(
                             fontSize: 14,
                             fontWeight: FontWeight.w500,
-                            color: Colors.white,
+                            color: Color(0xFF8fd14f),
                           ),
                         ),
                       ),
                     ],
                   ),
-                  SizedBox(height: 12),
+                  SizedBox(height: 8),
                   SizedBox(
                     height: 280,
                     child: ListView.builder(
+                      padding: const EdgeInsets.all(8),
                       scrollDirection: Axis.horizontal,
                       itemCount: videoList.length,
                       itemBuilder: (context, index) {
@@ -145,7 +171,7 @@ class WargaEdukasiPage extends StatelessWidget {
                         style: TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
-                          color: Colors.white,
+                          color: Color(0xFF8fd14f),
                         ),
                       ),
                       TextButton(
@@ -162,7 +188,7 @@ class WargaEdukasiPage extends StatelessWidget {
                           style: TextStyle(
                             fontSize: 14,
                             fontWeight: FontWeight.w500,
-                            color: Colors.white,
+                            color: Color(0xFF8fd14f),
                           ),
                         ),
                       ),

@@ -85,6 +85,14 @@ class WargaBerandaPage extends StatelessWidget {
                   bottomLeft: Radius.circular(20),
                   bottomRight: Radius.circular(20),
                 ),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.2),
+                    spreadRadius: 2,
+                    blurRadius: 8,
+                    offset: Offset(0, 4),
+                  ),
+                ],
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -122,7 +130,7 @@ class WargaBerandaPage extends StatelessWidget {
             ),
 
             Container(
-              margin: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              margin: EdgeInsets.symmetric(horizontal: 8, vertical: 8),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
@@ -169,7 +177,7 @@ class WargaBerandaPage extends StatelessWidget {
               ),
             ),
             Container(
-              margin: EdgeInsets.only(top: 16),
+              margin: EdgeInsets.only(top: 8),
               padding: EdgeInsets.all(16),
               decoration: BoxDecoration(
                 color: Color(0xff8fd14f),
@@ -181,7 +189,7 @@ class WargaBerandaPage extends StatelessWidget {
                   BoxShadow(
                     color: Colors.black12,
                     blurRadius: 6,
-                    offset: Offset(0, 3),
+                    offset: Offset(0, -4),
                   ),
                 ],
               ),
@@ -224,15 +232,17 @@ class WargaBerandaPage extends StatelessWidget {
                         final video = videoList[index];
                         return VideoCard(
                           imageUrl:
-                                'https://i.pinimg.com/736x/2d/d3/79/2dd379968693700ec12af8f1974b491e.jpg',
+                              'https://i.pinimg.com/736x/2d/d3/79/2dd379968693700ec12af8f1974b491e.jpg',
                           title: video['judul_video'] ?? '',
                           date: video['tanggal_format'] ?? '',
                           onTap: () {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (_) =>
-                                    WargaDetailVideoPage(videoId: video['id']),
+                                builder:
+                                    (_) => WargaDetailVideoPage(
+                                      videoId: video['id'],
+                                    ),
                               ),
                             );
                           },
@@ -303,10 +313,18 @@ class WargaBerandaPage extends StatelessWidget {
             height: 60,
             width: 60,
             decoration: BoxDecoration(
-              color: Color(0xff8fd14f),
+              color: Colors.white,
               borderRadius: BorderRadius.circular(12),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.2), // Warna bayangan
+                  spreadRadius: 1, // Menyebar keluar
+                  blurRadius: 8, // Seberapa kabur/sharp
+                  offset: Offset(0, 2),
+                ),
+              ],
             ),
-            child: Icon(icon, size: 30),
+            child: Icon(icon, size: 30, color: Colors.black87),
           ),
           const SizedBox(height: 8),
           Text(title, textAlign: TextAlign.center),
