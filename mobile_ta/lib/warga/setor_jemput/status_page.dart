@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:mobile_ta/warga/histori_setor/kumpulan_histori_setor_page.dart';
 import 'package:mobile_ta/widget/warga_main_widget.dart';
 
-class WargaStatusTungguSetorLangsung extends StatelessWidget {
-  const WargaStatusTungguSetorLangsung({super.key});
+class WargaStatusTungguSetorJemput extends StatelessWidget {
+  const WargaStatusTungguSetorJemput({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -13,7 +13,7 @@ class WargaStatusTungguSetorLangsung extends StatelessWidget {
         elevation: 0,
         centerTitle: true,
         title: Text(
-          'Setor Langsung',
+          'Setor Jemput',
           style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
         ),
       ),

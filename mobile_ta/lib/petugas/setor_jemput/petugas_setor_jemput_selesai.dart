@@ -1,6 +1,8 @@
 import 'dart:convert';
+import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:http/http.dart' as http;
 import 'package:mobile_ta/constants/constants.dart';
 import 'package:mobile_ta/widget/petugas_main_widget.dart';
@@ -17,7 +19,26 @@ class PetugasSetorJemputSelesai extends StatefulWidget {
 
 class _PetugasSetorJemputSelesaiState extends State<PetugasSetorJemputSelesai> {
   Map<String, dynamic>? pengajuanDetailSetor;
+  Map<String, dynamic>? bankSampah;
   Map<int, Map<String, dynamic>> jenisSampahCache = {};
+
+  late double latitudeBankSampah;
+  late double longitudeBankSampah;
+  late double latitudeWarga;
+  late double longitudeWarga;
+
+  late GoogleMapController _mapController;
+  late CameraPosition _initialCameraPosition;
+  Set<Marker> _markers = {};
+
+  List<Map<String, dynamic>> processedSetoran = [];
+  double totalBerat = 0;
+  int totalHarga = 0;
+  int biayaLayanan = 0;
+  String gambarPengguna = '';
+  String namaPengguna = 'memuat';
+  String alamatPengguna = 'memuat';
+
   bool isLoading = true;
 
   @override
@@ -29,7 +50,143 @@ class _PetugasSetorJemputSelesaiState extends State<PetugasSetorJemputSelesai> {
   Future<void> fetchData() async {
     await fetchPengajuanDetailSetor();
     await fetchJenisSampah();
-    setState(() => isLoading = false);
+    await fetchBankSampah();
+
+    if (pengajuanDetailSetor != null && bankSampah != null) {
+      final profil = pengajuanDetailSetor!['user']?['profil'];
+
+      // Update class variables instead of creating new ones
+      gambarPengguna =
+          (profil != null && (profil['gambar_pengguna'] ?? '').isNotEmpty)
+              ? profil['gambar_url']
+              : 'https://i.pinimg.com/736x/8a/e9/e9/8ae9e92fa4e69967aa61bf2bda967b7b.jpg';
+
+      namaPengguna = profil?['nama_pengguna'] ?? 'memuat..';
+      alamatPengguna = profil?['alamat_pengguna'] ?? 'memuat..';
+
+      // Parse coordinates with proper error handling
+      latitudeWarga =
+          double.tryParse(profil?['latitude']?.toString() ?? '0') ?? 0;
+      longitudeWarga =
+          double.tryParse(profil?['longitude']?.toString() ?? '0') ?? 0;
+      latitudeBankSampah =
+          double.tryParse(bankSampah?['latitude']?.toString() ?? '0') ?? 0;
+      longitudeBankSampah =
+          double.tryParse(bankSampah?['longitude']?.toString() ?? '0') ?? 0;
+
+      // Calculate mid point for initial camera position
+      final midLat = (latitudeBankSampah + latitudeWarga) / 2;
+      final midLng = (longitudeBankSampah + longitudeWarga) / 2;
+
+      _initialCameraPosition = CameraPosition(
+        target: LatLng(midLat, midLng),
+        zoom: 12,
+      );
+
+      // Process setoran data
+      final detailSetoran = pengajuanDetailSetor!['input_detail'];
+      final setoranSampah = detailSetoran['setoran_sampah'] as List;
+
+      // Reset totals
+      totalBerat = 0;
+      totalHarga = 0;
+      biayaLayanan = 0;
+
+      processedSetoran =
+          setoranSampah.map((item) {
+            final jenisId = item['jenis_sampah_id'];
+            final berat = (item['berat'] as num).toDouble();
+            final jenisInfo = jenisSampahCache[jenisId];
+            final subtotal = (berat * (jenisInfo?['harga'] ?? 0)).round();
+
+            totalBerat += berat;
+            totalHarga += subtotal;
+
+            return {
+              'nama': jenisInfo?['nama'] ?? 'Unknown',
+              'berat': berat,
+              'subtotal': subtotal,
+              'warna': jenisInfo?['warna'] ?? '#999999',
+            };
+          }).toList();
+    }
+    setState(() {
+      isLoading = false;
+      _updateMarkers();
+    });
+  }
+
+  void _updateMarkers() {
+    setState(() {
+      _markers = {
+        Marker(
+          markerId: const MarkerId('warga_location'),
+          position: LatLng(latitudeWarga, longitudeWarga),
+          infoWindow: const InfoWindow(title: 'Lokasi Warga'),
+          icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueRed),
+        ),
+        Marker(
+          markerId: const MarkerId('bank_sampah_location'),
+          position: LatLng(latitudeBankSampah, longitudeBankSampah),
+          infoWindow: InfoWindow(
+            title: bankSampah?['nama_bank_sampah'] ?? 'Bank Sampah',
+          ),
+          icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueBlue),
+        ),
+      };
+
+      // Fit camera to show both markers
+      if (_mapController != null) {
+        final bounds = _getBounds();
+        _mapController.animateCamera(
+          CameraUpdate.newLatLngBounds(bounds, 50.0),
+        );
+      }
+    });
+  }
+
+  LatLngBounds _getBounds() {
+    final northeast = LatLng(
+      latitudeBankSampah > latitudeWarga ? latitudeBankSampah : latitudeWarga,
+      longitudeBankSampah > longitudeWarga
+          ? longitudeBankSampah
+          : longitudeWarga,
+    );
+    final southwest = LatLng(
+      latitudeBankSampah < latitudeWarga ? latitudeBankSampah : latitudeWarga,
+      longitudeBankSampah < longitudeWarga
+          ? longitudeBankSampah
+          : longitudeWarga,
+    );
+    return LatLngBounds(northeast: northeast, southwest: southwest);
+  }
+
+  Future<Map<String, dynamic>?> fetchBankSampah() async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('token');
+
+    if (token == null) {
+      debugPrint('Token tidak ditemukan');
+      return null;
+    }
+
+    final response = await http.get(
+      Uri.parse('$baseUrl/bank-sampah/1'),
+      headers: {'Authorization': 'Bearer $token', 'Accept': 'application/json'},
+    );
+
+    if (response.statusCode == 200) {
+      final responseData = jsonDecode(response.body);
+      if (responseData['data'] != null) {
+        setState(() {
+          bankSampah = responseData['data'];
+        });
+        return responseData['data'];
+      }
+    } else {
+      debugPrint('Gagal ambil data bank sampah: ${response.body}');
+    }
+    return null;
   }
 
   Future<void> fetchPengajuanDetailSetor() async {
@@ -77,45 +234,48 @@ class _PetugasSetorJemputSelesaiState extends State<PetugasSetorJemputSelesai> {
     }
   }
 
+  double _calculateDistance(
+    double lat1,
+    double lon1,
+    double lat2,
+    double lon2,
+  ) {
+    const earthRadius = 6371;
+
+    // Convert degrees to radians
+    final dLat = _degreesToRadians(lat2 - lat1);
+    final dLon = _degreesToRadians(lon2 - lon1);
+
+    final a =
+        sin(dLat / 2) * sin(dLat / 2) +
+        cos(_degreesToRadians(lat1)) *
+            cos(_degreesToRadians(lat2)) *
+            sin(dLon / 2) *
+            sin(dLon / 2);
+    final c = 2 * atan2(sqrt(a), sqrt(1 - a));
+
+    return earthRadius * c;
+  }
+
+  double _degreesToRadians(double degrees) {
+    return degrees * pi / 180;
+  }
+
+  String _formatDistance(double distance) {
+    if (distance < 1) {
+      return "Kurang dari 1 Km";
+    } else {
+      return "${distance.toStringAsFixed(0)} Km";
+    }
+  }
+
   Widget build(BuildContext context) {
     if (isLoading || pengajuanDetailSetor == null) {
       return Scaffold(
-        appBar: AppBar(title: Text("Setor Langsung Sampah")),
+        appBar: AppBar(title: Text("Setor Jemput Sampah")),
         body: Center(child: CircularProgressIndicator()),
       );
     }
-
-    final profil = pengajuanDetailSetor!['user']?['profil'];
-    final gambarPengguna =
-        (profil != null && (profil['gambar_pengguna'] ?? '').isNotEmpty)
-            ? profil['gambar_url']
-            : 'https://i.pinimg.com/736x/8a/e9/e9/8ae9e92fa4e69967aa61bf2bda967b7b.jpg';
-
-    final namaPengguna = profil?['nama_pengguna'] ?? 'memuat..';
-    final detailSetoran = pengajuanDetailSetor!['input_detail'];
-    final setoranSampah = detailSetoran['setoran_sampah'] as List;
-
-    // Calculate total berat and harga
-    double totalBerat = 0;
-    int totalHarga = 0;
-    int biayaLayanan = 0;
-    final processedSetoran =
-        setoranSampah.map((item) {
-          final jenisId = item['jenis_sampah_id'];
-          final berat = (item['berat'] as num).toDouble();
-          final jenisInfo = jenisSampahCache[jenisId];
-          final subtotal = (berat * (jenisInfo?['harga'] ?? 0)).round();
-
-          totalBerat += berat;
-          totalHarga += subtotal;
-
-          return {
-            'nama': jenisInfo?['nama'] ?? 'Unknown',
-            'berat': berat,
-            'subtotal': subtotal,
-            'warna': jenisInfo?['warna'] ?? '#999999',
-          };
-        }).toList();
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -273,7 +433,19 @@ class _PetugasSetorJemputSelesaiState extends State<PetugasSetorJemputSelesai> {
                   const SizedBox(height: 4),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: const [Text('Biaya Layanan'), Text('-Rp 0')],
+                    children: [
+                      const Text("Jarak"),
+                      Text(
+                        _formatDistance(
+                          _calculateDistance(
+                            latitudeWarga,
+                            longitudeWarga,
+                            latitudeBankSampah,
+                            longitudeBankSampah,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                   const Divider(),
                   Row(
@@ -293,6 +465,7 @@ class _PetugasSetorJemputSelesaiState extends State<PetugasSetorJemputSelesai> {
               ),
             ),
 
+            const SizedBox(height: 10),
             Container(
               margin: EdgeInsets.symmetric(horizontal: 16),
               child: Column(
@@ -303,7 +476,7 @@ class _PetugasSetorJemputSelesaiState extends State<PetugasSetorJemputSelesai> {
                     style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
                   ),
                   Text(
-                    "Jl. Lorem ipsum dolor sit amet, consectetur adipiscing elit, Semarang, Jawa Tengah",
+                    alamatPengguna,
                     style: TextStyle(
                       fontSize: 12,
                       fontWeight: FontWeight.normal,
@@ -314,47 +487,8 @@ class _PetugasSetorJemputSelesaiState extends State<PetugasSetorJemputSelesai> {
               ),
             ),
 
-            Container(
-              margin: EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-              height: 233,
-              decoration: ShapeDecoration(
-                image: DecorationImage(
-                  image: NetworkImage(
-                    "https://i.pinimg.com/736x/b0/79/09/b079096855c0edbaba47d93c67f18853.jpg",
-                  ),
-                  fit: BoxFit.cover,
-                ),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(20),
-                ),
-              ),
-            ),
-            Padding(
-              padding: EdgeInsets.symmetric(horizontal: 16),
-              child: Row(
-                children: [
-                  Text(
-                    "Telah diambil oleh",
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.black,
-                    ),
-                  ),
-                  Spacer(),
-                  Text(
-                    "Nama Petugas Jemput",
-                    style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.normal,
-                      color: Colors.black,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-
-            SizedBox(height: 16),
+            const SizedBox(height: 10),
+            _buildMapImage(),
           ],
         ),
       ),
@@ -365,5 +499,49 @@ class _PetugasSetorJemputSelesaiState extends State<PetugasSetorJemputSelesai> {
     hexColor = hexColor.replaceAll("#", "");
     if (hexColor.length == 6) hexColor = "FF$hexColor";
     return Color(int.parse(hexColor, radix: 16));
+  }
+
+  Widget _buildMapImage() {
+    // Check if coordinates are valid
+    if (latitudeWarga == 0 ||
+        longitudeWarga == 0 ||
+        latitudeBankSampah == 0 ||
+        longitudeBankSampah == 0) {
+      return _buildFallbackMapImage();
+    }
+
+    return SizedBox(
+      height: 180,
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(8),
+        child: GoogleMap(
+          initialCameraPosition: _initialCameraPosition,
+          markers: _markers,
+          onMapCreated: (controller) {
+            _mapController = controller;
+            // After map is created, fit the bounds
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              final bounds = _getBounds();
+              _mapController.animateCamera(
+                CameraUpdate.newLatLngBounds(bounds, 50.0),
+              );
+            });
+          },
+          mapType: MapType.normal,
+          zoomControlsEnabled: false,
+          myLocationEnabled: false,
+          myLocationButtonEnabled: false,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildFallbackMapImage() {
+    return Image.network(
+      "https://i.pinimg.com/736x/b0/79/09/b079096855c0edbaba47d93c67f18853.jpg",
+      height: 150,
+      width: double.infinity,
+      fit: BoxFit.cover,
+    );
   }
 }

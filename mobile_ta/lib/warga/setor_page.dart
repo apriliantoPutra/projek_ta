@@ -3,9 +3,8 @@ import 'package:mobile_ta/warga/setor_jemput/index_page.dart';
 import '../warga/setor_langsung/index_page.dart';
 
 class WargaSetorPage extends StatelessWidget {
-  final Map<String, dynamic>? akunData;
-  final Map<String, dynamic>? bankSampah;
-  const WargaSetorPage({Key? key, this.bankSampah, this.akunData})
+  final Map<String, dynamic>? profilData;
+  const WargaSetorPage({Key? key, this.profilData})
     : super(key: key);
 
   @override
@@ -37,7 +36,7 @@ class WargaSetorPage extends StatelessWidget {
               onTap: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => WargaSetorLangsung(bankSampah: bankSampah)),
+                  MaterialPageRoute(builder: (context) => WargaSetorLangsung()),
                 );
               },
               borderRadius: BorderRadius.circular(16),
@@ -74,7 +73,7 @@ class WargaSetorPage extends StatelessWidget {
               onTap: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => WargaSetorJemput(bankSampah: bankSampah)),
+                  MaterialPageRoute(builder: (context) => WargaSetorJemput( profilData: profilData)),
                 );
               },
               borderRadius: BorderRadius.circular(16),

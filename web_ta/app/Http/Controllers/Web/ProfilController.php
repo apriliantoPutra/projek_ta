@@ -1,6 +1,6 @@
 <?php
-
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Web;
+use App\Http\Controllers\Controller;
 
 use App\Models\User;
 use App\Models\Profil;
@@ -16,7 +16,7 @@ class ProfilController extends Controller
         $userId = Auth::user()->id;
         $profil = Profil::where('akun_id', $userId)->first();
         if (!$profil) {
-            
+
             return redirect()->route('Profil-Tambah');
         }
 

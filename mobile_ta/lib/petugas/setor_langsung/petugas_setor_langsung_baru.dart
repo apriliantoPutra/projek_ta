@@ -11,7 +11,15 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class PetugasSetorLangsungBaru extends StatefulWidget {
   final int id;
-  const PetugasSetorLangsungBaru({required this.id, super.key});
+  final String tanggal;
+  final String catatan;
+
+  const PetugasSetorLangsungBaru({
+    required this.id,
+    required this.tanggal,
+    required this.catatan,
+    super.key,
+  });
 
   @override
   State<PetugasSetorLangsungBaru> createState() =>
@@ -140,6 +148,26 @@ class _PetugasSetorLangsungBaruState extends State<PetugasSetorLangsungBaru> {
                   style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
                 ),
               ],
+            ),
+            SizedBox(height: 16),
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Colors.greenAccent.shade100,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    "Detail Penyetoran",
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                  ),
+                  const SizedBox(height: 8),
+                  Text("Tanggal: ${widget.tanggal}"),
+                  Text("Catatan: ${widget.catatan}"),
+                ],
+              ),
             ),
             SizedBox(height: 16),
             Text(
@@ -323,6 +351,8 @@ class _PetugasSetorLangsungBaruState extends State<PetugasSetorLangsungBaru> {
                             dataSetoran: dataSetor,
                             pengajuanSetor: pengajuanSetor,
                             id: widget.id,
+                            tanggal: widget.tanggal,
+                            catatan: widget.catatan
                           ),
                     ),
                   );

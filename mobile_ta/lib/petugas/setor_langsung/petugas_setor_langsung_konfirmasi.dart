@@ -10,11 +10,15 @@ class PetugasSetorLangsungKonfirmasi extends StatefulWidget {
   final List<Map<String, dynamic>> dataSetoran;
   final Map<String, dynamic>? pengajuanSetor;
   final int id;
+  final String tanggal;
+  final String catatan;
 
   const PetugasSetorLangsungKonfirmasi({
     required this.pengajuanSetor,
     required this.dataSetoran,
     required this.id,
+    required this.tanggal,
+    required this.catatan,
     super.key,
   });
 
@@ -247,7 +251,31 @@ class _PetugasSetorLangsungKonfirmasiState
                                 ],
                               ),
                             ),
-
+                            const SizedBox(height: 16),
+                            Container(
+                              padding: const EdgeInsets.all(16),
+                              decoration: BoxDecoration(
+                                color: Colors.greenAccent.shade100,
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  const Text(
+                                    "Detail Penyetoran",
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 16,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 8),
+                                  Text("Tanggal: ${widget.tanggal}"),
+                                  Text("Catatan: ${widget.catatan}"),
+                                ],
+                              ),
+                            ),
+                            
+                            const SizedBox(height: 16),
                             const Text(
                               'Jenis dan Berat Sampah',
                               style: TextStyle(
@@ -378,15 +406,7 @@ class _PetugasSetorLangsungKonfirmasiState
                                     ],
                                   ),
                                   const SizedBox(height: 4),
-                                  Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    children: const [
-                                      Text('Biaya Layanan'),
-                                      Text('-Rp 0'),
-                                    ],
-                                  ),
-                                  const Divider(),
+                                  
                                   Row(
                                     mainAxisAlignment:
                                         MainAxisAlignment.spaceBetween,
@@ -430,7 +450,7 @@ class _PetugasSetorLangsungKonfirmasiState
                                   color: Colors.white,
                                 )
                                 : const Text(
-                                  'KONFIRMASI SETORAN',
+                                  'Konfirmasi Setoran',
                                   style: TextStyle(
                                     fontWeight: FontWeight.bold,
                                     fontSize: 16,

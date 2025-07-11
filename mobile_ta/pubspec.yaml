@@ -45,8 +45,8 @@ dependencies:
   path: ^1.9.1
   media_kit: ^1.1.10
   media_kit_video: ^1.1.10
-  media_kit_libs_android_video: ^1.0.7   # Android support
-  media_kit_libs_windows_video: ^1.0.7   # Windows support
+  media_kit_libs_android_video: ^1.0.7   
+  media_kit_libs_windows_video: ^1.0.7   
   google_maps_flutter: ^2.5.0
   flutter_dotenv: ^5.1.0
 

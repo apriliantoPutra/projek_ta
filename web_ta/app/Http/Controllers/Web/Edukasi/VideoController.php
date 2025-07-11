@@ -1,10 +1,9 @@
 <?php
 
-namespace App\Http\Controllers\Edukasi;
-
+namespace App\Http\Controllers\Web\Edukasi;
+use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Edukasi\Video;
-use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Storage;
 
 class VideoController extends Controller

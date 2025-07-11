@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Http\Controllers\Master;
-
+namespace App\Http\Controllers\Web\Master;
 use App\Http\Controllers\Controller;
+
 use App\Models\Master\BankSampah;
 use App\Models\User;
 use Illuminate\Http\Request;

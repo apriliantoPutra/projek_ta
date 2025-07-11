@@ -191,35 +191,7 @@ class _PetugasSetorLangsungSelesaiState
                       ),
                     ),
 
-                    const SizedBox(height: 16),
-
-                    // Header Layanan
-                    Container(
-                      padding: const EdgeInsets.all(16),
-                      margin: const EdgeInsets.only(bottom: 16),
-                      decoration: BoxDecoration(
-                        color: Colors.greenAccent.shade400,
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                      child: const Column(
-                        children: [
-                          Text(
-                            'Setor Langsung',
-                            style: TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white,
-                            ),
-                          ),
-                          SizedBox(height: 8),
-                          Text(
-                            'Setor Langsung adalah layanan penyetoran sampah langsung ke Bank Sampah oleh pengguna.',
-                            style: TextStyle(color: Colors.white),
-                            textAlign: TextAlign.center,
-                          ),
-                        ],
-                      ),
-                    ),
+                    const SizedBox(height: 16),                
 
                     const Text(
                       'Jenis dan Berat Sampah',
@@ -343,14 +315,7 @@ class _PetugasSetorLangsungSelesaiState
                             ],
                           ),
                           const SizedBox(height: 4),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: const [
-                              Text('Biaya Layanan'),
-                              Text('-Rp 0'),
-                            ],
-                          ),
-                          const Divider(),
+                          
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
@@ -394,7 +359,7 @@ class _PetugasSetorLangsungSelesaiState
                       (Route<dynamic> route) => false,
                     ),
                 child: const Text(
-                  'KEMBALI KE BERANDA',
+                  'Kembali Ke Beranda',
                   style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                 ),
               ),

@@ -197,6 +197,11 @@ class SetorJemputController extends Controller
         }
         $profil = $item->user->profil;
 
+        $koordinat = str_replace(' ', '', $profil->koordinat_pengguna); // Hilangkan spasi
+        $koordinatParts = explode(',', $koordinat);
+        $latitude = $koordinatParts[0] ?? null;
+        $longitude = $koordinatParts[1] ?? null;
+
         $pengajuan_setor = [
             'id' => $item->id,
             'jenis_setor' => $item->jenis_setor,
@@ -212,6 +217,9 @@ class SetorJemputController extends Controller
                     'no_hp_pengguna' => $profil->no_hp_pengguna,
                     'gambar_pengguna' => $profil->gambar_pengguna,
                     'gambar_url' => asset('storage/' . $profil->gambar_pengguna),
+                    'koordinat_pengguna'=> $koordinat,
+                    'latitude'=> $latitude,
+                    'longitude'=> $longitude
                 ]
             ],
             'input_detail' => [

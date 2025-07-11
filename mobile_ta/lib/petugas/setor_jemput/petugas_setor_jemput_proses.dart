@@ -1,5 +1,7 @@
 import 'dart:convert';
+import 'dart:math';
 import 'package:flutter/material.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:http/http.dart' as http;
 import 'package:mobile_ta/constants/constants.dart';
 import 'package:mobile_ta/petugas/setor_jemput/petugas_setor_jemput_selesai.dart';
@@ -17,9 +19,25 @@ class PetugasSetorJemputProses extends StatefulWidget {
 
 class _PetugasSetorJemputProsesState extends State<PetugasSetorJemputProses> {
   Map<String, dynamic>? pengajuanDetailSetor;
+  Map<String, dynamic>? bankSampah;
   Map<int, Map<String, dynamic>> jenisSampahCache = {};
   List<Map<String, dynamic>> _jenisSampahList = [];
   List<Map<String, dynamic>> _jenisSampahOptions = [];
+
+  List<Map<String, dynamic>> processedSetoran = [];
+  double totalBerat = 0;
+  int totalHarga = 0;
+  int biayaLayanan = 0;
+  String gambarPengguna = '';
+  String namaPengguna = '';
+
+  late double latitudeBankSampah;
+  late double longitudeBankSampah;
+  late double latitudeWarga;
+  late double longitudeWarga;
+  late GoogleMapController _mapController;
+  late CameraPosition _initialCameraPosition;
+  Set<Marker> _markers = {};
   bool isLoading = true;
 
   @override
@@ -33,15 +51,143 @@ class _PetugasSetorJemputProsesState extends State<PetugasSetorJemputProses> {
       await fetchPengajuanDetailSetor();
       await fetchJenisSampahOptions();
       await processInitialData();
+      await fetchBankSampah(); 
+      if (pengajuanDetailSetor != null && bankSampah != null) {
+        final profil = pengajuanDetailSetor!['user']?['profil'];
+        gambarPengguna =
+            (profil != null && (profil['gambar_url'] ?? '').isNotEmpty)
+                ? profil['gambar_url']
+                : 'https://i.pinimg.com/736x/8a/e9/e9/8ae9e92fa4e69967aa61bf2bda967b7b.jpg';
+
+        namaPengguna = profil?['nama_pengguna'] ?? 'memuat..';
+
+        // Parse coordinates with proper error handling
+        latitudeWarga =
+            double.tryParse(profil?['latitude']?.toString() ?? '0') ?? 0;
+        longitudeWarga =
+            double.tryParse(profil?['longitude']?.toString() ?? '0') ?? 0;
+        latitudeBankSampah =
+            double.tryParse(bankSampah?['latitude']?.toString() ?? '0') ?? 0;
+        longitudeBankSampah =
+            double.tryParse(bankSampah?['longitude']?.toString() ?? '0') ?? 0;
+
+        // Calculate mid point for initial camera position
+        final midLat = (latitudeBankSampah + latitudeWarga) / 2;
+        final midLng = (longitudeBankSampah + longitudeWarga) / 2;
+
+        _initialCameraPosition = CameraPosition(
+          target: LatLng(midLat, midLng),
+          zoom: 12,
+        );
+
+        // Process setoran data
+        processedSetoran =
+            _jenisSampahList.map((item) {
+              final jenisId = item['jenis_sampah_id'] as int?;
+              final berat = item['berat'] as double?;
+              final jenisInfo =
+                  jenisId != null ? jenisSampahCache[jenisId] : null;
+              final harga = (jenisInfo?['harga'] ?? 0) as int;
+              final subtotal = berat != null ? (berat * harga).round() : 0;
+
+              if (berat != null) {
+                totalBerat += berat;
+                totalHarga += subtotal;
+              }
+
+              return {
+                'nama': jenisInfo?['nama'] ?? 'Pilih jenis sampah',
+                'berat': berat,
+                'subtotal': subtotal,
+                'warna': jenisInfo?['warna'] ?? '#999999',
+              };
+            }).toList();
+      }
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Gagal memuat data: ${e.toString()}')),
       );
     } finally {
       if (mounted) {
-        setState(() => isLoading = false);
+        setState(() {
+          isLoading = false;
+          _updateMarkers();
+        });
       }
     }
+  }
+
+  void _updateMarkers() {
+    setState(() {
+      _markers = {
+        Marker(
+          markerId: const MarkerId('warga_location'),
+          position: LatLng(latitudeWarga, longitudeWarga),
+          infoWindow: const InfoWindow(title: 'Lokasi Warga'),
+          icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueRed),
+        ),
+        Marker(
+          markerId: const MarkerId('bank_sampah_location'),
+          position: LatLng(latitudeBankSampah, longitudeBankSampah),
+          infoWindow: InfoWindow(
+            title: bankSampah?['nama_bank_sampah'] ?? 'Bank Sampah',
+          ),
+          icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueBlue),
+        ),
+      };
+
+      // Fit camera to show both markers
+      if (_mapController != null) {
+        final bounds = _getBounds();
+        _mapController.animateCamera(
+          CameraUpdate.newLatLngBounds(bounds, 50.0),
+        );
+      }
+    });
+  }
+
+  LatLngBounds _getBounds() {
+    final northeast = LatLng(
+      latitudeBankSampah > latitudeWarga ? latitudeBankSampah : latitudeWarga,
+      longitudeBankSampah > longitudeWarga
+          ? longitudeBankSampah
+          : longitudeWarga,
+    );
+    final southwest = LatLng(
+      latitudeBankSampah < latitudeWarga ? latitudeBankSampah : latitudeWarga,
+      longitudeBankSampah < longitudeWarga
+          ? longitudeBankSampah
+          : longitudeWarga,
+    );
+    return LatLngBounds(northeast: northeast, southwest: southwest);
+  }
+
+  Future<Map<String, dynamic>?> fetchBankSampah() async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('token');
+
+    if (token == null) {
+      debugPrint('Token tidak ditemukan');
+      return null;
+    }
+
+    final response = await http.get(
+      Uri.parse('$baseUrl/bank-sampah/1'),
+      headers: {'Authorization': 'Bearer $token', 'Accept': 'application/json'},
+    );
+
+    if (response.statusCode == 200) {
+      final responseData = jsonDecode(response.body);
+      if (responseData['data'] != null) {
+        setState(() {
+          bankSampah = responseData['data'];
+        });
+        return responseData['data'];
+      }
+    } else {
+      debugPrint('Gagal ambil data bank sampah: ${response.body}');
+    }
+    return null;
   }
 
   Future<void> fetchPengajuanDetailSetor() async {
@@ -228,6 +374,42 @@ class _PetugasSetorJemputProsesState extends State<PetugasSetorJemputProses> {
     }
   }
 
+  // perhitungan jarak
+  double _calculateDistance(
+    double lat1,
+    double lon1,
+    double lat2,
+    double lon2,
+  ) {
+    const earthRadius = 6371;
+
+    // Convert degrees to radians
+    final dLat = _degreesToRadians(lat2 - lat1);
+    final dLon = _degreesToRadians(lon2 - lon1);
+
+    final a =
+        sin(dLat / 2) * sin(dLat / 2) +
+        cos(_degreesToRadians(lat1)) *
+            cos(_degreesToRadians(lat2)) *
+            sin(dLon / 2) *
+            sin(dLon / 2);
+    final c = 2 * atan2(sqrt(a), sqrt(1 - a));
+
+    return earthRadius * c;
+  }
+
+  double _degreesToRadians(double degrees) {
+    return degrees * pi / 180;
+  }
+
+  String _formatDistance(double distance) {
+    if (distance < 1) {
+      return "Kurang dari 1 Km";
+    } else {
+      return "${distance.toStringAsFixed(0)} Km";
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     if (isLoading || pengajuanDetailSetor == null) {
@@ -236,40 +418,6 @@ class _PetugasSetorJemputProsesState extends State<PetugasSetorJemputProses> {
         body: Center(child: CircularProgressIndicator()),
       );
     }
-
-    // Calculate current totals for display
-    double totalBerat = 0;
-    int totalHarga = 0;
-    int biayaLayanan = 0;
-
-    final processedSetoran =
-        _jenisSampahList.map((item) {
-          final jenisId = item['jenis_sampah_id'] as int?;
-          final berat = item['berat'] as double?;
-          final jenisInfo = jenisId != null ? jenisSampahCache[jenisId] : null;
-          final harga = (jenisInfo?['harga'] ?? 0) as int;
-          final subtotal = berat != null ? (berat * harga).round() : 0;
-
-          if (berat != null) {
-            totalBerat += berat;
-            totalHarga += subtotal;
-          }
-
-          return {
-            'nama': jenisInfo?['nama'] ?? 'Pilih jenis sampah',
-            'berat': berat,
-            'subtotal': subtotal,
-            'warna': jenisInfo?['warna'] ?? '#999999',
-          };
-        }).toList();
-
-    final profil = pengajuanDetailSetor!['user']?['profil'];
-    final gambarPengguna =
-        (profil != null && (profil['gambar_url'] ?? '').isNotEmpty)
-            ? profil['gambar_url']
-            : 'https://i.pinimg.com/736x/8a/e9/e9/8ae9e92fa4e69967aa61bf2bda967b7b.jpg';
-
-    final namaPengguna = profil?['nama_pengguna'] ?? 'memuat..';
 
     return Scaffold(
       appBar: AppBar(
@@ -318,6 +466,7 @@ class _PetugasSetorJemputProsesState extends State<PetugasSetorJemputProses> {
                   ),
                 ],
               ),
+
               child: Row(
                 children: [
                   CircleAvatar(
@@ -338,6 +487,27 @@ class _PetugasSetorJemputProsesState extends State<PetugasSetorJemputProses> {
               ),
             ),
 
+            // In your build method, add this:
+            const SizedBox(height: 16),
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Colors.greenAccent.shade100,
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    "Lokasi",
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                  ),
+                  const SizedBox(height: 8),
+                  _buildMapImage(),
+                ],
+              ),
+            ),
+            const SizedBox(height: 16),
             // Waste Visualization
             Container(
               padding: EdgeInsets.all(16),
@@ -433,7 +603,19 @@ class _PetugasSetorJemputProsesState extends State<PetugasSetorJemputProses> {
                   SizedBox(height: 4),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [Text('Biaya Layanan'), Text('-Rp 0')],
+                    children: [
+                      const Text("Jarak"),
+                      Text(
+                        _formatDistance(
+                          _calculateDistance(
+                            latitudeWarga,
+                            longitudeWarga,
+                            latitudeBankSampah,
+                            longitudeBankSampah,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                   Divider(),
                   Row(
@@ -604,5 +786,49 @@ class _PetugasSetorJemputProsesState extends State<PetugasSetorJemputProses> {
     } catch (e) {
       return Colors.grey;
     }
+  }
+
+  Widget _buildMapImage() {
+    // Check if coordinates are valid
+    if (latitudeWarga == 0 ||
+        longitudeWarga == 0 ||
+        latitudeBankSampah == 0 ||
+        longitudeBankSampah == 0) {
+      return _buildFallbackMapImage();
+    }
+
+    return SizedBox(
+      height: 180,
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(8),
+        child: GoogleMap(
+          initialCameraPosition: _initialCameraPosition,
+          markers: _markers,
+          onMapCreated: (controller) {
+            _mapController = controller;
+            // After map is created, fit the bounds
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              final bounds = _getBounds();
+              _mapController.animateCamera(
+                CameraUpdate.newLatLngBounds(bounds, 50.0),
+              );
+            });
+          },
+          mapType: MapType.normal,
+          zoomControlsEnabled: false,
+          myLocationEnabled: false,
+          myLocationButtonEnabled: false,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildFallbackMapImage() {
+    return Image.network(
+      "https://i.pinimg.com/736x/b0/79/09/b079096855c0edbaba47d93c67f18853.jpg",
+      height: 150,
+      width: double.infinity,
+      fit: BoxFit.cover,
+    );
   }
 }

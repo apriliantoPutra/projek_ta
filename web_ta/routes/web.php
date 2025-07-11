@@ -1,17 +1,17 @@
 <?php
 
-use App\Http\Controllers\AkunController;
-use App\Http\Controllers\DashboardController;
-use App\Http\Controllers\Edukasi\ArtikelController;
-use App\Http\Controllers\Edukasi\VideoController;
-use App\Http\Controllers\LoginController;
-use App\Http\Controllers\Master\BankSampahController;
-use App\Http\Controllers\Master\DataController;
-use App\Http\Controllers\Master\JenisSampahController;
-use App\Http\Controllers\ProfilController;
-use App\Http\Controllers\Setoran\SetorJemputController;
-use App\Http\Controllers\Setoran\SetorLangsungController;
-use App\Http\Controllers\TarikSaldoController;
+use App\Http\Controllers\Web\AkunController;
+use App\Http\Controllers\Web\DashboardController;
+use App\Http\Controllers\Web\Edukasi\ArtikelController;
+use App\Http\Controllers\Web\Edukasi\VideoController;
+use App\Http\Controllers\Web\LoginController;
+use App\Http\Controllers\Web\Master\BankSampahController;
+use App\Http\Controllers\Web\Master\DataController;
+use App\Http\Controllers\Web\Master\JenisSampahController;
+use App\Http\Controllers\Web\ProfilController;
+use App\Http\Controllers\Web\Setoran\SetorJemputController;
+use App\Http\Controllers\Web\Setoran\SetorLangsungController;
+use App\Http\Controllers\Web\TarikSaldoController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', [LoginController::class, 'index']);
@@ -83,4 +83,3 @@ Route::middleware(['authorization', 'admin'])->group(function () {
     Route::put('/tarik-saldo-terima/{id}', [TarikSaldoController::class, 'terimaTarikSaldo'])->name('Tarik-Saldo-Terima');
     Route::put('/tarik-saldo-tolak/{id}', [TarikSaldoController::class, 'tolakTarikSaldo'])->name('Tarik-Saldo-Tolak');
 });
-

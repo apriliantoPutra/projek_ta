@@ -6,8 +6,9 @@ import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class WargaSetorJemput extends StatefulWidget {
-  final Map<String, dynamic>? bankSampah;
-  const WargaSetorJemput({this.bankSampah, super.key});
+  
+  final Map<String, dynamic>? profilData;
+  const WargaSetorJemput({ this.profilData, super.key});
 
   @override
   State<WargaSetorJemput> createState() => _WargaSetorJemputState();
@@ -325,7 +326,7 @@ class _WargaSetorJemputState extends State<WargaSetorJemput> {
                             dataSetoran: validData,
                             tanggal: _tanggalController.text,
                             catatan: _catatanController.text,
-                            bankSampah: widget.bankSampah,
+                            profilData: widget.profilData
                           ),
                     ),
                   );

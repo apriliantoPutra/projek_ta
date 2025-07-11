@@ -1,21 +1,20 @@
 <?php
 
-namespace App\Http\Controllers\Setoran;
+namespace App\Http\Controllers\Web\Setoran;
+use App\Http\Controllers\Controller;
 
 use Illuminate\Http\Request;
 use App\Models\PengajuanSetor;
-use App\Http\Controllers\Controller;
 use App\Models\InputDetailSetor;
 use App\Models\Master\JenisSampah;
-use App\Models\TotalSampah;
 use Carbon\Carbon;
 
-class SetorLangsungController extends Controller
+class SetorJemputController extends Controller
 {
     public function index()
     {
         $pengajuan_setor = PengajuanSetor::with(['user.profil'])
-            ->where('jenis_setor', '=', 'langsung')
+            ->where('jenis_setor', '=', 'jemput')
             ->orderBy('waktu_pengajuan', 'desc')     // urut berdasarkan waktu terbaru
             ->orderBy('id', 'asc')                   // jika waktu sama, ambil yang lebih dulu
             ->get()
@@ -41,9 +40,9 @@ class SetorLangsungController extends Controller
                 ];
             });
 
-
-        return view('setoranSampah.langsung.index', ['headerTitle' => 'Setoran Langsung', 'datas' => $pengajuan_setor]);
+        return view('setoranSampah.jemput.index', ['headerTitle' => 'Setoran Jemput', 'datas' => $pengajuan_setor]);
     }
+
     public function show($id)
     {
         $item = PengajuanSetor::with('user.profil')->find($id);
@@ -80,6 +79,7 @@ class SetorLangsungController extends Controller
                     'no_hp_pengguna' => $no_hp,
                     'gambar_pengguna' => $gambar,
                     'gambar_url' => $gambar_url,
+                    'koordinat_pengguna'=> $profil->koordinat_pengguna
                 ]
             ],
 
@@ -113,7 +113,7 @@ class SetorLangsungController extends Controller
 
 
 
-        return view('setoranSampah.langsung.show', [
+        return view('setoranSampah.jemput.show', [
             'headerTitle' => 'Setoran Langsung',
             'pengajuan' => $pengajuan_setor,
             'detail' => $detail_setor

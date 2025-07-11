@@ -1,22 +1,23 @@
 import 'dart:convert';
+import 'dart:math';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 import 'package:mobile_ta/constants/constants.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:mobile_ta/warga/setor_langsung/status_page.dart';
+import 'package:mobile_ta/warga/setor_jemput/status_page.dart';
 
 class WargaKonfirmasiSetorJemputPage extends StatefulWidget {
   final List<Map<String, dynamic>> dataSetoran;
   final String tanggal;
   final String? catatan;
-  final Map<String, dynamic>? bankSampah;
+  final Map<String, dynamic>? profilData;
 
   const WargaKonfirmasiSetorJemputPage({
     super.key,
-    this.bankSampah,
+    this.profilData,
     required this.dataSetoran,
     required this.tanggal,
     required this.catatan,
@@ -29,14 +30,21 @@ class WargaKonfirmasiSetorJemputPage extends StatefulWidget {
 
 class _WargaKonfirmasiSetorJemputPageState
     extends State<WargaKonfirmasiSetorJemputPage> {
-  late Map<String, dynamic>? bankSampah;
-  late String namaBank;
-  late String deskripsiBank;
-  late String alamatBank;
-  late String namaAdmin;
-  late String emailAdmin;
-  late String noHpAdmin;
-  late String mapUrl;
+  Map<String, dynamic>? bankSampah;
+  String namaBank = 'Memuat...';
+  String deskripsiBank = 'Memuat...';
+  String alamatBank = 'Memuat...';
+  String namaAdmin = 'Memuat...';
+  String emailAdmin = 'Memuat...';
+  String noHpAdmin = 'Memuat...';
+
+  double? latitudeBankSampah;
+  double? longitudeBankSampah;
+  double? latitudeWarga;
+  double? longitudeWarga;
+  GoogleMapController? _mapController;
+  CameraPosition? _initialCameraPosition;
+  Set<Marker> _markers = {};
 
   final Map<int, Map<String, dynamic>> jenisSampahCache = {};
   List<Map<String, dynamic>> processedSetoran = [];
@@ -49,24 +57,146 @@ class _WargaKonfirmasiSetorJemputPageState
   @override
   void initState() {
     super.initState();
-    processSetoran();
-    bankSampah = widget.bankSampah;
+    fetchData();
+  }
 
-    namaBank = bankSampah?['nama_bank_sampah'] ?? 'Memuat...';
-    mapUrl = bankSampah?['koordinat_bank_sampah'] ?? 'Memuat...';
-    deskripsiBank = bankSampah?['deskripsi_bank_sampah'] ?? 'Memuat...';
-    alamatBank = bankSampah?['alamat_bank_sampah'] ?? 'Memuat...';
-    namaAdmin = bankSampah?['user']?['profil']?['nama_pengguna'] ?? 'Memuat...';
-    emailAdmin = bankSampah?['user']?['email'] ?? 'Memuat...';
-    noHpAdmin =
-        bankSampah?['user']?['profil']?['no_hp_pengguna'] ?? 'Memuat...';
-
+  Future<void> fetchData() async {
+    setState(() {
+      isLoading = true;
+    });
     try {
       final inputDate = DateFormat('dd/MM/yyyy').parse(widget.tanggal);
       formattedDate = DateFormat('yyyy-MM-dd').format(inputDate);
     } catch (e) {
       formattedDate = null;
     }
+
+    try {
+      await fetchBankSampah();
+      await processSetoran();
+
+      if (bankSampah != null) {
+        namaBank = bankSampah?['nama_bank_sampah'] ?? 'Tidak tersedia';
+        latitudeBankSampah = double.tryParse(bankSampah?['latitude'] ?? '');
+        longitudeBankSampah = double.tryParse(bankSampah?['longitude'] ?? '');
+
+        latitudeWarga = double.tryParse(widget.profilData?['latitude'] ?? '');
+        longitudeWarga = double.tryParse(widget.profilData?['longitude'] ?? '');
+
+        deskripsiBank =
+            bankSampah?['deskripsi_bank_sampah'] ?? 'Tidak tersedia';
+        alamatBank = bankSampah?['alamat_bank_sampah'] ?? 'Tidak tersedia';
+        namaAdmin =
+            bankSampah?['user']?['profil']?['nama_pengguna'] ??
+            'Tidak tersedia';
+        emailAdmin = bankSampah?['user']?['email'] ?? 'Tidak tersedia';
+        noHpAdmin =
+            bankSampah?['user']?['profil']?['no_hp_pengguna'] ??
+            'Tidak tersedia';
+
+        if (latitudeBankSampah != null &&
+            longitudeBankSampah != null &&
+            latitudeWarga != null &&
+            longitudeWarga != null) {
+          final midLat = (latitudeBankSampah! + latitudeWarga!) / 2;
+          final midLng = (longitudeBankSampah! + longitudeWarga!) / 2;
+
+          _initialCameraPosition = CameraPosition(
+            target: LatLng(midLat, midLng),
+            zoom: 12,
+          );
+        }
+      }
+
+      _updateMarkers();
+    } catch (e) {
+      debugPrint('Error in fetchData: $e');
+    } finally {
+      if (mounted) {
+        setState(() {
+          isLoading = false;
+        });
+      }
+    }
+  }
+
+  void _updateMarkers() {
+    if (latitudeBankSampah == null ||
+        longitudeBankSampah == null ||
+        latitudeWarga == null ||
+        longitudeWarga == null)
+      return;
+
+    setState(() {
+      _markers = {
+        Marker(
+          markerId: const MarkerId('bank_sampah_location'),
+          position: LatLng(latitudeBankSampah!, longitudeBankSampah!),
+          infoWindow: InfoWindow(title: namaBank),
+          icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueRed),
+        ),
+        Marker(
+          markerId: const MarkerId('warga_location'),
+          position: LatLng(latitudeWarga!, longitudeWarga!),
+          infoWindow: const InfoWindow(title: 'Lokasi Anda'),
+          icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueBlue),
+        ),
+      };
+
+      // Fit camera to show both markers
+      if (_mapController != null) {
+        final bounds = _getBounds();
+        _mapController!.animateCamera(
+          CameraUpdate.newLatLngBounds(bounds, 50.0),
+        );
+      }
+    });
+  }
+
+  LatLngBounds _getBounds() {
+    final northeast = LatLng(
+      max(latitudeBankSampah!, latitudeWarga!),
+      max(longitudeBankSampah!, longitudeWarga!),
+    );
+    final southwest = LatLng(
+      min(latitudeBankSampah!, latitudeWarga!),
+      min(longitudeBankSampah!, longitudeWarga!),
+    );
+    return LatLngBounds(northeast: northeast, southwest: southwest);
+  }
+
+  Future<Map<String, dynamic>?> fetchBankSampah() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString('token');
+
+      if (token == null) {
+        debugPrint('Token tidak ditemukan');
+        return null;
+      }
+
+      final response = await http.get(
+        Uri.parse('$baseUrl/bank-sampah/1'),
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Accept': 'application/json',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final responseData = jsonDecode(response.body);
+        setState(() {
+          bankSampah = responseData['data'];
+        });
+      } else {
+        debugPrint(
+          'Gagal ambil data bank sampah: ${response.statusCode} - ${response.body}',
+        );
+      }
+    } catch (e) {
+      debugPrint('Error in fetchBankSampah: $e');
+    }
+    return null;
   }
 
   Future<void> processSetoran() async {
@@ -114,29 +244,29 @@ class _WargaKonfirmasiSetorJemputPageState
         totalHarga += subtotal;
       }
     }
-
-    setState(() => isLoading = false);
   }
 
   Future<void> storePengajuanSetorJemput() async {
     if (formattedDate == null) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Tanggal tidak valid.')));
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('Tanggal tidak valid.')));
+      }
       return;
     }
-
-    setState(() {
-      isLoading = true;
-    });
 
     final prefs = await SharedPreferences.getInstance();
     final String? token = prefs.getString('token');
 
     if (token == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Token tidak ditemukan. Silakan login ulang.')),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Token tidak ditemukan. Silakan login ulang.'),
+          ),
+        );
+      }
       return;
     }
 
@@ -151,6 +281,10 @@ class _WargaKonfirmasiSetorJemputPageState
 
     final url = Uri.parse("$baseUrl/setor-jemput");
     try {
+      setState(() {
+        isLoading = true;
+      });
+
       final response = await http.post(
         url,
         headers: {
@@ -170,33 +304,79 @@ class _WargaKonfirmasiSetorJemputPageState
       final responseData = jsonDecode(response.body);
 
       if (response.statusCode == 200 || response.statusCode == 201) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(responseData['message'] ?? 'Berhasil mengirim'),
-          ),
-        );
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(responseData['message'] ?? 'Berhasil mengirim'),
+            ),
+          );
 
-        Navigator.pushAndRemoveUntil(
-          context,
-          MaterialPageRoute(
-            builder: (context) => const WargaStatusTungguSetorLangsung(),
-          ),
-          (Route<dynamic> route) => false,
-        );
+          Navigator.pushAndRemoveUntil(
+            context,
+            MaterialPageRoute(
+              builder: (context) => const WargaStatusTungguSetorJemput(),
+            ),
+            (Route<dynamic> route) => false,
+          );
+        }
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(responseData['message'] ?? 'Gagal mengirim')),
-        );
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(responseData['message'] ?? 'Gagal mengirim'),
+            ),
+          );
+        }
       }
     } catch (e) {
-      print("Error: $e");
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Terjadi kesalahan, coba lagi.')));
+      debugPrint("Error: $e");
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Terjadi kesalahan, coba lagi.')),
+        );
+      }
     } finally {
-      setState(() {
-        isLoading = false;
-      });
+      if (mounted) {
+        setState(() {
+          isLoading = false;
+        });
+      }
+    }
+  }
+
+  // perhitungan jarak
+  double _calculateDistance(
+    double lat1,
+    double lon1,
+    double lat2,
+    double lon2,
+  ) {
+    const earthRadius = 6371;
+
+    // Convert degrees to radians
+    final dLat = _degreesToRadians(lat2 - lat1);
+    final dLon = _degreesToRadians(lon2 - lon1);
+
+    final a =
+        sin(dLat / 2) * sin(dLat / 2) +
+        cos(_degreesToRadians(lat1)) *
+            cos(_degreesToRadians(lat2)) *
+            sin(dLon / 2) *
+            sin(dLon / 2);
+    final c = 2 * atan2(sqrt(a), sqrt(1 - a));
+
+    return earthRadius * c;
+  }
+
+  double _degreesToRadians(double degrees) {
+    return degrees * pi / 180;
+  }
+
+  String _formatDistance(double distance) {
+    if (distance < 1) {
+      return "Kurang dari 1 Km";
+    } else {
+      return "${distance.toStringAsFixed(1)} Km";
     }
   }
 
@@ -208,10 +388,10 @@ class _WargaKonfirmasiSetorJemputPageState
         elevation: 0,
         centerTitle: true,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: Colors.white),
+          icon: const Icon(Icons.arrow_back, color: Colors.white),
           onPressed: () => Navigator.pop(context),
         ),
-        title: Text(
+        title: const Text(
           'Setor Jemput',
           style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
         ),
@@ -350,6 +530,24 @@ class _WargaKonfirmasiSetorJemputPageState
                                     mainAxisAlignment:
                                         MainAxisAlignment.spaceBetween,
                                     children: [
+                                      const Text("Jarak"),
+                                      Text(
+                                        _formatDistance(
+                                          _calculateDistance(
+                                            latitudeWarga ?? 0,
+                                            longitudeWarga ?? 0,
+                                            latitudeBankSampah ?? 0,
+                                            longitudeBankSampah ?? 0,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  const Divider(),
+                                  Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: [
                                       const Text(
                                         "Total Insentif",
                                         style: TextStyle(
@@ -407,11 +605,12 @@ class _WargaKonfirmasiSetorJemputPageState
                                   Text("Deskripsi: $deskripsiBank"),
                                   Text("Alamat: $alamatBank"),
                                   const SizedBox(height: 12),
-                                  _buildMapImage(mapUrl),
                                 ],
                               ),
                             ),
-
+                            const SizedBox(height: 20),
+                            _buildMapImage(),
+                            const SizedBox(height: 20),
                             _buildCard(
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -485,33 +684,36 @@ class _WargaKonfirmasiSetorJemputPageState
     );
   }
 
-  Widget _buildMapImage(String koordinat) {
-    final cleanedKoordinat = koordinat.trim().replaceAll(' ', '');
-
-    final isValid = RegExp(
-      r'^-?\d+(\.\d+)?,-?\d+(\.\d+)?$',
-    ).hasMatch(cleanedKoordinat);
-
-    if (!isValid) {
+  Widget _buildMapImage() {
+    if (latitudeBankSampah == null ||
+        longitudeBankSampah == null ||
+        latitudeWarga == null ||
+        longitudeWarga == null ||
+        _initialCameraPosition == null) {
       return _buildFallbackMapImage();
     }
 
-    final apiKey = dotenv.env['GOOGLE_MAPS_API_KEY'];
-    if (apiKey == null || apiKey.isEmpty) {
-      return _buildFallbackMapImage();
-    }
-
-    final staticMapUrl =
-        "https://maps.googleapis.com/maps/api/staticmap?center=$cleanedKoordinat&zoom=15&size=600x300&markers=color:red%7C$cleanedKoordinat&key=$apiKey";
-
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(8),
-      child: Image.network(
-        staticMapUrl,
-        height: 180,
-        width: double.infinity,
-        fit: BoxFit.cover,
-        errorBuilder: (context, error, stackTrace) => _buildFallbackMapImage(),
+    return SizedBox(
+      height: 300,
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(8),
+        child: GoogleMap(
+          initialCameraPosition: _initialCameraPosition!,
+          markers: _markers,
+          onMapCreated: (controller) {
+            _mapController = controller;
+            // After map is created, fit the bounds
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              _mapController?.animateCamera(
+                CameraUpdate.newLatLngBounds(_getBounds(), 50.0),
+              );
+            });
+          },
+          mapType: MapType.normal,
+          zoomControlsEnabled: false,
+          myLocationEnabled: false,
+          myLocationButtonEnabled: false,
+        ),
       ),
     );
   }
@@ -523,5 +725,11 @@ class _WargaKonfirmasiSetorJemputPageState
       width: double.infinity,
       fit: BoxFit.cover,
     );
+  }
+
+  @override
+  void dispose() {
+    _mapController?.dispose();
+    super.dispose();
   }
 }

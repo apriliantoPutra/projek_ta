@@ -18,6 +18,7 @@ class SetorCardLangsungBaru extends StatelessWidget {
               'id_ID',
             ).format(DateTime.parse(waktuPengajuan))
             : "-";
+    final String catatan = data['catatan_petugas'] ?? '';
 
     final profil = data['user']?['profil'];
     final gambarPengguna =
@@ -82,7 +83,11 @@ class SetorCardLangsungBaru extends StatelessWidget {
                     context,
                     MaterialPageRoute(
                       builder:
-                          (context) => PetugasSetorLangsungBaru(id: data['id']),
+                          (context) => PetugasSetorLangsungBaru(
+                            id: data['id'],
+                            tanggal: tanggal,
+                            catatan: catatan,
+                          ),
                     ),
                   );
                 },

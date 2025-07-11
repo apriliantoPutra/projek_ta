@@ -1,13 +1,8 @@
 import 'package:flutter/material.dart';
 
-class DetailHistoriSetorPage extends StatefulWidget {
-  const DetailHistoriSetorPage({super.key});
+class WargaNotifikasiPage extends StatelessWidget {
+  const WargaNotifikasiPage({super.key});
 
-  @override
-  State<DetailHistoriSetorPage> createState() => _DetailHistoriSetorPageState();
-}
-
-class _DetailHistoriSetorPageState extends State<DetailHistoriSetorPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -20,9 +15,10 @@ class _DetailHistoriSetorPageState extends State<DetailHistoriSetorPage> {
           onPressed: () => Navigator.pop(context),
         ),
         title: const Text(
-          'Detail Setor Sampah',
+          'Notifikasi',
           style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
         ),
+        
       ),
     );
   }

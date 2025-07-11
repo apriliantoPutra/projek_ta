@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Api\ApiAkunController;
 use App\Http\Controllers\Api\ArtikelController;
+use App\Http\Controllers\Api\ChatBotController;
 use App\Http\Controllers\Api\HistoriController;
 use App\Http\Controllers\Api\KumpulanSetorController;
 use App\Http\Controllers\Api\LoginController as ApiLoginController;
@@ -11,6 +12,7 @@ use App\Http\Controllers\Api\SaldoController;
 use App\Http\Controllers\Api\SetorJemputController;
 use App\Http\Controllers\Api\SetorLangsungController;
 use App\Http\Controllers\Api\TarikSaldoController as ApiTarikSaldoController;
+use App\Http\Controllers\Api\TotalSampahController;
 use App\Http\Controllers\Api\VideoController;
 use App\Http\Controllers\PengajuanPetugasController;
 use Illuminate\Support\Facades\Route;
@@ -84,10 +86,9 @@ Route::prefix('v1')->group(function () {
 
         Route::get('histori-setor-detai/{id}', [HistoriController::class, 'detailSetor']);
 
+        Route::post('/chatbot', [ChatBotController::class, 'store']);
 
-        // tidak dipakai
-        Route::post('/setor-sampah', [PengajuanPetugasController::class, 'store']);
-        Route::get('/setor-sampah/{id}', [PengajuanPetugasController::class, 'show']);
+       
 
         // Logout
         Route::post('logout', [ApiLoginController::class, 'logout']);
@@ -106,4 +107,6 @@ Route::prefix('v1')->group(function () {
         Route::get('/terbaru', [VideoController::class, 'terbaru']);
         Route::get('{id}', [VideoController::class, 'show']);
     });
+
+    Route::get('/total-berat', [TotalSampahController::class, 'totalSampah']);
 });

@@ -23,9 +23,11 @@ class _WargaMainWrapperState extends State<WargaMainWrapper> {
   Map<String, dynamic>? akunData;
   Map<String, dynamic>? profilData;
   Map<String, dynamic>? saldoData;
-  Map<String, dynamic>? bankSampah;
+
   List<dynamic> artikelList = [];
   List<dynamic> videoList = [];
+
+  String? totalSampah;
 
   @override
   void initState() {
@@ -34,18 +36,27 @@ class _WargaMainWrapperState extends State<WargaMainWrapper> {
     checkInitialData();
   }
 
-  Future<void> loadBankSampah() async {
-    final data = await fetchBankSampah();
-    setState(() {
-      bankSampah = data;
-    });
-  }
-
   Future<void> loadAkunData() async {
     final data = await fetchAkunData();
     setState(() {
       akunData = data;
     });
+  }
+
+  Future<void> loadTotalSampah() async {
+    try {
+      final response = await http.get(Uri.parse('$baseUrl/total-berat'));
+      if (response.statusCode == 200) {
+        final jsonData = json.decode(response.body);
+        setState(() {
+          totalSampah = jsonData['data'];
+        });
+      } else {
+        debugPrint('Gagal ambil total sampah: ${response.body}');
+      }
+    } catch (e) {
+      debugPrint('Error total sampah: $e');
+    }
   }
 
   Future<void> loadSaldoData() async {
@@ -60,13 +71,14 @@ class _WargaMainWrapperState extends State<WargaMainWrapper> {
 
   Future<void> checkInitialData() async {
     await loadAkunData();
-    await loadBankSampah();
+
     await cekProfil();
     // Jika profil ditemukan, baru load saldo
     if (profilDitemukan) {
       await loadSaldoData();
-      await loadArtikel(); 
-      await loadVideo(); 
+      await loadArtikel();
+      await loadVideo();
+      await loadTotalSampah();
     }
     setState(() {
       isLoading = false;
@@ -172,29 +184,6 @@ class _WargaMainWrapperState extends State<WargaMainWrapper> {
     }
   }
 
-  Future<Map<String, dynamic>?> fetchBankSampah() async {
-    final prefs = await SharedPreferences.getInstance();
-    final token = prefs.getString('token');
-
-    if (token == null) {
-      debugPrint('Token tidak ditemukan');
-      return null;
-    }
-
-    final response = await http.get(
-      Uri.parse('$baseUrl/bank-sampah/1'),
-      headers: {'Authorization': 'Bearer $token', 'Accept': 'application/json'},
-    );
-
-    if (response.statusCode == 200) {
-      final json = jsonDecode(response.body);
-      return json['data'];
-    } else {
-      debugPrint('Gagal ambil data bank sampah: ${response.body}');
-      return null;
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     if (isLoading) {
@@ -210,13 +199,16 @@ class _WargaMainWrapperState extends State<WargaMainWrapper> {
         akunData: akunData,
         profilData: profilData,
         saldoData: saldoData,
-         artikelList: artikelList,
-    videoList: videoList,
+        artikelList: artikelList,
+        videoList: videoList,
+        totalSampah: totalSampah,
       ),
-      WargaSetorPage(akunData: akunData, bankSampah: bankSampah),
-      WargaEdukasiPage(akunData: akunData,
-      artikelList: artikelList,
-    videoList: videoList,),
+      WargaSetorPage(profilData: profilData),
+      WargaEdukasiPage(
+        akunData: akunData,
+        artikelList: artikelList,
+        videoList: videoList,
+      ),
       WargaAkunPage(
         akunData: akunData,
         profilData: profilData,

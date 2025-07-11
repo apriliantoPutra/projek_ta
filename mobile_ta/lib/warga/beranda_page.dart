@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:mobile_ta/warga/artikel/detail_page.dart';
 import 'package:mobile_ta/warga/chatbot_page.dart';
-import 'package:mobile_ta/warga/histori_saldo/kumpulan_histori_setor_page.dart';
+import 'package:mobile_ta/warga/histori_setor/kumpulan_histori_setor_page.dart';
 import 'package:mobile_ta/warga/histori_setor_page.dart';
+import 'package:mobile_ta/warga/info_page.dart';
 import 'package:mobile_ta/warga/kalkulator/kalkulator_setor_sampah_page.dart';
 import 'package:mobile_ta/warga/video/detail_page.dart';
 import 'package:mobile_ta/widget/videoCard_widget.dart';
@@ -15,6 +16,8 @@ class WargaBerandaPage extends StatelessWidget {
   final List<dynamic> artikelList;
   final List<dynamic> videoList;
 
+  final String? totalSampah;
+
   const WargaBerandaPage({
     Key? key,
     this.akunData,
@@ -22,6 +25,7 @@ class WargaBerandaPage extends StatelessWidget {
     this.saldoData,
     required this.artikelList,
     required this.videoList,
+    this.totalSampah,
   }) : super(key: key);
 
   @override
@@ -98,7 +102,7 @@ class WargaBerandaPage extends StatelessWidget {
                   ),
                   SizedBox(height: 4),
                   Text(
-                    "14,114,400 kg Sampah Botol",
+                    totalSampah != null ? '$totalSampah kg' : 'Memuat...',
                     style: TextStyle(
                       fontSize: 22,
                       fontWeight: FontWeight.bold,
@@ -168,7 +172,16 @@ class WargaBerandaPage extends StatelessWidget {
                           );
                         },
                       ),
-                      _menuItem(Icons.info_outline, "Info"),
+                      _menuItem(
+                        Icons.info_outline,
+                        "Info",
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (context) => InfoPage()),
+                          );
+                        },
+                      ),
                     ],
                   ),
                 ],
@@ -230,15 +243,17 @@ class WargaBerandaPage extends StatelessWidget {
                         final video = videoList[index];
                         return VideoCard(
                           imageUrl:
-                                'https://i.pinimg.com/736x/2d/d3/79/2dd379968693700ec12af8f1974b491e.jpg',
+                              'https://i.pinimg.com/736x/2d/d3/79/2dd379968693700ec12af8f1974b491e.jpg',
                           title: video['judul_video'] ?? '',
                           date: video['tanggal_format'] ?? '',
                           onTap: () {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (_) =>
-                                    WargaDetailVideoPage(videoId: video['id']),
+                                builder:
+                                    (_) => WargaDetailVideoPage(
+                                      videoId: video['id'],
+                                    ),
                               ),
                             );
                           },

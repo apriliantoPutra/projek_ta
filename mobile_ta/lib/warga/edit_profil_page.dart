@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
 import 'package:mobile_ta/constants/constants.dart';
@@ -24,6 +25,10 @@ class _WargaEditProfilPageState extends State<WargaEditProfilPage> {
   late TextEditingController _telponController;
   late TextEditingController _alamatController;
   late TextEditingController _koordinatController;
+  GoogleMapController? _mapController;
+  late CameraPosition _initialCameraPosition;
+  Set<Marker> _markers = {};
+  LatLng? _currentLatLng;
 
   @override
   void initState() {
@@ -40,6 +45,59 @@ class _WargaEditProfilPageState extends State<WargaEditProfilPage> {
     _koordinatController = TextEditingController(
       text: widget.profilData?['koordinat_pengguna'] ?? '',
     );
+
+    _initializeMap();
+  }
+
+  void _initializeMap() {
+    final initialCoords =
+        widget.profilData?['koordinat_pengguna'] ?? '-6.2088,106.8456';
+    _currentLatLng = _parseCoordinates(initialCoords);
+
+    _initialCameraPosition = CameraPosition(target: _currentLatLng!, zoom: 15);
+
+    _updateMarkers();
+  }
+
+  LatLng _parseCoordinates(String koordinat) {
+    final cleanedKoordinat = koordinat.trim().replaceAll(' ', '');
+    final parts = cleanedKoordinat.split(',');
+
+    double latitude =
+        parts.isNotEmpty ? double.tryParse(parts[0]) ?? -6.2088 : -6.2088;
+    double longitude =
+        parts.length > 1 ? double.tryParse(parts[1]) ?? 106.8456 : 106.8456;
+
+    return LatLng(latitude, longitude);
+  }
+
+  void _updateMarkers() {
+    if (_currentLatLng == null) return;
+
+    setState(() {
+      _markers = {
+        Marker(
+          markerId: const MarkerId('user_location'),
+          position: _currentLatLng!,
+          infoWindow: const InfoWindow(title: 'Lokasi Anda'),
+          icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueRed),
+        ),
+      };
+    });
+
+    _mapController?.animateCamera(CameraUpdate.newLatLng(_currentLatLng!));
+  }
+
+  void _handleKoordinatChanged() {
+    try {
+      final newLatLng = _parseCoordinates(_koordinatController.text);
+      setState(() {
+        _currentLatLng = newLatLng;
+      });
+      _updateMarkers();
+    } catch (e) {
+      debugPrint('Error parsing coordinates: $e');
+    }
   }
 
   File? _profileImage;
@@ -239,13 +297,13 @@ class _WargaEditProfilPageState extends State<WargaEditProfilPage> {
                   _buildTextField("Nama Lengkap", _namaController),
                   _buildTextField("Telpon", _telponController),
                   _buildTextField("Alamat", _alamatController),
-                  _buildTextField("Titik Koordinat", _koordinatController),
+                  _buildCoordinateField(),
                   const SizedBox(height: 12),
-
-                  _buildMapImage(_koordinatController.text),
                 ],
               ),
             ),
+            const SizedBox(height: 20),
+            _buildMapWidget(),
           ],
         ),
       ),
@@ -284,43 +342,84 @@ class _WargaEditProfilPageState extends State<WargaEditProfilPage> {
     );
   }
 
-  Widget _buildMapImage(String koordinat) {
-    final cleanedKoordinat = koordinat.trim().replaceAll(' ', '');
+  Widget _buildCoordinateField() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          "Titik Koordinat",
+          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+        ),
+        const SizedBox(height: 4),
+        TextField(
+          controller: _koordinatController,
+          decoration: InputDecoration(
+            filled: true,
+            fillColor: Colors.white,
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 12,
+              vertical: 8,
+            ),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide.none,
+            ),
+            suffixIcon: IconButton(
+              icon: const Icon(Icons.map),
+              onPressed: () {
+                _handleKoordinatChanged();
+              },
+            ),
+          ),
+          onChanged: (value) {
+            // Optional: Update map in real-time as user types
+            // _handleKoordinatChanged();
+          },
+          onSubmitted: (value) {
+            _handleKoordinatChanged();
+          },
+        ),
+        const SizedBox(height: 12),
+      ],
+    );
+  }
 
-    final isValid = RegExp(
-      r'^-?\d+(\.\d+)?,-?\d+(\.\d+)?$',
-    ).hasMatch(cleanedKoordinat);
-
-    if (!isValid) {
-      return _buildFallbackMapImage();
-    }
-
-    final apiKey = dotenv.env['GOOGLE_MAPS_API_KEY'];
-    if (apiKey == null || apiKey.isEmpty) {
-      return _buildFallbackMapImage();
-    }
-
-    final staticMapUrl =
-        "https://maps.googleapis.com/maps/api/staticmap?center=$cleanedKoordinat&zoom=15&size=600x300&markers=color:red%7C$cleanedKoordinat&key=$apiKey";
-
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(8),
-      child: Image.network(
-        staticMapUrl,
-        height: 180,
-        width: double.infinity,
-        fit: BoxFit.cover,
-        errorBuilder: (context, error, stackTrace) => _buildFallbackMapImage(),
+  Widget _buildMapWidget() {
+    return SizedBox(
+      height: 300,
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(12),
+        child: GoogleMap(
+          initialCameraPosition: _initialCameraPosition,
+          markers: _markers,
+          onMapCreated: (controller) {
+            _mapController = controller;
+          },
+          onTap: (LatLng position) {
+            // Optional: Allow user to tap on map to set location
+            setState(() {
+              _currentLatLng = position;
+              _koordinatController.text =
+                  '${position.latitude.toStringAsFixed(6)},${position.longitude.toStringAsFixed(6)}';
+              _updateMarkers();
+            });
+          },
+          mapType: MapType.normal,
+          zoomControlsEnabled: false,
+          myLocationEnabled: false,
+          myLocationButtonEnabled: false,
+        ),
       ),
     );
   }
 
-  Widget _buildFallbackMapImage() {
-    return Image.network(
-      "https://i.pinimg.com/736x/b0/79/09/b079096855c0edbaba47d93c67f18853.jpg",
-      height: 150,
-      width: double.infinity,
-      fit: BoxFit.cover,
-    );
+  @override
+  void dispose() {
+    _namaController.dispose();
+    _telponController.dispose();
+    _alamatController.dispose();
+    _koordinatController.dispose();
+    _mapController?.dispose();
+    super.dispose();
   }
 }
