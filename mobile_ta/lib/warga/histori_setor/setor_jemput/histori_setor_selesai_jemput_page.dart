@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:http/http.dart' as http;
 import 'package:mobile_ta/constants/constants.dart';
+import 'package:mobile_ta/warga/detail_map/map_bank_sampah_map_warga_page.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class HistoriSetorSelesaiJemputPage extends StatefulWidget {
@@ -39,6 +40,7 @@ class HistoriSetorSelesaiJemputPageState
   Set<Marker> _markers = {};
 
   List<Map<String, dynamic>> processedSetoran = [];
+  int ongkir_per_jarak = 0;
   double totalBerat = 0;
   int totalHarga = 0;
   int biayaLayanan = 0;
@@ -54,6 +56,7 @@ class HistoriSetorSelesaiJemputPageState
       await fetchPengajuanDetailSetor();
       await fetchJenisSampah();
       await fetchBankSampah();
+      calculateServiceFee();
 
       if (pengajuanDetailSetor != null && bankSampah != null) {
         final profil = pengajuanDetailSetor!['user']?['profil'];
@@ -67,6 +70,7 @@ class HistoriSetorSelesaiJemputPageState
             double.tryParse(bankSampah?['latitude']?.toString() ?? '0') ?? 0;
         longitudeBankSampah =
             double.tryParse(bankSampah?['longitude']?.toString() ?? '0') ?? 0;
+        ongkir_per_jarak = bankSampah?['ongkir_per_jarak'] ?? 0;
 
         // Calculate mid point for initial camera position
         final midLat = (latitudeBankSampah + latitudeWarga) / 2;
@@ -236,18 +240,34 @@ class HistoriSetorSelesaiJemputPageState
     }
   }
 
-  double _calculateDistance(
+  void calculateServiceFee() {
+    if (latitudeWarga == null ||
+        longitudeWarga == null ||
+        latitudeBankSampah == null ||
+        longitudeBankSampah == null) {
+      biayaLayanan = 0;
+      return;
+    }
+    final jarak = _calculateDistanceInKm(
+      latitudeWarga!,
+      longitudeWarga!,
+      latitudeBankSampah!,
+      longitudeBankSampah!,
+    );
+
+    // Hitung biaya layanan
+    biayaLayanan = jarak * ongkir_per_jarak;
+  }
+
+  int _calculateDistanceInKm(
     double lat1,
     double lon1,
     double lat2,
     double lon2,
   ) {
-    const earthRadius = 6371;
-
-    // Convert degrees to radians
+    const earthRadius = 6371; // Radius bumi dalam kilometer
     final dLat = _degreesToRadians(lat2 - lat1);
     final dLon = _degreesToRadians(lon2 - lon1);
-
     final a =
         sin(dLat / 2) * sin(dLat / 2) +
         cos(_degreesToRadians(lat1)) *
@@ -255,8 +275,10 @@ class HistoriSetorSelesaiJemputPageState
             sin(dLon / 2) *
             sin(dLon / 2);
     final c = 2 * atan2(sqrt(a), sqrt(1 - a));
+    final distance = earthRadius * c;
 
-    return earthRadius * c;
+    // Jika jarak < 1 km, return 0, else return jarak dibulatkan ke bawah
+    return distance < 1 ? 0 : distance.floor();
   }
 
   double _degreesToRadians(double degrees) {
@@ -297,7 +319,6 @@ class HistoriSetorSelesaiJemputPageState
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          
           const SizedBox(height: 16),
           // Waste Visualization
           Container(
@@ -398,14 +419,22 @@ class HistoriSetorSelesaiJemputPageState
                     const Text("Jarak"),
                     Text(
                       _formatDistance(
-                        _calculateDistance(
-                          latitudeWarga,
-                          longitudeWarga,
-                          latitudeBankSampah,
-                          longitudeBankSampah,
-                        ),
+                        _calculateDistanceInKm(
+                          latitudeWarga ?? 0,
+                          longitudeWarga ?? 0,
+                          latitudeBankSampah ?? 0,
+                          longitudeBankSampah ?? 0,
+                        ).toDouble(),
                       ),
                     ),
+                  ],
+                ),
+                const Divider(),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Text("Biaya Layanan (Ongkir)"),
+                    Text('Rp $biayaLayanan'),
                   ],
                 ),
                 const Divider(),
@@ -427,6 +456,36 @@ class HistoriSetorSelesaiJemputPageState
           ),
           const SizedBox(height: 10),
           _buildMapImage(),
+          const SizedBox(height: 10),
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton.icon(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder:
+                        (context) => (WargaMapBankSampahMapWargaPage(
+                          latitudeWarga: latitudeWarga,
+                          longitudeWarga: longitudeWarga,
+                          latitudeBankSampah: latitudeBankSampah,
+                          longitudeBankSampah: longitudeBankSampah,
+                        )),
+                  ),
+                );
+              },
+              icon: const Icon(Icons.map),
+              label: const Text("Detail Map"),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.green,
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(vertical: 14),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
+            ),
+          ),
           const SizedBox(height: 10),
           Padding(
             padding: EdgeInsets.symmetric(horizontal: 16),

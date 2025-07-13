@@ -7,7 +7,7 @@
             <!-- Header -->
             <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-6 gap-3">
                 <h1 class="text-xl font-bold text-gray-800 flex items-center gap-2">
-                    <i class="ri-search-line"></i> Setoran Sampah Warga
+                    <i class="ri-search-line"></i> Tarik Saldo Warga
                 </h1>
                 {{-- <a href="#" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition">+ Tambah
                     Data</a> --}}
@@ -15,23 +15,14 @@
 
 
             <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-4 gap-4">
-                <!-- Input & Tombol Search -->
-                <div class="flex w-full md:w-1/2 gap-2">
-                    <input type="text" placeholder="Cari nama warga"
+                <form method="GET" action="{{ route('Tarik-Saldo') }}" class="flex w-full md:w-1/2 gap-2">
+                    <input type="text" name="search" value="{{ request('search') }}" placeholder="Cari nama warga"
                         class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500">
-                    <button class="bg-gray-200 text-sm px-4 py-2 rounded hover:bg-green-600 hover:text-white transition">
+                    <button type="submit"
+                        class="bg-gray-200 text-sm px-4 py-2 rounded hover:bg-green-600 hover:text-white transition">
                         Search
                     </button>
-                </div>
-
-                <!-- Filter Role -->
-                <div>
-                    <span class="font-medium mr-2">Filter Status:</span>
-                    <button class=" text-sm px-3 py-1 rounded hover:bg-green-500 hover:text-white">Langsung</button>
-                    <button class="text-white text-sm px-3 py-1 rounded bg-green-500 transition">
-                        Jemput</button>
-
-                </div>
+                </form>
             </div>
 
 
@@ -116,6 +107,10 @@
 
                     </tbody>
                 </table>
+                <div class="mt-4 flex justify-end">
+                    {{ $paginated->links('vendor.pagination.tailwind') }}
+                </div>
+
             </div>
 
         </div>

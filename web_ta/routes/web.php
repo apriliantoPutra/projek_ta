@@ -8,6 +8,7 @@ use App\Http\Controllers\Web\LoginController;
 use App\Http\Controllers\Web\Master\BankSampahController;
 use App\Http\Controllers\Web\Master\DataController;
 use App\Http\Controllers\Web\Master\JenisSampahController;
+use App\Http\Controllers\Web\Master\LayananJemputController;
 use App\Http\Controllers\Web\ProfilController;
 use App\Http\Controllers\Web\Setoran\SetorJemputController;
 use App\Http\Controllers\Web\Setoran\SetorLangsungController;
@@ -35,6 +36,13 @@ Route::middleware(['authorization', 'admin'])->group(function () {
         Route::post('/bank-sampah-store', [BankSampahController::class, 'store'])->name('Bank-Sampah-Store');
         Route::get('/bank-sampah-edit', [BankSampahController::class, 'edit'])->name('Bank-Sampah-Edit');
         Route::put('/bank-sampah-update/{id}', [BankSampahController::class, 'update'])->name('Bank-Sampah-Update');
+
+        Route::get('/layanan-jemput', [LayananJemputController::class, 'index'])->name('Layanan-Jemput');
+        Route::get('/layanan-jemput-tambah', [LayananJemputController::class, 'create'])->name('Layanan-Jemput-Tambah');
+        Route::post('/layanan-jemput-store', [LayananJemputController::class, 'store'])->name('Layanan-Jemput-Store');
+        Route::get('/layanan-jemput-edit/{id}', [LayananJemputController::class, 'edit'])->name('Layanan-Jemput-Edit');
+        Route::put('/layanan-jemput-update/{id}', [LayananJemputController::class, 'update'])->name('Layanan-Jemput-Update');
+
     });
 
     Route::get('/setoran-langsung', [SetorLangsungController::class, 'index'])->name('Setor-Langsung');

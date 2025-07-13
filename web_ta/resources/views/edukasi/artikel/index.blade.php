@@ -15,24 +15,14 @@
 
 
             <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-4 gap-4">
-                <!-- Input & Tombol Search -->
-                <div class="flex w-full md:w-1/2 gap-2">
-                    <input type="text" placeholder="Cari judul edukasi"
+                <form method="GET" action="{{ route('Artikel') }}" class="flex w-full md:w-1/2 gap-2">
+                    <input type="text" name="search" value="{{ request('search') }}" placeholder="Cari Judul Artikel"
                         class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500">
-                    <button
-                        class="bg-gray-200 text-sm px-4 py-2 rounded cursor-pointer hover:bg-green-600 hover:text-white transition">
+                    <button type="submit"
+                        class="bg-gray-200 text-sm px-4 py-2 rounded hover:bg-green-600 hover:text-white transition">
                         Search
                     </button>
-                </div>
-
-                <!-- Filter Role -->
-                <div>
-                    <span class="font-medium mr-2">Jenis Edukasi:</span>
-                    <button class="bg-green-500 text-white text-sm px-3 py-1 rounded ">Artikel</button>
-                    <a href="/video"
-                        class="bg-gray-200 text-sm px-3 py-1 rounded hover:bg-green-500 hover:text-white transition">Video</a>
-
-                </div>
+                </form>
             </div>
 
 
@@ -69,12 +59,15 @@
 
                                 {{-- Aksi --}}
                                 <td class="px-5 py-3 space-x-2">
-                                    <a href="{{ route('Artikel-Edit', $artikel->id) }}" class="text-yellow-600 hover:underline">Edit</a>
-                                    <a href="{{ route('Artikel-Detail', $artikel->id) }}" class="text-blue-600 hover:underline">Detail</a>
+                                    <a href="{{ route('Artikel-Edit', $artikel->id) }}"
+                                        class="text-yellow-600 hover:underline">Edit</a>
+                                    <a href="{{ route('Artikel-Detail', $artikel->id) }}"
+                                        class="text-blue-600 hover:underline">Detail</a>
                                     <form action="{{ route('Artikel-Hapus', $artikel->id) }}" method="POST" class="inline">
                                         @csrf
                                         @method('DELETE')
-                                        <button type="submit" onclick="return confirm('Yakin ingin menghapus artikel ini?')"
+                                        <button type="submit"
+                                            onclick="return confirm('Yakin ingin menghapus artikel ini?')"
                                             class="text-red-600 cursor-pointer hover:underline">
                                             Hapus
                                         </button>
@@ -92,6 +85,9 @@
 
                     </tbody>
                 </table>
+                <div class="mt-4 flex justify-end">
+                    {{ $data->links('vendor.pagination.tailwind') }}
+                </div>
             </div>
 
         </div>

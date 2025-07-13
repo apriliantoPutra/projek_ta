@@ -65,9 +65,7 @@
                     <iframe src="https://www.google.com/maps?q={{ $bank_sampah->koordinat_bank_sampah }}&output=embed"
                         allowfullscreen loading="lazy" class="w-full h-96 border-0"
                         referrerpolicy="no-referrer-when-downgrade"></iframe>
-                    {{-- <iframe src="https://www.google.com/maps?q={{ $profil->koordinat_pengguna }}&output=embed"
-                            allowfullscreen loading="lazy" class="w-full h-96 border-0"
-                            referrerpolicy="no-referrer-when-downgrade"></iframe> --}}
+                    
                 </div>
             </div>
 

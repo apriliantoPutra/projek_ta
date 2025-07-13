@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Http\Controllers\Web\Setoran;
+
 use App\Http\Controllers\Controller;
 
 use Illuminate\Http\Request;
@@ -11,37 +12,55 @@ use Carbon\Carbon;
 
 class SetorJemputController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $pengajuan_setor = PengajuanSetor::with(['user.profil'])
-            ->where('jenis_setor', '=', 'jemput')
-            ->orderBy('waktu_pengajuan', 'desc')     // urut berdasarkan waktu terbaru
-            ->orderBy('id', 'asc')                   // jika waktu sama, ambil yang lebih dulu
-            ->get()
-            ->map(function ($item) {
-                $profil = $item->user->profil;
-                return [
-                    'id' => $item->id,
-                    'jenis_setor' => $item->jenis_setor,
-                    'waktu_pengajuan' => Carbon::parse($item->waktu_pengajuan)->isoFormat('dddd, DD/MM/YYYY'),
-                    'status_pengajuan' => $item->status_pengajuan,
-                    'catatan_petugas' => $item->catatan_petugas,
-                    'user' => [
-                        'username' => $item->user->username,
-                        'email' => $item->user->email,
-                        'profil' => [
-                            'nama_pengguna' => $profil->nama_pengguna,
-                            'alamat_pengguna' => $profil->alamat_pengguna,
-                            'no_hp_pengguna' => $profil->no_hp_pengguna,
-                            'gambar_pengguna' => $profil->gambar_pengguna,
-                            'gambar_url' => asset('storage/' . $profil->gambar_pengguna),
-                        ]
-                    ]
-                ];
-            });
+        $query = PengajuanSetor::with(['user.profil'])
+            ->where('jenis_setor', '=', 'jemput');
 
-        return view('setoranSampah.jemput.index', ['headerTitle' => 'Setoran Jemput', 'datas' => $pengajuan_setor]);
+        // Search berdasarkan username
+        if ($request->filled('search')) {
+            $query->whereHas('user', function ($q) use ($request) {
+                $q->where('username', 'like', '%' . $request->search . '%');
+            });
+        }
+
+        // Pagination dan urutan
+        $pengajuan_setor = $query->orderBy('waktu_pengajuan', 'desc')
+            ->orderBy('id', 'asc')
+            ->paginate(10)
+            ->withQueryString();
+
+        // Mapping
+        $datas = $pengajuan_setor->map(function ($item) {
+            $profil = $item->user->profil;
+            return [
+                'id' => $item->id,
+                'jenis_setor' => $item->jenis_setor,
+                'waktu_pengajuan' => \Carbon\Carbon::parse($item->waktu_pengajuan)->isoFormat('dddd, DD/MM/YYYY'),
+                'status_pengajuan' => $item->status_pengajuan,
+                'catatan_petugas' => $item->catatan_petugas,
+                'user' => [
+                    'username' => $item->user->username,
+                    'email' => $item->user->email,
+                    'profil' => [
+                        'nama_pengguna' => $profil->nama_pengguna,
+                        'alamat_pengguna' => $profil->alamat_pengguna,
+                        'no_hp_pengguna' => $profil->no_hp_pengguna,
+                        'gambar_pengguna' => $profil->gambar_pengguna,
+                        'gambar_url' => asset('storage/' . $profil->gambar_pengguna),
+                    ]
+                ]
+            ];
+        });
+
+        return view('setoranSampah.jemput.index', [
+            'headerTitle' => 'Setoran Jemput',
+            'datas' => $datas,
+            'paginated' => $pengajuan_setor,
+            'search' => $request->search,
+        ]);
     }
+
 
     public function show($id)
     {
@@ -79,7 +98,7 @@ class SetorJemputController extends Controller
                     'no_hp_pengguna' => $no_hp,
                     'gambar_pengguna' => $gambar,
                     'gambar_url' => $gambar_url,
-                    'koordinat_pengguna'=> $profil->koordinat_pengguna
+                    'koordinat_pengguna' => $profil->koordinat_pengguna
                 ]
             ],
 

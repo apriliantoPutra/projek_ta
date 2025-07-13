@@ -13,31 +13,36 @@
                     Tambah
                     Akun</a>
             </div>
-
-
             <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-4 gap-4">
                 <!-- Input & Tombol Search -->
-                <div class="flex w-full md:w-1/2 gap-2">
-                    <input type="text" placeholder="Cari nama atau email..."
+                <form method="GET" action="{{ route('Akun') }}" class="flex w-full md:w-1/2 gap-2">
+                    <input type="text" name="search" value="{{ request('search') }}"
+                        placeholder="Cari nama atau email..."
                         class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500">
-                    <button
+                    <button type="submit"
                         class="bg-gray-200 cursor-pointer text-sm px-4 py-2 rounded hover:bg-green-600 hover:text-white transition">
                         Search
                     </button>
-                </div>
+                </form>
 
                 <!-- Filter Role -->
-                <div>
-                    <span class="font-medium mr-2">Filter Role:</span>
-                    <button
-                        class="bg-gray-200 text-sm px-3 py-1 rounded hover:bg-green-500 hover:text-white transition">Admin</button>
-                    <button
-                        class="bg-gray-200 text-sm px-3 py-1 rounded hover:bg-green-500 hover:text-white transition">Petugas</button>
-                    <button
-                        class="bg-gray-200 text-sm px-3 py-1 rounded hover:bg-green-500 hover:text-white transition">Nasabah</button>
+                <div class="flex items-center gap-2">
+                    <span class="font-medium">Filter Role:</span>
+                    @foreach (['petugas', 'warga'] as $r)
+                        <a href="{{ route('Akun', ['role' => $r] + request()->only('search')) }}"
+                            class="text-sm px-3 py-1 rounded
+                {{ request('role') === $r ? 'bg-green-600 text-white' : 'bg-gray-200 hover:bg-green-500 hover:text-white transition' }}">
+                            {{ ucfirst($r) }}
+                        </a>
+                    @endforeach
+                    @if (request('role'))
+                        <a href="{{ route('Akun', request()->only('search')) }}"
+                            class="text-sm px-3 py-1 rounded bg-red-200 hover:bg-red-400 text-red-800 hover:text-white transition">
+                            Reset
+                        </a>
+                    @endif
                 </div>
             </div>
-
 
             <!-- Tabel Akun -->
             <div class="overflow-x-auto">
@@ -83,6 +88,9 @@
 
                     </tbody>
                 </table>
+                <div class="mt-4 flex justify-end">
+                    {{ $data->links('vendor.pagination.tailwind') }}
+                </div>
             </div>
 
         </div>

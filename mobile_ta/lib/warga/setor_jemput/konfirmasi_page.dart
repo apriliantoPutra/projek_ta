@@ -37,6 +37,7 @@ class _WargaKonfirmasiSetorJemputPageState
   String namaAdmin = 'Memuat...';
   String emailAdmin = 'Memuat...';
   String noHpAdmin = 'Memuat...';
+  int ongkir_per_jarak = 0;
 
   double? latitudeBankSampah;
   double? longitudeBankSampah;
@@ -53,6 +54,8 @@ class _WargaKonfirmasiSetorJemputPageState
   int biayaLayanan = 0;
   bool isLoading = true;
   String? formattedDate;
+  bool isTotalValid = true;
+  String? totalError;
 
   @override
   void initState() {
@@ -74,6 +77,11 @@ class _WargaKonfirmasiSetorJemputPageState
     try {
       await fetchBankSampah();
       await processSetoran();
+      calculateServiceFee();
+
+      final totalAkhir = totalHarga - biayaLayanan;
+      isTotalValid = totalAkhir >= 0;
+      totalError = isTotalValid ? null : "Total insentif tidak boleh negatif";
 
       if (bankSampah != null) {
         namaBank = bankSampah?['nama_bank_sampah'] ?? 'Tidak tersedia';
@@ -93,6 +101,8 @@ class _WargaKonfirmasiSetorJemputPageState
         noHpAdmin =
             bankSampah?['user']?['profil']?['no_hp_pengguna'] ??
             'Tidak tersedia';
+
+        ongkir_per_jarak = bankSampah?['ongkir_per_jarak'] ?? 0;
 
         if (latitudeBankSampah != null &&
             longitudeBankSampah != null &&
@@ -199,6 +209,25 @@ class _WargaKonfirmasiSetorJemputPageState
     return null;
   }
 
+  void calculateServiceFee() {
+    if (latitudeWarga == null ||
+        longitudeWarga == null ||
+        latitudeBankSampah == null ||
+        longitudeBankSampah == null) {
+      biayaLayanan = 0;
+      return;
+    }
+    final jarak = _calculateDistanceInKm(
+      latitudeWarga!,
+      longitudeWarga!,
+      latitudeBankSampah!,
+      longitudeBankSampah!,
+    );
+
+    // Hitung biaya layanan
+    biayaLayanan = jarak * ongkir_per_jarak;
+  }
+
   Future<void> processSetoran() async {
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('token');
@@ -247,6 +276,21 @@ class _WargaKonfirmasiSetorJemputPageState
   }
 
   Future<void> storePengajuanSetorJemput() async {
+    calculateServiceFee();
+    final totalAkhir = totalHarga - biayaLayanan;
+
+    // Validasi total akhir tidak boleh negatif
+    if (totalAkhir < 0) {
+      setState(() {
+        isTotalValid = false;
+        totalError = "Total insentif tidak boleh negatif";
+      });
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(totalError!)));
+      return;
+    }
+
     if (formattedDate == null) {
       if (mounted) {
         ScaffoldMessenger.of(
@@ -270,7 +314,6 @@ class _WargaKonfirmasiSetorJemputPageState
       return;
     }
 
-    // Bentuk data setoran_sampah dari dataSetoran awal
     final List<Map<String, dynamic>> setoranSampah =
         widget.dataSetoran.map((item) {
           return {
@@ -297,7 +340,7 @@ class _WargaKonfirmasiSetorJemputPageState
           'catatan_petugas': widget.catatan ?? '',
           'setoran_sampah': setoranSampah,
           'total_berat': totalBerat,
-          'total_harga': totalHarga,
+          'total_harga': totalAkhir, 
         }),
       );
 
@@ -345,18 +388,15 @@ class _WargaKonfirmasiSetorJemputPageState
   }
 
   // perhitungan jarak
-  double _calculateDistance(
+  int _calculateDistanceInKm(
     double lat1,
     double lon1,
     double lat2,
     double lon2,
   ) {
-    const earthRadius = 6371;
-
-    // Convert degrees to radians
+    const earthRadius = 6371; // Radius bumi dalam kilometer
     final dLat = _degreesToRadians(lat2 - lat1);
     final dLon = _degreesToRadians(lon2 - lon1);
-
     final a =
         sin(dLat / 2) * sin(dLat / 2) +
         cos(_degreesToRadians(lat1)) *
@@ -364,8 +404,10 @@ class _WargaKonfirmasiSetorJemputPageState
             sin(dLon / 2) *
             sin(dLon / 2);
     final c = 2 * atan2(sqrt(a), sqrt(1 - a));
+    final distance = earthRadius * c;
 
-    return earthRadius * c;
+    // Jika jarak < 1 km, return 0, else return jarak dibulatkan ke bawah
+    return distance < 1 ? 0 : distance.floor();
   }
 
   double _degreesToRadians(double degrees) {
@@ -504,7 +546,6 @@ class _WargaKonfirmasiSetorJemputPageState
                                 ],
                               ),
                             ),
-
                             _buildCard(
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -533,14 +574,23 @@ class _WargaKonfirmasiSetorJemputPageState
                                       const Text("Jarak"),
                                       Text(
                                         _formatDistance(
-                                          _calculateDistance(
+                                          _calculateDistanceInKm(
                                             latitudeWarga ?? 0,
                                             longitudeWarga ?? 0,
                                             latitudeBankSampah ?? 0,
                                             longitudeBankSampah ?? 0,
-                                          ),
+                                          ).toDouble(),
                                         ),
                                       ),
+                                    ],
+                                  ),
+                                  const Divider(),
+                                  Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      const Text("Biaya Layanan (Ongkir)"),
+                                      Text('Rp $biayaLayanan'),
                                     ],
                                   ),
                                   const Divider(),
@@ -554,11 +604,29 @@ class _WargaKonfirmasiSetorJemputPageState
                                           fontWeight: FontWeight.bold,
                                         ),
                                       ),
-                                      Text(
-                                        'Rp${totalHarga - biayaLayanan}',
-                                        style: const TextStyle(
-                                          fontWeight: FontWeight.bold,
-                                        ),
+                                      Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.end,
+                                        children: [
+                                          Text(
+                                            'Rp${totalHarga - biayaLayanan}',
+                                            style: TextStyle(
+                                              fontWeight: FontWeight.bold,
+                                              color:
+                                                  isTotalValid
+                                                      ? Colors.black
+                                                      : Colors.red,
+                                            ),
+                                          ),
+                                          if (!isTotalValid)
+                                            Text(
+                                              totalError!,
+                                              style: TextStyle(
+                                                color: Colors.red,
+                                                fontSize: 12,
+                                              ),
+                                            ),
+                                        ],
                                       ),
                                     ],
                                   ),
@@ -646,7 +714,7 @@ class _WargaKonfirmasiSetorJemputPageState
                                   ),
                                 ),
                                 onPressed:
-                                    isLoading
+                                    (isLoading || !isTotalValid)
                                         ? null
                                         : storePengajuanSetorJemput,
                                 child:

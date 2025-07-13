@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:http/http.dart' as http;
 import 'package:mobile_ta/constants/constants.dart';
+import 'package:mobile_ta/petugas/detail_map/map_bank_sampah_map_warga_page.dart';
 import 'package:mobile_ta/petugas/setor_jemput/petugas_setor_jemput_selesai.dart';
 import 'package:mobile_ta/widget/petugas_main_widget.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -25,11 +26,14 @@ class _PetugasSetorJemputProsesState extends State<PetugasSetorJemputProses> {
   List<Map<String, dynamic>> _jenisSampahOptions = [];
 
   List<Map<String, dynamic>> processedSetoran = [];
+  int ongkir_per_jarak = 0;
   double totalBerat = 0;
   int totalHarga = 0;
   int biayaLayanan = 0;
   String gambarPengguna = '';
   String namaPengguna = '';
+  bool isTotalValid = true;
+  String? totalError;
 
   late double latitudeBankSampah;
   late double longitudeBankSampah;
@@ -51,7 +55,9 @@ class _PetugasSetorJemputProsesState extends State<PetugasSetorJemputProses> {
       await fetchPengajuanDetailSetor();
       await fetchJenisSampahOptions();
       await processInitialData();
-      await fetchBankSampah(); 
+      await fetchBankSampah();
+      calculateServiceFee();
+
       if (pengajuanDetailSetor != null && bankSampah != null) {
         final profil = pengajuanDetailSetor!['user']?['profil'];
         gambarPengguna =
@@ -70,6 +76,7 @@ class _PetugasSetorJemputProsesState extends State<PetugasSetorJemputProses> {
             double.tryParse(bankSampah?['latitude']?.toString() ?? '0') ?? 0;
         longitudeBankSampah =
             double.tryParse(bankSampah?['longitude']?.toString() ?? '0') ?? 0;
+        ongkir_per_jarak = bankSampah?['ongkir_per_jarak'] ?? 0;
 
         // Calculate mid point for initial camera position
         final midLat = (latitudeBankSampah + latitudeWarga) / 2;
@@ -287,10 +294,7 @@ class _PetugasSetorJemputProsesState extends State<PetugasSetorJemputProses> {
   }
 
   Future<void> konfirmasiSetoran() async {
-    // Validate inputs
     bool hasError = false;
-
-    // Check for errors and empty fields
     for (var i = 0; i < _jenisSampahList.length; i++) {
       final item = _jenisSampahList[i];
       if (item['jenis_sampah_id'] == null) {
@@ -319,25 +323,41 @@ class _PetugasSetorJemputProsesState extends State<PetugasSetorJemputProses> {
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('token');
     if (token == null) return;
-
-    // Calculate totals
-    double totalBerat = 0;
-    int totalHarga = 0;
-    final setoranSampah =
-        _jenisSampahList.map((item) {
-          final jenisId = item['jenis_sampah_id'] as int;
-          final berat = item['berat'] as double;
-          final jenisInfo = jenisSampahCache[jenisId];
-          final harga = (jenisInfo?['harga'] ?? 0) as int;
-          final subtotal = (berat * harga).round();
-
-          totalBerat += berat;
-          totalHarga += subtotal;
-
-          return {'jenis_sampah_id': jenisId, 'berat': berat};
-        }).toList();
-
     try {
+      // 1. Hitung total berat dan harga dari sampah yang dipilih
+      double totalBerat = 0;
+      int totalHarga = 0;
+      final setoranSampah =
+          _jenisSampahList.map((item) {
+            final jenisId = item['jenis_sampah_id'] as int;
+            final berat = item['berat'] as double;
+            final jenisInfo = jenisSampahCache[jenisId];
+            final harga = (jenisInfo?['harga'] ?? 0) as int;
+            final subtotal = (berat * harga).round();
+
+            totalBerat += berat;
+            totalHarga += subtotal;
+
+            return {'jenis_sampah_id': jenisId, 'berat': berat};
+          }).toList();
+
+      // 2. Hitung biaya layanan berdasarkan jarak
+      calculateServiceFee(); // Pastikan ini mengupdate biayaLayanan
+
+      // 3. Hitung total akhir setelah dikurangi biaya layanan
+      final totalAkhir = totalHarga - biayaLayanan;
+
+      // 4. Validasi total akhir tidak negatif
+      if (totalAkhir <= 0) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Total harga tidak boleh kurang dari biaya layanan'),
+          ),
+        );
+        return;
+      }
+
+      // 5. Kirim data ke API
       final response = await http.patch(
         Uri.parse('$baseUrl/setor-jemput/konfirmasi/${widget.id}'),
         headers: {
@@ -348,7 +368,7 @@ class _PetugasSetorJemputProsesState extends State<PetugasSetorJemputProses> {
         body: jsonEncode({
           'setoran_sampah': setoranSampah,
           'total_berat': totalBerat,
-          'total_harga': totalHarga,
+          'total_harga': totalAkhir,
         }),
       );
 
@@ -375,18 +395,34 @@ class _PetugasSetorJemputProsesState extends State<PetugasSetorJemputProses> {
   }
 
   // perhitungan jarak
-  double _calculateDistance(
+  void calculateServiceFee() {
+    if (latitudeWarga == null ||
+        longitudeWarga == null ||
+        latitudeBankSampah == null ||
+        longitudeBankSampah == null) {
+      biayaLayanan = 0;
+      return;
+    }
+    final jarak = _calculateDistanceInKm(
+      latitudeWarga!,
+      longitudeWarga!,
+      latitudeBankSampah!,
+      longitudeBankSampah!,
+    );
+
+    // Hitung biaya layanan
+    biayaLayanan = jarak * ongkir_per_jarak;
+  }
+
+  int _calculateDistanceInKm(
     double lat1,
     double lon1,
     double lat2,
     double lon2,
   ) {
-    const earthRadius = 6371;
-
-    // Convert degrees to radians
+    const earthRadius = 6371; // Radius bumi dalam kilometer
     final dLat = _degreesToRadians(lat2 - lat1);
     final dLon = _degreesToRadians(lon2 - lon1);
-
     final a =
         sin(dLat / 2) * sin(dLat / 2) +
         cos(_degreesToRadians(lat1)) *
@@ -394,8 +430,10 @@ class _PetugasSetorJemputProsesState extends State<PetugasSetorJemputProses> {
             sin(dLon / 2) *
             sin(dLon / 2);
     final c = 2 * atan2(sqrt(a), sqrt(1 - a));
+    final distance = earthRadius * c;
 
-    return earthRadius * c;
+    // Jika jarak < 1 km, return 0, else return jarak dibulatkan ke bawah
+    return distance < 1 ? 0 : distance.floor();
   }
 
   double _degreesToRadians(double degrees) {
@@ -418,6 +456,10 @@ class _PetugasSetorJemputProsesState extends State<PetugasSetorJemputProses> {
         body: Center(child: CircularProgressIndicator()),
       );
     }
+
+    final estimatedTotal = totalHarga - biayaLayanan;
+    isTotalValid = estimatedTotal >= 0;
+    totalError = isTotalValid ? null : "Total tidak boleh negatif";
 
     return Scaffold(
       appBar: AppBar(
@@ -504,6 +546,37 @@ class _PetugasSetorJemputProsesState extends State<PetugasSetorJemputProses> {
                   ),
                   const SizedBox(height: 8),
                   _buildMapImage(),
+                  const SizedBox(height: 10),
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton.icon(
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder:
+                                (context) => (PetugasMapBankSampahMapWargaPage(
+                                  latitudeWarga: latitudeWarga,
+                                  longitudeWarga: longitudeWarga,
+                                  latitudeBankSampah: latitudeBankSampah,
+                                  longitudeBankSampah: longitudeBankSampah,
+                                )),
+                          ),
+                        );
+                      },
+                      icon: const Icon(Icons.map),
+                      label: const Text("Detail Map"),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.green,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 10),
                 ],
               ),
             ),
@@ -607,17 +680,26 @@ class _PetugasSetorJemputProsesState extends State<PetugasSetorJemputProses> {
                       const Text("Jarak"),
                       Text(
                         _formatDistance(
-                          _calculateDistance(
-                            latitudeWarga,
-                            longitudeWarga,
-                            latitudeBankSampah,
-                            longitudeBankSampah,
-                          ),
+                          _calculateDistanceInKm(
+                            latitudeWarga ?? 0,
+                            longitudeWarga ?? 0,
+                            latitudeBankSampah ?? 0,
+                            longitudeBankSampah ?? 0,
+                          ).toDouble(),
                         ),
                       ),
                     ],
                   ),
+                  const Divider(),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text("Biaya Layanan (Ongkir)"),
+                      Text('Rp $biayaLayanan'),
+                    ],
+                  ),
                   Divider(),
+                  // CHANGED: Tampilkan estimatedTotal dengan validasi
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
@@ -625,9 +707,22 @@ class _PetugasSetorJemputProsesState extends State<PetugasSetorJemputProses> {
                         'Perkiraan Insentif',
                         style: TextStyle(fontWeight: FontWeight.bold),
                       ),
-                      Text(
-                        'Rp ${totalHarga - biayaLayanan}',
-                        style: TextStyle(fontWeight: FontWeight.bold),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          Text(
+                            'Rp ${estimatedTotal >= 0 ? estimatedTotal : 0}',
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              color: isTotalValid ? Colors.black : Colors.red,
+                            ),
+                          ),
+                          if (!isTotalValid)
+                            Text(
+                              totalError!,
+                              style: TextStyle(color: Colors.red, fontSize: 12),
+                            ),
+                        ],
                       ),
                     ],
                   ),
@@ -751,7 +846,8 @@ class _PetugasSetorJemputProsesState extends State<PetugasSetorJemputProses> {
             Padding(
               padding: EdgeInsets.only(top: 16),
               child: ElevatedButton(
-                onPressed: isLoading ? null : konfirmasiSetoran,
+                onPressed:
+                    (isLoading || !isTotalValid) ? null : konfirmasiSetoran,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Color(0xFF8FD14F),
                   padding: EdgeInsets.symmetric(vertical: 16, horizontal: 32),

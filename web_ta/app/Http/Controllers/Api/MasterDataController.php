@@ -46,7 +46,7 @@ class MasterDataController extends Controller
 
     public function bankSampahShow($id)
     {
-        $item = BankSampah::with(['user.profil'])
+        $item = BankSampah::with(['user.profil', 'layananJemput'])
             ->find($id);
 
         if (!$item) {
@@ -70,6 +70,7 @@ class MasterDataController extends Controller
             'koordinat_bank_sampah' => $koordinat,
             'latitude' => $latitude,
             'longitude' => $longitude,
+            'ongkir_per_jarak' => $item->layananJemput->ongkir_per_jarak,
             'user' => [
                 'username' => $item->user->username,
                 'email' => $item->user->email,

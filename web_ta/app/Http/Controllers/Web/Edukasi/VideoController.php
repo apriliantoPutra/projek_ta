@@ -8,11 +8,17 @@ use Illuminate\Support\Facades\Storage;
 
 class VideoController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $datas = Video::all();
+        $query = Video::query();
+        if ($request->filled('search')) {
+            $query->where(function ($q) use ($request) {
+                $q->where('judul_video', 'like', '%' . $request->search . '%');
+            });
+        }
+        $datas = $query->orderBy('judul_video')->paginate(10)->withQueryString();
 
-        return view('edukasi/video/index', ['headerTitle' => 'Manajemen Edukasi', 'data' => $datas]);
+        return view('edukasi/video/index', ['headerTitle' => 'Manajemen Edukasi', 'search' => $request->search, 'data' => $datas]);
     }
     public function show($id)
     {

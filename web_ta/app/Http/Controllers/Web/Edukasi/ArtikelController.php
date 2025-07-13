@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Http\Controllers\Web\Edukasi;
+
 use App\Http\Controllers\Controller;
 
 use Illuminate\Http\Request;
@@ -9,11 +10,17 @@ use Illuminate\Support\Facades\Storage;
 
 class ArtikelController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $datas = Artikel::all();
+        $query = Artikel::query();
+        if ($request->filled('search')) {
+            $query->where(function ($q) use ($request) {
+                $q->where('judul_artikel', 'like', '%' . $request->search . '%');
+            });
+        }
+        $datas = $query->orderBy('judul_artikel')->paginate(10)->withQueryString();
 
-        return view('edukasi/artikel/index', ['headerTitle' => 'Manajemen Edukasi', 'data' => $datas]);
+        return view('edukasi/artikel/index', ['headerTitle' => 'Manajemen Edukasi', 'search' => $request->search, 'data' => $datas]);
     }
     public function show($id)
     {

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:http/http.dart' as http;
 import 'package:mobile_ta/constants/constants.dart';
+import 'package:mobile_ta/warga/detail_map/map_bank_sampah_page.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class HistoriSetorBaruLangsungPage extends StatefulWidget {
@@ -225,6 +226,35 @@ class _HistoriSetorBaruLangsungPageState
                 Text("Alamat: $alamatBank"),
                 const SizedBox(height: 12),
                 _buildMapImage(),
+                const SizedBox(height: 12),
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton.icon(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder:
+                              (context) => (WargaMapBankSampahPage(
+                                latitude: latitudeBankSampah!,
+                                longitude: longitudeBankSampah!,
+                                namaBank: namaBank,
+                              )),
+                        ),
+                      );
+                    },
+                    icon: const Icon(Icons.map),
+                    label: const Text("Detail Map"),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.green,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
+                  ),
+                ),
               ],
             ),
           ),

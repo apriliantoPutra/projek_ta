@@ -13,6 +13,7 @@ class ChatBotController extends Controller
         $validated = $request->validate([
             'message' => 'required|string|max:1000',
         ]);
+
         $apiKey = env('OPENAI_API_KEY');
         try {
             $response = Http::withHeaders([
@@ -23,13 +24,15 @@ class ChatBotController extends Controller
                 'messages' => [
                     ['role' => 'user', 'content' => $validated['message']],
                 ],
-                'max_tokens' => 100,
+                'max_tokens' => 300,
+                'temperature' => 0.7,
+                'top_p' => 1.0,
             ]);
 
             $data = $response->json();
 
             return response()->json([
-                'reply' => $data['choices'][0]['message']['content'] ?? 'Tidak ada jawaban.',
+                'reply' => $data
             ]);
         } catch (\Exception $e) {
             return response()->json([

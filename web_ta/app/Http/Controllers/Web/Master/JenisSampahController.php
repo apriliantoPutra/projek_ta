@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Http\Controllers\Web\Master;
+
 use App\Http\Controllers\Controller;
 
 use App\Models\Master\JenisSampah;
@@ -10,11 +11,20 @@ use Illuminate\Support\Facades\DB;
 
 class JenisSampahController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $datas = JenisSampah::all();
+        $query = JenisSampah::query();
 
-        return view('masterData.jenisSampah.index', ['headerTitle' => 'Data Sampah', 'datas' => $datas]);
+        if ($request->filled('search')) {
+            $query->where(function ($q) use ($request) {
+                $q->where('nama_sampah', 'like', '%' . $request->search . '%');
+            });
+        }
+
+
+        $datas = $query->orderBy('nama_sampah')->paginate(10)->withQueryString();
+
+        return view('masterData.jenisSampah.index', ['headerTitle' => 'Data Sampah', 'search' => $request->search, 'data' => $datas]);
     }
     public function create()
     {

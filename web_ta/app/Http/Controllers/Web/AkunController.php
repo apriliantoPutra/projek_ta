@@ -1,5 +1,7 @@
 <?php
+
 namespace App\Http\Controllers\Web;
+
 use App\Http\Controllers\Controller;
 
 use App\Models\User;
@@ -8,11 +10,22 @@ use Illuminate\Support\Facades\Auth;
 
 class AkunController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $datas = User::where('id', '!=', Auth::user()->id)->get();
+        $query = User::where('id', '!=', Auth::user()->id);
+        if ($request->filled('search')) {
+            $query->where(function ($q) use ($request) {
+                $q->where('username', 'like', '%' . $request->search . '%')
+                    ->orWhere('email', 'like', '%' . $request->search . '%');
+            });
+        }
+        if ($request->filled('role')) {
+            $query->where('role', $request->role);
+        }
 
-        return view('akun/index', ['headerTitle' => 'Manajemen Akun', 'data' => $datas]);
+        $datas = $query->orderBy('username')->paginate(10)->withQueryString();
+
+        return view('akun/index', ['headerTitle' => 'Manajemen Akun', 'search' => $request->search, 'data' => $datas, 'role' => $request->role]);
     }
     public function create()
     {

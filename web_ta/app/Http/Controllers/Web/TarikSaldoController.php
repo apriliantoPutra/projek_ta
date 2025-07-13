@@ -1,5 +1,7 @@
 <?php
+
 namespace App\Http\Controllers\Web;
+
 use App\Http\Controllers\Controller;
 
 use App\Models\Saldo;
@@ -10,10 +12,17 @@ use Illuminate\Support\Facades\DB;
 class TarikSaldoController extends Controller
 {
     // admin
-    public function index()
+    public function index(Request $request)
     {
-        $tarik_saldo = TarikSaldo::with('user')->get()->map(function ($item) {
+        $query = TarikSaldo::with('user');
 
+        if ($request->filled('search')) {
+            $query->whereHas('user', function ($q) use ($request) {
+                $q->where('username', 'like', '%' . $request->search . '%');
+            });
+        }
+        $tarik_saldo = $query->latest()->paginate(10)->withQueryString();
+        $datas = $tarik_saldo->map(function ($item) {
             return [
                 'id' => $item->id,
                 'jumlah_saldo' => $item->jumlah_saldo,
@@ -28,8 +37,15 @@ class TarikSaldoController extends Controller
             ];
         });
 
-        return view('tarikSaldo.index', ['headerTitle' => 'Tarik Saldo', 'datas' => $tarik_saldo]);
+        return view('tarikSaldo.index', [
+            'headerTitle' => 'Tarik Saldo',
+            'datas' => $datas,
+            'paginated' => $tarik_saldo,
+            'search' => $request->search,
+        ]);
     }
+
+
     public function show($id)
     {
         $item = TarikSaldo::with('user.profil')->find($id);
@@ -46,11 +62,11 @@ class TarikSaldoController extends Controller
 
         $tarik_saldo = [
             'id' => $item->id,
-            'jumlah_saldo'=> $item->jumlah_saldo,
+            'jumlah_saldo' => $item->jumlah_saldo,
             'status' => $item->status,
             'metode' => $item->metode,
-            'nomor_tarik_saldo'=> $item->nomor_tarik_saldo,
-            'pesan'=> $item->pesan,
+            'nomor_tarik_saldo' => $item->nomor_tarik_saldo,
+            'pesan' => $item->pesan,
             'user' => [
                 'username' => $item->user->username,
                 'email' => $item->user->email,
@@ -64,7 +80,7 @@ class TarikSaldoController extends Controller
             ],
         ];
 
-        return view('tarikSaldo.show', ['headerTitle' => 'Tarik Saldo', 'tarik_saldo'=> $tarik_saldo]);
+        return view('tarikSaldo.show', ['headerTitle' => 'Tarik Saldo', 'tarik_saldo' => $tarik_saldo]);
     }
     public function terimaTarikSaldo($id)
     {
