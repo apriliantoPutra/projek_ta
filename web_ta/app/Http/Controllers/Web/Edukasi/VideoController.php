@@ -1,9 +1,13 @@
 <?php
 
 namespace App\Http\Controllers\Web\Edukasi;
+
+use App\Http\Controllers\Web\NotificationController;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Edukasi\Video;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 
 class VideoController extends Controller
@@ -39,13 +43,26 @@ class VideoController extends Controller
 
 
         ]);
-        if ($request->hasFile('video')) {
-            $filaname = time() . '_' . uniqid() . '.' . $request->file('video')->getClientOriginalExtension();
-            $validated['video'] = $request->file('video')->storeAs('video', $filaname, 'public');
-        }
 
-        Video::create($validated);
-        return redirect()->route('Video');
+        try {
+            if ($request->hasFile('video')) {
+                $filaname = time() . '_' . uniqid() . '.' . $request->file('video')->getClientOriginalExtension();
+                $validated['video'] = $request->file('video')->storeAs('video', $filaname, 'public');
+            }
+
+            Video::create($validated);
+            app(NotificationController::class)->sendNotificationToAllUsers(
+                'Konten Edukasi Baru!',
+                'Yuk cek video edukasi terbaru yang baru saja ditambahkan.'
+            );
+
+            return redirect()->route('Video');
+        } catch (\Exception $e) {
+            DB::rollback();
+            Log::error('Gagal menambahkan artikel: ' . $e->getMessage());
+
+            return redirect()->back()->withErrors(['msg' => 'Terjadi kesalahan saat menyimpan data.']);
+        }
     }
     public function edit($id)
     {

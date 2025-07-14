@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:mobile_ta/petugas/setor_jemput/petugas_setor_jemput_proses.dart';
-import 'package:mobile_ta/warga/histori_setor/setor_jemput/histori_setor_proses_jemput_page.dart';
+import 'package:mobile_ta/pages/petugas/setor_jemput/petugas_setor_jemput_proses.dart';
+import 'package:mobile_ta/pages/warga/histori_setor/setor_jemput/histori_setor_proses_jemput_page.dart';
 
 class HistoriSetorCardJemputProses extends StatelessWidget {
   final Map<String, dynamic> data;

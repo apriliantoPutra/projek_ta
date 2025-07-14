@@ -25,7 +25,8 @@ class User extends Authenticatable
         'username',
         'email',
         'password',
-        'role'
+        'role',
+        'fcm_token'
     ];
 
     /**
@@ -73,5 +74,4 @@ class User extends Authenticatable
     {
         return $this->hasMany(InputDetailSetor::class, 'petugas_id');
     }
-
 }

@@ -1,0 +1,197 @@
+import 'dart:convert';
+import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'package:mobile_ta/constants/constants.dart';
+import 'package:mobile_ta/pages/petugas/info_page.dart';
+import 'package:mobile_ta/pages/petugas/notifikasi_page.dart';
+import 'package:mobile_ta/pages/petugas/petugas_edit_profil_page.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import '../auth/login_page.dart';
+
+class PetugasAkunPage extends StatelessWidget {
+  final Map<String, dynamic>? akunData;
+  final Map<String, dynamic>? profilData;
+  const PetugasAkunPage({Key? key, this.akunData, this.profilData})
+    : super(key: key);
+
+  Future<void> logout(BuildContext context) async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('token');
+
+    if (token == null) {
+      return;
+    }
+
+    final response = await http.post(
+      Uri.parse('$baseUrl/logout'),
+      headers: {'Authorization': 'Bearer $token', 'Accept': 'application/json'},
+    );
+
+    if (response.statusCode == 200) {
+      await prefs.remove('token');
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(
+          builder: (_) => LoginPage(),
+        ), // Ganti dengan halaman login
+        (route) => false,
+      );
+    } else {
+      final message = jsonDecode(response.body)['message'] ?? 'Gagal logout';
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(message)));
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      // backgroundColor: Colors.white,
+      appBar: AppBar(
+        backgroundColor: Colors.white,
+        elevation: 0,
+        centerTitle: true,
+        title: Text(
+          "Akun Saya",
+          style: TextStyle(fontWeight: FontWeight.w500, color: Colors.black),
+        ),
+      ),
+
+      body: SingleChildScrollView(
+        child: Column(
+          children: [
+            Padding(padding: EdgeInsets.all(16)),
+            Center(
+              child: Column(
+                children: [
+                  CircleAvatar(
+                    radius: 40,
+                    backgroundImage: NetworkImage(
+                      (profilData?['gambar_pengguna'] ?? '').isNotEmpty
+                          ? profilData!['gambar_url']
+                          : 'https://i.pinimg.com/736x/8a/e9/e9/8ae9e92fa4e69967aa61bf2bda967b7b.jpg',
+                    ),
+                  ),
+                  SizedBox(height: 8),
+
+                  //username
+                  Text(
+                    akunData?['username'] ?? 'Memuat...',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black,
+                    ),
+                  ),
+
+                  //email
+                  Text(
+                    akunData?['email'] ?? 'Memuat...',
+                    style: TextStyle(fontSize: 14, color: Colors.black),
+                  ),
+
+                  SizedBox(height: 8),
+                  ElevatedButton(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder:
+                              (context) =>
+                                  PetugasEditProfilPage(profilData: profilData),
+                        ),
+                      );
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.grey.shade300,
+                      foregroundColor: Colors.black,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    child: Text("Edit Akun"),
+                  ),
+                ],
+              ),
+            ),
+            SizedBox(height: 24),
+
+            //menu menu
+            Padding(
+              padding: EdgeInsets.symmetric(horizontal: 16),
+              child: Column(
+                children: [
+                  _buildMenuItem(
+                    Icons.info,
+                    "Info",
+                    iconColor: Colors.deepPurpleAccent,
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (_) => PetugasInfoPage()),
+                      );
+                    },
+                  ),
+                  _buildMenuItem(
+                    Icons.mail_outline,
+                    "Notifikasi",
+                    iconColor: Colors.blue,
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => PetugasNotifikasiPage(),
+                        ),
+                      );
+                    },
+                  ),
+                  _buildMenuItem(
+                    Icons.logout,
+                    "Logout",
+                    iconColor: Colors.red,
+                    onTap: () => logout(context),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  //widget builder
+  Widget _buildMenuItem(
+    IconData icon,
+    String title, {
+    Color? iconColor,
+    VoidCallback? onTap,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 16.0),
+      child: Container(
+        decoration: BoxDecoration(
+          color: Colors.greenAccent.shade100,
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: ListTile(
+          leading: Icon(icon, color: iconColor ?? Colors.green.shade900),
+          title: Text(
+            title,
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              color: Colors.green.shade900,
+            ),
+          ),
+          trailing: Icon(
+            Icons.arrow_forward_ios,
+            size: 16,
+            color: Colors.green.shade900,
+          ),
+          onTap: onTap,
+        ),
+      ),
+    );
+  }
+}

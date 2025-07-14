@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:mobile_ta/petugas/setor_jemput/petugas_setor_jemput_selesai.dart';
+import 'package:mobile_ta/pages/petugas/setor_jemput/petugas_setor_jemput_selesai.dart';
 
 class SetorCardJemputSelesai extends StatelessWidget {
   final Map<String, dynamic> data;

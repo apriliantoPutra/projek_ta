@@ -3,9 +3,11 @@
 namespace App\Http\Controllers\Web\Edukasi;
 
 use App\Http\Controllers\Controller;
-
+use App\Http\Controllers\Web\NotificationController;
 use Illuminate\Http\Request;
 use App\Models\Edukasi\Artikel;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 
 class ArtikelController extends Controller
@@ -44,14 +46,27 @@ class ArtikelController extends Controller
             'nama_author' => 'required|string',
         ]);
 
-        if ($request->hasFile('gambar_artikel')) {
-            $filaname = time() . '_' . uniqid() . '.' . $request->file('gambar_artikel')->getClientOriginalExtension();
-            $validated['gambar_artikel'] = $request->file('gambar_artikel')->storeAs('img/artikel', $filaname, 'public');
-        }
+        try {
+            if ($request->hasFile('gambar_artikel')) {
+                $filaname = time() . '_' . uniqid() . '.' . $request->file('gambar_artikel')->getClientOriginalExtension();
+                $validated['gambar_artikel'] = $request->file('gambar_artikel')->storeAs('img/artikel', $filaname, 'public');
+            }
 
-        Artikel::create($validated);
-        return redirect()->route('Artikel');
+            Artikel::create($validated);
+            app(NotificationController::class)->sendNotificationToAllUsers(
+                'Konten Edukasi Baru!',
+                'Yuk cek artikel edukasi terbaru yang baru saja ditambahkan.'
+            );
+
+            return redirect()->route('Artikel');
+        } catch (\Exception $e) {
+            DB::rollback();
+            Log::error('Gagal menambahkan artikel: ' . $e->getMessage());
+
+            return redirect()->back()->withErrors(['msg' => 'Terjadi kesalahan saat menyimpan data.']);
+        }
     }
+
     public function edit($id)
     {
         $datas = Artikel::find($id);

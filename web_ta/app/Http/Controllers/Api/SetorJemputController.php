@@ -6,6 +6,7 @@ use App\Models\DetailSetor;
 use Illuminate\Http\Request;
 use App\Models\PengajuanSetor;
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\Web\NotificationController;
 use App\Models\InputDetailSetor;
 use App\Models\Saldo;
 use App\Models\TotalSampah;
@@ -217,9 +218,9 @@ class SetorJemputController extends Controller
                     'no_hp_pengguna' => $profil->no_hp_pengguna,
                     'gambar_pengguna' => $profil->gambar_pengguna,
                     'gambar_url' => asset('storage/' . $profil->gambar_pengguna),
-                    'koordinat_pengguna'=> $koordinat,
-                    'latitude'=> $latitude,
-                    'longitude'=> $longitude
+                    'koordinat_pengguna' => $koordinat,
+                    'latitude' => $latitude,
+                    'longitude' => $longitude
                 ]
             ],
             'input_detail' => [
@@ -251,6 +252,11 @@ class SetorJemputController extends Controller
                 'petugas_id' => Auth::id(), // id petugas
             ]);
 
+            app(NotificationController::class)->sendNotificationToUser(
+                $pengajuan_setor->warga_id,
+                'Permintaan Setor Jemput!',
+                'Permintaan setor jemput Anda di proses.'
+            );
             DB::commit();
             return response()->json([
                 'success' => true,
@@ -283,6 +289,11 @@ class SetorJemputController extends Controller
 
             $detail_setor->delete();
 
+            app(NotificationController::class)->sendNotificationToUser(
+                $pengajuan_setor->warga_id,
+                'Permintaan Setor Jemput!',
+                'Permintaan setor jemput Anda di tolak.'
+            );
             DB::commit();
             return response()->json([
                 'success' => true,
@@ -334,6 +345,12 @@ class SetorJemputController extends Controller
             $saldo->update([
                 "total_saldo" => $saldo->total_saldo + $request->total_harga
             ]);
+
+            app(NotificationController::class)->sendNotificationToUser(
+                $pengajuan_setor->warga_id,
+                'Konfirmasi Setor Jemput!',
+                'Permintaan setor jemput Anda telah selesai.'
+            );
 
             DB::commit();
             return response()->json([

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:mobile_ta/petugas/setor_jemput/petugas_setor_jemput_baru.dart';
+import 'package:mobile_ta/pages/petugas/setor_jemput/petugas_setor_jemput_baru.dart';
 
 class SetorCardLangsungProses extends StatelessWidget {
   const SetorCardLangsungProses({super.key});

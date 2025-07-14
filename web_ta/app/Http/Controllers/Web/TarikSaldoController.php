@@ -97,6 +97,11 @@ class TarikSaldoController extends Controller
             $saldo->update([
                 "total_saldo" => $saldo->total_saldo - $tarik_saldo->jumlah_saldo
             ]);
+            app(NotificationController::class)->sendNotificationToUser(
+                $tarik_saldo->warga_id,
+                'Verifikasi Tarik Saldo!',
+                'Permintaan tarik saldo Anda telah disetujui.'
+            );
 
             DB::commit();
             return redirect()->back();
@@ -121,6 +126,12 @@ class TarikSaldoController extends Controller
             $tarik_saldo->update([
                 'status' => 'tolak',
             ]);
+
+            app(NotificationController::class)->sendNotificationToUser(
+                $tarik_saldo->warga_id,
+                'Verifikasi Tarik Saldo!',
+                'Permintaan tarik saldo Anda telah ditolak.'
+            );
 
             DB::commit();
             return redirect()->back();

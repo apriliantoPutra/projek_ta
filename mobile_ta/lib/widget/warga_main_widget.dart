@@ -3,12 +3,12 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:mobile_ta/constants/constants.dart';
-import 'package:mobile_ta/warga/akun_page.dart';
-import 'package:mobile_ta/warga/edukasi_page.dart';
-import 'package:mobile_ta/warga/setor_page.dart';
+import 'package:mobile_ta/pages/warga/akun_page.dart';
+import 'package:mobile_ta/pages/warga/edukasi_page.dart';
+import 'package:mobile_ta/pages/warga/setor_page.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../warga/beranda_page.dart';
-import '../warga/tambah_profil_page.dart';
+import '../pages/warga/beranda_page.dart';
+import '../pages/warga/tambah_profil_page.dart';
 
 class WargaMainWrapper extends StatefulWidget {
   final int initialMenu;

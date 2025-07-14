@@ -34,11 +34,12 @@
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <!-- Placeholder Grafik -->
             <div class="bg-white rounded-xl shadow-md p-5">
-                <h3 class="text-lg font-semibold text-gray-700 mb-2">Grafik Setoran Sampah</h3>
-                <div class="h-64 flex items-center justify-center text-gray-400">
-                    <span>📊 Grafik akan ditampilkan di sini</span>
+                <h3 class="text-lg font-semibold text-gray-700 mb-2">Grafik Penarikan Saldo</h3>
+                <div>
+                    <canvas id="grafikTarikSaldo" height="250"></canvas>
                 </div>
             </div>
+
 
             <!-- Info Ringkasan -->
             <div class="bg-white rounded-xl shadow-md p-5">
@@ -51,4 +52,45 @@
             </div>
         </div>
     </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        const ctx = document.getElementById('grafikTarikSaldo').getContext('2d');
+
+        const chart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: {!! json_encode($grafikTarikSaldo->pluck('bulan')) !!},
+                datasets: [{
+                    label: 'Jumlah Saldo Ditarik (Rp)',
+                    data: {!! json_encode($grafikTarikSaldo->pluck('total_saldo')) !!},
+                    backgroundColor: 'rgba(34,197,94,0.7)',
+                    borderColor: 'rgba(34,197,94,1)',
+                    borderWidth: 1,
+                    borderRadius: 8,
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            callback: function(value) {
+                                return 'Rp ' + value.toLocaleString('id-ID');
+                            }
+                        }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        display: true,
+                        labels: {
+                            color: '#4B5563'
+                        }
+                    }
+                }
+            }
+        });
+    </script>
 @endsection

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:mobile_ta/warga/histori_setor/setor_langsung/histori_setor_baru_langsung_page.dart';
+import 'package:mobile_ta/pages/warga/histori_setor/setor_langsung/histori_setor_baru_langsung_page.dart';
 
 class HistoriSetorCardLangsungBaru extends StatelessWidget {
   final Map<String, dynamic> data;

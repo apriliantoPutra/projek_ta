@@ -48,7 +48,8 @@ dependencies:
   media_kit_libs_android_video: ^1.0.7   
   media_kit_libs_windows_video: ^1.0.7   
   google_maps_flutter: ^2.5.0
-  flutter_dotenv: ^5.1.0
+  google_generative_ai: ^0.4.7
+  flutter_dotenv: ^5.2.1
 
 dev_dependencies:
   flutter_test:

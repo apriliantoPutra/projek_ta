@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:mobile_ta/petugas/setor_langsung/petugas_setor_langsung_selesai.dart';
-import 'package:mobile_ta/warga/histori_setor/setor_langsung/histori_setor_selesai_langsung_page.dart';
+import 'package:mobile_ta/pages/petugas/setor_langsung/petugas_setor_langsung_selesai.dart';
+import 'package:mobile_ta/pages/warga/histori_setor/setor_langsung/histori_setor_selesai_langsung_page.dart';
 
 class HistoriSetorCardLangsungSelesai extends StatelessWidget {
   final Map<String, dynamic> data;

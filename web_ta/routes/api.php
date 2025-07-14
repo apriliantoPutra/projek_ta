@@ -7,6 +7,7 @@ use App\Http\Controllers\Api\HistoriController;
 use App\Http\Controllers\Api\KumpulanSetorController;
 use App\Http\Controllers\Api\LoginController as ApiLoginController;
 use App\Http\Controllers\Api\MasterDataController;
+use App\Http\Controllers\Api\NotificationController;
 use App\Http\Controllers\Api\ProfilController as ApiProfilController;
 use App\Http\Controllers\Api\SaldoController;
 use App\Http\Controllers\Api\SetorJemputController;
@@ -15,6 +16,7 @@ use App\Http\Controllers\Api\TarikSaldoController as ApiTarikSaldoController;
 use App\Http\Controllers\Api\TotalSampahController;
 use App\Http\Controllers\Api\VideoController;
 use App\Http\Controllers\PengajuanPetugasController;
+use Illuminate\Support\Facades\Request;
 use Illuminate\Support\Facades\Route;
 
 
@@ -75,26 +77,26 @@ Route::prefix('v1')->group(function () {
         //tarik saldo
         Route::post('/pengajuan-tarik-saldo', [ApiTarikSaldoController::class, 'pengajuanTarikSaldo']);
         Route::get('/permintaan-tarik-saldo', [ApiTarikSaldoController::class, 'permintaanTarikSaldo']);
-        Route::get('histori-tarik-saldo', [HistoriController::class, 'listSaldo']);
-        Route::get('histori-tarik-saldo/{id}', [HistoriController::class, 'detailSaldo']);
+        Route::get('/histori-tarik-saldo', [HistoriController::class, 'listSaldo']);
+        Route::get('/histori-tarik-saldo/{id}', [HistoriController::class, 'detailSaldo']);
 
         // histori setor warga
-        Route::get('histori-setor-baru', [HistoriController::class, 'listSetorBaru']);
-        Route::get('histori-setor-proses', [HistoriController::class, 'listSetorProses']);
-        Route::get('histori-setor-selesai', [HistoriController::class, 'listSetorSelesai']);
-        Route::get('histori-setor-batal', [HistoriController::class, 'listSetorBatal']);
+        Route::get('/histori-setor-baru', [HistoriController::class, 'listSetorBaru']);
+        Route::get('/histori-setor-proses', [HistoriController::class, 'listSetorProses']);
+        Route::get('/histori-setor-selesai', [HistoriController::class, 'listSetorSelesai']);
+        Route::get('/histori-setor-batal', [HistoriController::class, 'listSetorBatal']);
 
-        Route::get('histori-setor-detai/{id}', [HistoriController::class, 'detailSetor']);
+        Route::get('/histori-setor-detai/{id}', [HistoriController::class, 'detailSetor']);
 
         Route::post('/chatbot', [ChatBotController::class, 'store']);
 
-       
+        Route::get('/notifikasi', [NotificationController::class, 'detailNotifikasi']);
+
+
 
         // Logout
-        Route::post('logout', [ApiLoginController::class, 'logout']);
+        Route::post('/logout', [ApiLoginController::class, 'logout']);
     });
-
-
 
     Route::prefix('artikel')->group(function () {
         Route::get('/', [ArtikelController::class, 'index']);
