@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:mobile_ta/petugas/setor_jemput/petugas_setor_jemput_baru.dart';
+import 'package:mobile_ta/pages/petugas/setor_jemput/petugas_setor_jemput_baru.dart';
 
 class SetorCardJemputBaru extends StatelessWidget {
   final Map<String, dynamic> data;
@@ -18,6 +18,7 @@ class SetorCardJemputBaru extends StatelessWidget {
               'id_ID',
             ).format(DateTime.parse(waktuPengajuan))
             : "-";
+    final String catatan = data['catatan_petugas'] ?? '';
 
     final profil = data['user']?['profil'];
     final gambarPengguna =
@@ -25,14 +26,25 @@ class SetorCardJemputBaru extends StatelessWidget {
             ? profil['gambar_url']
             : 'https://i.pinimg.com/736x/8a/e9/e9/8ae9e92fa4e69967aa61bf2bda967b7b.jpg';
 
-    final namaPengguna = profil['nama_pengguna'] ?? 'memuat..';
+    final namaPengguna = profil?['nama_pengguna'] ?? 'memuat..';
 
     return Container(
       width: width * 0.95,
-      margin: const EdgeInsets.symmetric(vertical: 6, horizontal: 8),
+      margin: const EdgeInsets.symmetric(vertical: 6),
       padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 12),
       decoration: BoxDecoration(
-        color: const Color(0xff8fd14f),
+        gradient: LinearGradient(
+          colors: [Color(0xFF1a9f61), Color(0xFF128d54)],
+          begin: Alignment.centerRight,
+          end: Alignment.centerLeft,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.25),
+            blurRadius: 4,
+            offset: Offset(0, 2),
+          ),
+        ],
         borderRadius: BorderRadius.circular(16),
       ),
       child: Row(
@@ -49,8 +61,8 @@ class SetorCardJemputBaru extends StatelessWidget {
               children: [
                 Text(
                   namaPengguna,
-                  style: TextStyle(
-                    fontSize: 20, // responsif ~18
+                  style: const TextStyle(
+                    fontSize: 20,
                     fontWeight: FontWeight.w700,
                     color: Colors.white,
                   ),
@@ -73,7 +85,7 @@ class SetorCardJemputBaru extends StatelessWidget {
             children: [
               Text(
                 tanggal,
-                style: TextStyle(fontSize: 14, color: Colors.white),
+                style: const TextStyle(fontSize: 14, color: Colors.white),
               ),
               IconButton(
                 icon: const Icon(Icons.arrow_forward, color: Colors.white),
@@ -82,7 +94,11 @@ class SetorCardJemputBaru extends StatelessWidget {
                     context,
                     MaterialPageRoute(
                       builder:
-                          (context) => PetugasSetorJemputBaru(id: data['id']),
+                          (context) => PetugasSetorJemputBaru(
+                            id: data['id'],
+                            tanggal: tanggal,
+                            catatan: catatan,
+                          ),
                     ),
                   );
                 },

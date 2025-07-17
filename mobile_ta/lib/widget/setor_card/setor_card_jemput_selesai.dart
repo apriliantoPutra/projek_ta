@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:mobile_ta/petugas/setor_jemput/petugas_setor_jemput_selesai.dart';
+import 'package:mobile_ta/pages/petugas/setor_jemput/petugas_setor_jemput_selesai.dart';
 
 class SetorCardJemputSelesai extends StatelessWidget {
   final Map<String, dynamic> data;
@@ -29,10 +29,21 @@ class SetorCardJemputSelesai extends StatelessWidget {
 
     return Container(
       width: width * 0.95,
-      margin: const EdgeInsets.symmetric(vertical: 6, horizontal: 8),
+      margin: const EdgeInsets.symmetric(vertical: 6),
       padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 12),
       decoration: BoxDecoration(
-        color: const Color(0xff8fd14f),
+        gradient: LinearGradient(
+          colors: [Color(0xFF1a9f61), Color(0xFF128d54)],
+          begin: Alignment.centerRight,
+          end: Alignment.centerLeft,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.25),
+            blurRadius: 4,
+            offset: Offset(0, 2),
+          ),
+        ],
         borderRadius: BorderRadius.circular(16),
       ),
       child: Row(

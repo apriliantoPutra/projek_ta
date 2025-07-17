@@ -31,6 +31,10 @@
                             class="block px-4 py-2 text-lg rounded-lg hover:bg-green-600 hover:text-white transition-colors ">
                             Bank Sampah
                         </a>
+                        <a href="{{ route('Layanan-Jemput') }}"
+                            class="block px-4 py-2 text-lg rounded-lg hover:bg-green-600 hover:text-white transition-colors ">
+                            Layanan Jemput
+                        </a>
                     </div>
                 </div>
 
@@ -56,10 +60,24 @@
                     class="flex items-center px-4 py-2 text-lg rounded-lg hover:bg-green-600 hover:text-white transition-colors border-b border-gray-700">
                     <i class="ri-wallet-3-line mr-3"></i> Tarik Saldo
                 </a>
-                <a href="/artikel"
-                    class="flex items-center px-4 py-2 text-lg rounded-lg hover:bg-green-600 hover:text-white transition-colors border-b border-gray-700">
-                    <i class="ri-book-open-line mr-3"></i> Edukasi
-                </a>
+                <div class="rounded-lg border-b border-gray-700">
+                    <button onclick="toggleDropdown('dropdownButton3')"
+                        class="flex items-center justify-between w-full px-4 py-2 text-lg rounded-lg hover:bg-green-600 hover:text-white transition-colors">
+                        <span><i class="ri-book-open-line mr-3"></i>Edukasi</span>
+                        <i class="ri-arrow-down-s-line"></i>
+                    </button>
+                    <div id="dropdownButton3" class="hidden flex-col space-y-1 pl-10 mt-2">
+                        <a href="{{ route('Artikel') }}"
+                            class="block px-4 py-2 text-lg rounded-lg hover:bg-green-600 hover:text-white transition-colors border-b border-gray-700">
+                            Artikel
+                        </a>
+                        <a href="{{ route('Video') }}"
+                            class="block px-4 py-2 text-lg rounded-lg hover:bg-green-600 hover:text-white transition-colors ">
+                            Video
+                        </a>
+                    </div>
+                </div>
+
 
                 {{-- <a href="#"
                     class="flex items-center px-4 py-2 text-lg rounded-lg hover:bg-green-600 hover:text-white transition-colors border-b border-gray-700">

@@ -79,16 +79,30 @@ class ProfilController extends Controller
     public function show()
     {
         $akun_id = Auth::user()->id;
-        $profil = Profil::where('akun_id', '=', $akun_id)->first();
+        $item = Profil::where('akun_id', '=', $akun_id)->first();
 
-        if (!$profil) {
+        if (!$item) {
             return response()->json([
                 'success' => false,
                 'message' => 'Profil tidak ditemukan'
             ], 404);
         }
 
-        $profil->gambar_url = asset('storage/' . $profil->gambar_pengguna);
+        $koordinat = str_replace(' ', '', $item->koordinat_pengguna);
+        $koordinatParts = explode(',', $koordinat);
+        $latitude = $koordinatParts[0] ?? null;
+        $longitude = $koordinatParts[1] ?? null;
+
+        $profil = [
+            'nama_pengguna' => $item->nama_pengguna,
+            'no_hp_pengguna' => $item->no_hp_pengguna,
+            'alamat_pengguna' => $item->alamat_pengguna,
+            'koordinat_pengguna' => $koordinat,
+            'latitude' => $latitude,
+            'longitude' => $longitude,
+            'gambar_pengguna' => $item->gambar_pengguna,
+            'gambar_url' => asset('storage/' . $item->gambar_pengguna)
+        ];
 
         return response()->json([
             'success' => true,

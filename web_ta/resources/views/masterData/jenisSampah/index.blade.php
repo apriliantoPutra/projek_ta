@@ -10,21 +10,19 @@
                 </h1>
                 <a href="{{ route('Jenis-Sampah-Tambah') }}"
                     class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition">+
-                    Tambah
-                    Data</a>
+                    Tambah Data</a>
             </div>
             <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-4 gap-4">
-                <!-- Input & Tombol Search -->
-                <div class="flex w-full md:w-1/2 gap-2">
-                    <input type="text" placeholder="Cari nama sampah"
+                <form method="GET" action="{{ route('Jenis-Sampah') }}" class="flex w-full md:w-1/2 gap-2">
+                    <input type="text" name="search" value="{{ request('search') }}" placeholder="Cari nama sampah"
                         class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500">
-                    <button
-                        class="bg-gray-200 text-sm px-4 py-2 rounded cursor-pointer hover:bg-green-600 hover:text-white transition">
+                    <button type="submit"
+                        class="bg-gray-200 text-sm px-4 py-2 rounded hover:bg-green-600 hover:text-white transition">
                         Search
                     </button>
-                </div>
-
+                </form>
             </div>
+
 
 
             <!-- Tabel Akun -->
@@ -41,7 +39,7 @@
                         </tr>
                     </thead>
                     <tbody class="bg-white divide-y divide-gray-200 text-lg">
-                        @forelse ($datas as $jenis_sampah)
+                        @forelse ($data as $jenis_sampah)
                             <tr class="hover:bg-gray-50">
                                 <td class="px-5 py-3">{{ $loop->iteration }}.</td>
 
@@ -67,11 +65,11 @@
                                 <td class="px-5 py-3 space-x-2">
                                     <a href="{{ route('Jenis-Sampah-Edit', $jenis_sampah->id) }}"
                                         class="text-yellow-600 hover:underline">Edit</a>
-                                    <form action="{{ route('Jenis-Sampah-delete', $jenis_sampah->id) }}" method="POST" class="inline">
+                                    <form action="{{ route('Jenis-Sampah-delete', $jenis_sampah->id) }}" method="POST"
+                                        class="inline">
                                         @csrf
                                         @method('DELETE')
-                                        <button type="submit"
-                                            onclick="return confirm('Yakin ingin menghapus data ini?')"
+                                        <button type="submit" onclick="return confirm('Yakin ingin menghapus data ini?')"
                                             class="text-red-600 cursor-pointer hover:underline">
                                             Hapus
                                         </button>
@@ -81,12 +79,15 @@
                         @empty
                             <tr>
                                 <td colspan="6" class="px-5 py-8 text-center text-gray-500 italic">
-                                    Tidak ada data akun.
+                                    Tidak ada data sampah.
                                 </td>
                             </tr>
                         @endforelse
                     </tbody>
                 </table>
+                <div class="mt-4 flex justify-end">
+                    {{ $data->links('vendor.pagination.tailwind') }}
+                </div>
             </div>
 
         </div>

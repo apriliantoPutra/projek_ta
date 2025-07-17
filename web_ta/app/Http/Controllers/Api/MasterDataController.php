@@ -46,7 +46,7 @@ class MasterDataController extends Controller
 
     public function bankSampahShow($id)
     {
-        $item = BankSampah::with(['user.profil'])
+        $item = BankSampah::with(['user.profil', 'layananJemput'])
             ->find($id);
 
         if (!$item) {
@@ -56,6 +56,10 @@ class MasterDataController extends Controller
             ], 404);
         }
         $profil = $item->user->profil;
+        $koordinat = str_replace(' ', '', $item->koordinat_bank_sampah); // Hilangkan spasi
+        $koordinatParts = explode(',', $koordinat);
+        $latitude = $koordinatParts[0] ?? null;
+        $longitude = $koordinatParts[1] ?? null;
 
         $bankSampah = [
             'id' => $item->id,
@@ -63,7 +67,10 @@ class MasterDataController extends Controller
             'nama_bank_sampah' => $item->nama_bank_sampah,
             'deskripsi_bank_sampah' => $item->deskripsi_bank_sampah,
             'alamat_bank_sampah' => $item->alamat_bank_sampah,
-            'koordinat_bank_sampah' => $item->koordinat_bank_sampah,
+            'koordinat_bank_sampah' => $koordinat,
+            'latitude' => $latitude,
+            'longitude' => $longitude,
+            'ongkir_per_jarak' => $item->layananJemput->ongkir_per_jarak,
             'user' => [
                 'username' => $item->user->username,
                 'email' => $item->user->email,

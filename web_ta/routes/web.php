@@ -1,17 +1,18 @@
 <?php
 
-use App\Http\Controllers\AkunController;
-use App\Http\Controllers\DashboardController;
-use App\Http\Controllers\Edukasi\ArtikelController;
-use App\Http\Controllers\Edukasi\VideoController;
-use App\Http\Controllers\LoginController;
-use App\Http\Controllers\Master\BankSampahController;
-use App\Http\Controllers\Master\DataController;
-use App\Http\Controllers\Master\JenisSampahController;
-use App\Http\Controllers\ProfilController;
-use App\Http\Controllers\Setoran\SetorJemputController;
-use App\Http\Controllers\Setoran\SetorLangsungController;
-use App\Http\Controllers\TarikSaldoController;
+use App\Http\Controllers\Web\AkunController;
+use App\Http\Controllers\Web\DashboardController;
+use App\Http\Controllers\Web\Edukasi\ArtikelController;
+use App\Http\Controllers\Web\Edukasi\VideoController;
+use App\Http\Controllers\Web\LoginController;
+use App\Http\Controllers\Web\Master\BankSampahController;
+use App\Http\Controllers\Web\Master\DataController;
+use App\Http\Controllers\Web\Master\JenisSampahController;
+use App\Http\Controllers\Web\Master\LayananJemputController;
+use App\Http\Controllers\Web\ProfilController;
+use App\Http\Controllers\Web\Setoran\SetorJemputController;
+use App\Http\Controllers\Web\Setoran\SetorLangsungController;
+use App\Http\Controllers\Web\TarikSaldoController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', [LoginController::class, 'index']);
@@ -35,6 +36,13 @@ Route::middleware(['authorization', 'admin'])->group(function () {
         Route::post('/bank-sampah-store', [BankSampahController::class, 'store'])->name('Bank-Sampah-Store');
         Route::get('/bank-sampah-edit', [BankSampahController::class, 'edit'])->name('Bank-Sampah-Edit');
         Route::put('/bank-sampah-update/{id}', [BankSampahController::class, 'update'])->name('Bank-Sampah-Update');
+
+        Route::get('/layanan-jemput', [LayananJemputController::class, 'index'])->name('Layanan-Jemput');
+        Route::get('/layanan-jemput-tambah', [LayananJemputController::class, 'create'])->name('Layanan-Jemput-Tambah');
+        Route::post('/layanan-jemput-store', [LayananJemputController::class, 'store'])->name('Layanan-Jemput-Store');
+        Route::get('/layanan-jemput-edit/{id}', [LayananJemputController::class, 'edit'])->name('Layanan-Jemput-Edit');
+        Route::put('/layanan-jemput-update/{id}', [LayananJemputController::class, 'update'])->name('Layanan-Jemput-Update');
+
     });
 
     Route::get('/setoran-langsung', [SetorLangsungController::class, 'index'])->name('Setor-Langsung');
@@ -83,4 +91,3 @@ Route::middleware(['authorization', 'admin'])->group(function () {
     Route::put('/tarik-saldo-terima/{id}', [TarikSaldoController::class, 'terimaTarikSaldo'])->name('Tarik-Saldo-Terima');
     Route::put('/tarik-saldo-tolak/{id}', [TarikSaldoController::class, 'tolakTarikSaldo'])->name('Tarik-Saldo-Tolak');
 });
-

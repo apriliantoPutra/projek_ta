@@ -15,25 +15,14 @@
 
 
             <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-4 gap-4">
-                <!-- Input & Tombol Search -->
-                <div class="flex w-full md:w-1/2 gap-2">
-                    <input type="text" placeholder="Cari judul video"
+                <form method="GET" action="{{ route('Video') }}" class="flex w-full md:w-1/2 gap-2">
+                    <input type="text" name="search" value="{{ request('search') }}" placeholder="Cari Judul Video"
                         class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500">
-                    <button
-                        class="bg-gray-200 text-sm px-4 py-2 rounded cursor-pointer hover:bg-green-600 hover:text-white transition">
+                    <button type="submit"
+                        class="bg-gray-200 text-sm px-4 py-2 rounded hover:bg-green-600 hover:text-white transition">
                         Search
                     </button>
-                </div>
-
-                <!-- Filter Role -->
-                <div>
-                    <span class="font-medium mr-2">Jenis Edukasi:</span>
-                    <a href="/artikel"
-                        class="bg-gray-200 text-sm px-3 py-1 rounded hover:bg-green-500 hover:text-white transition">Artikel</a>
-                    <button
-                        class="bg-green-500 text-white text-sm px-3 py-1 rounded hover:bg-green-500 hover:text-white transition">Video</button>
-
-                </div>
+                </form>
             </div>
 
 
@@ -63,8 +52,7 @@
                                     <form action="{{ route('Video-Hapus', $video->id) }}" method="POST" class="inline">
                                         @csrf
                                         @method('DELETE')
-                                        <button type="submit"
-                                            onclick="return confirm('Yakin ingin menghapus video ini?')"
+                                        <button type="submit" onclick="return confirm('Yakin ingin menghapus video ini?')"
                                             class="text-red-600 cursor-pointer hover:underline">
                                             Hapus
                                         </button>
@@ -82,6 +70,9 @@
 
                     </tbody>
                 </table>
+                <div class="mt-4 flex justify-end">
+                    {{ $data->links('vendor.pagination.tailwind') }}
+                </div>
             </div>
 
         </div>

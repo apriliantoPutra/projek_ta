@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:mobile_ta/warga/histori_saldo/detail_histori_saldo_page.dart';
+import 'package:mobile_ta/pages/warga/histori_saldo/detail_histori_saldo_page.dart';
 
 class TarikSaldoCard extends StatelessWidget {
   final Map<String, dynamic> data;

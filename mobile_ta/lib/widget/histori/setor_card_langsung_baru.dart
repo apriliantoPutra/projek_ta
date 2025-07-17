@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:mobile_ta/pages/warga/histori_setor/setor_langsung/histori_setor_baru_langsung_page.dart';
 
 class HistoriSetorCardLangsungBaru extends StatelessWidget {
   final Map<String, dynamic> data;
@@ -10,6 +11,7 @@ class HistoriSetorCardLangsungBaru extends StatelessWidget {
   Widget build(BuildContext context) {
     final width = MediaQuery.of(context).size.width;
     final waktuPengajuan = data['waktu_pengajuan'];
+    final catatan = data['catatan_petugas'];
     final tanggal =
         waktuPengajuan != null
             ? DateFormat(
@@ -52,7 +54,17 @@ class HistoriSetorCardLangsungBaru extends StatelessWidget {
           IconButton(
             icon: const Icon(Icons.arrow_forward_ios, color: Colors.white),
             onPressed: () {
-              // Aksi ketika diklik
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder:
+                      (context) => HistoriSetorBaruLangsungPage(
+                        id: data['id'],
+                        tanggal: tanggal,
+                        catatan: catatan,
+                      ),
+                ),
+              );
             },
           ),
         ],

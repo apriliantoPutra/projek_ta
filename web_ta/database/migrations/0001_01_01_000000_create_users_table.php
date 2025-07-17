@@ -18,6 +18,7 @@ return new class extends Migration
             $table->timestamp('email_verified_at')->nullable();
             $table->string('role');
             $table->string('password');
+            $table->string('fcm_token')->nullable();
             $table->rememberToken();
             $table->timestamps();
         });

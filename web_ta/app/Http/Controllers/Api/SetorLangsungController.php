@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\Web\NotificationController;
 use App\Models\InputDetailSetor;
 use App\Models\PengajuanSetor;
 use App\Models\Saldo;
@@ -203,6 +204,11 @@ class SetorLangsungController extends Controller
                 "total_saldo" => $saldo->total_saldo + $request->total_harga
             ]);
 
+            app(NotificationController::class)->sendNotificationToUser(
+                $pengajuan->warga_id,
+                'Konfirmasi Setor Langsung!',
+                'Permintaan setor langsung Anda telah selesai.'
+            );
             DB::commit();
             return response()->json([
                 'success' => true,

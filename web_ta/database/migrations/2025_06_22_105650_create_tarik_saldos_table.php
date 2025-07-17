@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('tarik_saldos', function (Blueprint $table) {
             $table->id();
-             $table->foreignId('warga_id')->constrained('akun');
+            $table->foreignId('warga_id')->constrained('akun');
             $table->integer('jumlah_saldo');
             $table->string('status');
             $table->string('metode');
