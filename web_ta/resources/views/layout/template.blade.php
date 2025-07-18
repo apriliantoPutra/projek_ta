@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Bank Sampah</title>
-    <link rel="icon" href="{{ asset('img/logo.png') }}" type="image/png">
+   <link rel="icon" href="{{ asset('/img/green.png') }}" type="image/png">
     @vite('resources/css/app.css')
     <link href="https://cdn.jsdelivr.net/npm/remixicon@4.5.0/fonts/remixicon.css" rel="stylesheet" />
 

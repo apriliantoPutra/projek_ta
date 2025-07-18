@@ -7,6 +7,7 @@ use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class AkunController extends Controller
 {
@@ -71,8 +72,32 @@ class AkunController extends Controller
     }
     public function destroy($id)
     {
-        $datas = User::find($id);
-        $datas->delete();
-        return redirect()->back();
+        DB::beginTransaction();
+
+        try {
+            $user = User::with('profil', 'saldo', 'pengajuansetor', 'inputdetailsetor')->findOrFail($id);
+
+            $user->profil()?->delete();
+            $user->saldo?->each(function ($item) {
+                $item->delete();
+            });
+            $user->pengajuansetor?->each(function ($item) {
+                $item->delete();
+            });
+
+            $user->inputdetailsetor?->each(function ($item) {
+                $item->delete();
+            });
+
+
+            // Terakhir hapus user
+            $user->delete();
+
+            DB::commit();
+            return redirect()->back()->with('success', 'User dan relasinya berhasil dihapus.');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()->back()->with('error', 'Gagal menghapus user: ' . $e->getMessage());
+        }
     }
 }

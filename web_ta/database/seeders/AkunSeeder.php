@@ -24,10 +24,17 @@ class AkunSeeder extends Seeder
                 'created_at'=> Carbon::now()
             ],
             [
-                'username'=> 'warga',
-                'email'=> 'warga@gmail.com',
+                'username'=> 'warga1',
+                'email'=> 'warga1@gmail.com',
                 'password'=> Hash::make('warga123'),
                 'role'=>'warga',
+                'created_at'=> Carbon::now()
+            ],
+            [
+                'username'=> 'petugas1',
+                'email'=> 'petugas1@gmail.com',
+                'password'=> Hash::make('petugas123'),
+                'role'=>'petugas',
                 'created_at'=> Carbon::now()
             ],
         ]);

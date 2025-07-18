@@ -34,6 +34,7 @@
                             <th class="px-5 py-3">Nama Sampah</th>
                             <th class="px-5 py-3">Satuan</th>
                             <th class="px-5 py-3">Harga/satuan</th>
+                            <th class="px-5 py-3">Total Sampah</th>
                             <th class="px-5 py-3">warna Indikasi</th>
                             <th class="px-5 py-3">Aksi</th>
                         </tr>
@@ -43,17 +44,17 @@
                             <tr class="hover:bg-gray-50">
                                 <td class="px-5 py-3">{{ $loop->iteration }}.</td>
 
-                                {{-- Judul Artikel --}}
                                 <td class="px-5 py-3">{{ $jenis_sampah->nama_sampah }}</td>
 
-                                {{-- Tanggal Rilis --}}
                                 <td class="px-5 py-3">
                                     {{ $jenis_sampah->satuan }}
                                 </td>
 
-                                {{-- Gambar Artikel --}}
                                 <td class="px-5 py-3">
                                     {{ $jenis_sampah->harga_per_satuan }}
+                                </td>
+                                <td class="px-5 py-3">
+                                    {{ $jenis_sampah->totalSampah->total_berat }}
                                 </td>
                                 <td class="px-5 py-3">
                                     <div class="w-6 h-6 rounded-full border border-gray-300"

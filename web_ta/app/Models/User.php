@@ -54,12 +54,16 @@ class User extends Authenticatable
 
     public function profil()
     {
-        return $this->hasOne(Profil::class, 'akun_id'); // profil.akun_id mengarah ke user.id
+        return $this->hasOne(Profil::class, 'akun_id');
+    }
+    public function saldo()
+    {
+        return $this->hasOne(Saldo::class, 'warga_id');
     }
 
     public function bankSampah()
     {
-        return $this->hasOne(BankSampah::class, 'admin_id'); // bank_sampah.admin_id = user.id
+        return $this->hasOne(BankSampah::class, 'admin_id');
     }
     /**
      * Get all of the PengajuanSetor for the User

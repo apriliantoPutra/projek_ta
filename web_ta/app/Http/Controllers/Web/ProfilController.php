@@ -1,9 +1,12 @@
 <?php
+
 namespace App\Http\Controllers\Web;
+
 use App\Http\Controllers\Controller;
 
 use App\Models\User;
 use App\Models\Profil;
+use App\Models\Saldo;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
@@ -102,6 +105,7 @@ class ProfilController extends Controller
         $profil = Profil::where('akun_id', $id)->first();
 
         $akun = User::find($id);
-        return view('profil.user.index', ['headerTitle' => 'Profil', 'profil' => $profil, 'akun' => $akun]);
+        $saldo = Saldo::where('warga_id', '=', $id)->first();
+        return view('profil.user.index', ['headerTitle' => 'Profil', 'profil' => $profil, 'akun' => $akun, 'saldo' => $saldo]);
     }
 }

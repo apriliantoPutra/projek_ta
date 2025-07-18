@@ -2,7 +2,9 @@
 
 namespace App\Models\Master;
 
+use App\Models\TotalSampah;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class JenisSampah extends Model
 {
@@ -13,4 +15,14 @@ class JenisSampah extends Model
         'harga_per_satuan',
         'warna_indikasi',
     ];
+
+    /**
+     * Get the user associated with the JenisSampah
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasOne
+     */
+    public function totalSampah(): HasOne
+    {
+        return $this->hasOne(TotalSampah::class, 'sampah_id', 'id');
+    }
 }
