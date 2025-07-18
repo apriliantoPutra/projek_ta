@@ -8,6 +8,7 @@ import 'package:mobile_ta/pages/petugas/detail_map/map_bank_sampah_map_warga_pag
 import 'package:mobile_ta/pages/petugas/setor_jemput/petugas_setor_jemput_proses.dart';
 import 'package:mobile_ta/widget/petugas_main_widget.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class PetugasSetorJemputBaru extends StatefulWidget {
   final int id;
@@ -384,23 +385,27 @@ class _PetugasSetorJemputBaruState extends State<PetugasSetorJemputBaru> {
 
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: Color(0xFF128d54),
         elevation: 0,
         centerTitle: true,
         title: Column(
           children: [
             Text(
               "Setor Jemput Sampah",
-              style: TextStyle(fontSize: 24, fontWeight: FontWeight.w600),
+              style: GoogleFonts.poppins(
+                fontSize: 24,
+                fontWeight: FontWeight.w600,
+                color: Colors.white,
+              ),
             ),
             Text(
               "Baru",
-              style: TextStyle(fontSize: 14, color: Colors.grey[600]),
+              style: GoogleFonts.poppins(fontSize: 14, color: Colors.white),
             ),
           ],
         ),
         leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: Colors.black),
+          icon: Icon(Icons.arrow_back, color: Colors.white),
           onPressed:
               () => Navigator.pushAndRemoveUntil(
                 context,
@@ -411,12 +416,26 @@ class _PetugasSetorJemputBaruState extends State<PetugasSetorJemputBaru> {
               ),
         ),
       ),
+
       body: SingleChildScrollView(
         child: Column(
           children: [
             // User Profile
             Container(
+              margin: EdgeInsets.all(16),
               padding: EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(20),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.green.withOpacity(0.20),
+                    blurRadius: 16,
+                    offset: Offset(0, 6),
+                  ),
+                ],
+              ),
+
               child: Row(
                 children: [
                   CircleAvatar(
@@ -426,51 +445,86 @@ class _PetugasSetorJemputBaruState extends State<PetugasSetorJemputBaru> {
                   SizedBox(width: 16),
                   Text(
                     namaPengguna,
-                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
+                    style: GoogleFonts.poppins(
+                      fontSize: 20,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
                 ],
               ),
             ),
-            const SizedBox(height: 16),
+
             Container(
+              width: double.infinity,
+              margin: EdgeInsets.symmetric(horizontal: 16),
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: Colors.greenAccent.shade100,
+                gradient: LinearGradient(
+                  colors: [Color(0xFF6BBE44), Color(0xFF128d54)],
+                  begin: Alignment.bottomCenter,
+                  end: Alignment.topCenter,
+                ),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
-                    "Detail Penyetoran",
-                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                  Text(
+                    "Detail Penyetoran :",
+                    style: GoogleFonts.poppins(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                      color: Colors.white,
+                    ),
                   ),
                   const SizedBox(height: 8),
-                  Text("Tanggal: ${widget.tanggal}"),
-                  Text("Catatan: ${widget.catatan}"),
+                  Text(
+                    "Tanggal: ${widget.tanggal}",
+                    style: GoogleFonts.poppins(color: Colors.white),
+                  ),
+                  Text(
+                    "Catatan: ${widget.catatan}",
+                    style: GoogleFonts.poppins(color: Colors.white),
+                  ),
                 ],
               ),
             ),
             const SizedBox(height: 16),
+            Text(
+              'Estimasi Berat Sampah',
+              style: GoogleFonts.poppins(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            SizedBox(height: 8),
             // Waste Visualization
             Container(
               padding: EdgeInsets.all(16),
-              margin: EdgeInsets.all(16),
+              margin: EdgeInsets.symmetric(horizontal: 16),
               decoration: BoxDecoration(
-                color: Colors.greenAccent.shade100,
-                borderRadius: BorderRadius.circular(12),
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(20),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.green.withOpacity(0.20),
+                    blurRadius: 16,
+                    offset: Offset(0, 0),
+                  ),
+                ],
               ),
+
               child: Column(
                 children: [
                   Stack(
                     children: [
-                      Container(
-                        height: 32,
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(8),
-                          color: Colors.grey[300],
-                        ),
-                      ),
+                      // Container(
+                      //   height: 32,
+                      //   decoration: BoxDecoration(
+                      //     borderRadius: BorderRadius.circular(8),
+                      //     color: Colors.grey[300],
+                      //   ),
+                      // ),
                       Row(
                         children:
                             processedSetoran.map((item) {
@@ -486,12 +540,14 @@ class _PetugasSetorJemputBaruState extends State<PetugasSetorJemputBaru> {
                               );
                             }).toList(),
                       ),
-                      Center(
-                        child: Text(
-                          "${totalBerat.toStringAsFixed(1)}kg",
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
+                      Positioned.fill(
+                        child: Center(
+                          child: Text(
+                            "${totalBerat.toStringAsFixed(1)}kg",
+                            style: GoogleFonts.poppins(
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                            ),
                           ),
                         ),
                       ),
@@ -516,23 +572,31 @@ class _PetugasSetorJemputBaruState extends State<PetugasSetorJemputBaru> {
                       ),
                     ),
                   ),
-                  SizedBox(height: 16),
-                  const Text(
-                    'Estimasi Insentif',
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                  ),
                 ],
               ),
             ),
-            const SizedBox(height: 10),
-
-            // Estimasi Insentif
+            const SizedBox(height: 16),
+            Text(
+              'Estimasi Insentif',
+              style: GoogleFonts.poppins(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            SizedBox(height: 8), // Estimasi Insentif
             Container(
               padding: const EdgeInsets.all(16),
-              margin: EdgeInsets.all(16),
+              margin: EdgeInsets.symmetric(horizontal: 16),
               decoration: BoxDecoration(
-                color: Colors.greenAccent.shade100,
-                borderRadius: BorderRadius.circular(16),
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(20),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.green.withOpacity(0.20),
+                    blurRadius: 16,
+                    offset: Offset(0, 0),
+                  ),
+                ],
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -540,15 +604,24 @@ class _PetugasSetorJemputBaruState extends State<PetugasSetorJemputBaru> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      const Text('Estimasi harga sampah anda'),
-                      Text('Rp $totalHarga'),
+                      Text(
+                        'Estimasi harga sampah anda',
+                        style: GoogleFonts.poppins(color: Colors.black),
+                      ),
+                      Text(
+                        'Rp $totalHarga',
+                        style: GoogleFonts.poppins(color: Colors.black),
+                      ),
                     ],
                   ),
                   const SizedBox(height: 4),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      const Text("Jarak"),
+                      Text(
+                        "Jarak",
+                        style: GoogleFonts.poppins(color: Colors.black),
+                      ),
                       Text(
                         _formatDistance(
                           _calculateDistanceInKm(
@@ -558,6 +631,7 @@ class _PetugasSetorJemputBaruState extends State<PetugasSetorJemputBaru> {
                             longitudeBankSampah ?? 0,
                           ).toDouble(),
                         ),
+                        style: GoogleFonts.poppins(color: Colors.black),
                       ),
                     ],
                   ),
@@ -565,21 +639,33 @@ class _PetugasSetorJemputBaruState extends State<PetugasSetorJemputBaru> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      const Text("Biaya Layanan (Ongkir)"),
-                      Text('Rp $biayaLayanan'),
+                      Text(
+                        "Biaya Layanan (Ongkir)",
+                        style: GoogleFonts.poppins(color: Colors.black),
+                      ),
+                      Text(
+                        'Rp $biayaLayanan',
+                        style: GoogleFonts.poppins(color: Colors.black),
+                      ),
                     ],
                   ),
                   const Divider(),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      const Text(
+                      Text(
                         'Perkiraan Insentif',
-                        style: TextStyle(fontWeight: FontWeight.bold),
+                        style: GoogleFonts.poppins(
+                          color: Colors.black,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                       Text(
                         'Rp ${totalHarga - biayaLayanan}',
-                        style: const TextStyle(fontWeight: FontWeight.bold),
+                        style: GoogleFonts.poppins(
+                          color: Colors.black,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ],
                   ),
@@ -589,31 +675,43 @@ class _PetugasSetorJemputBaruState extends State<PetugasSetorJemputBaru> {
             const SizedBox(height: 10),
             _buildMapImage(),
             const SizedBox(height: 10),
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton.icon(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder:
-                          (context) => (PetugasMapBankSampahMapWargaPage(
-                            latitudeWarga: latitudeWarga,
-                            longitudeWarga: longitudeWarga,
-                            latitudeBankSampah: latitudeBankSampah,
-                            longitudeBankSampah: longitudeBankSampah,
-                          )),
+            Padding(
+              padding: const EdgeInsets.symmetric(
+                horizontal: 16,
+              ), // Kiri dan kanan 16px
+              child: SizedBox(
+                width: double.infinity,
+                child: ElevatedButton.icon(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder:
+                            (context) => PetugasMapBankSampahMapWargaPage(
+                              latitudeWarga: latitudeWarga,
+                              longitudeWarga: longitudeWarga,
+                              latitudeBankSampah: latitudeBankSampah,
+                              longitudeBankSampah: longitudeBankSampah,
+                            ),
+                      ),
+                    );
+                  },
+                  icon: const Icon(Icons.map),
+                  label: Text(
+                    "Detail Map",
+                    style: GoogleFonts.poppins(
+                      color: Colors.white,
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
                     ),
-                  );
-                },
-                icon: const Icon(Icons.map),
-                label: const Text("Detail Map"),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.green,
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(vertical: 14),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Color(0xFF128d54),
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(20),
+                    ),
                   ),
                 ),
               ),
@@ -638,7 +736,7 @@ class _PetugasSetorJemputBaruState extends State<PetugasSetorJemputBaru> {
                       ),
                       child: Text(
                         "Batalkan Pengambilan",
-                        style: TextStyle(color: Colors.white),
+                        style: GoogleFonts.poppins(color: Colors.white),
                       ),
                     ),
                   ),
@@ -648,7 +746,7 @@ class _PetugasSetorJemputBaruState extends State<PetugasSetorJemputBaru> {
                     child: ElevatedButton(
                       onPressed: ambilSetoran,
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Color(0xFF8FD14F),
+                        backgroundColor: Color(0xFF6BBE44),
                         padding: EdgeInsets.symmetric(vertical: 16),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(8),
@@ -656,7 +754,7 @@ class _PetugasSetorJemputBaruState extends State<PetugasSetorJemputBaru> {
                       ),
                       child: Text(
                         "Ambil Sampah",
-                        style: TextStyle(color: Colors.white),
+                        style: GoogleFonts.poppins(color: Colors.white),
                       ),
                     ),
                   ),

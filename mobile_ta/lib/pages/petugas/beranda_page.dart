@@ -194,7 +194,7 @@ class PetugasBerandaPage extends StatelessWidget {
                       Text(
                         "Setor Terbaru",
                         style: GoogleFonts.poppins(
-                          color: Colors.black,
+                          color: Color(0xFF128d54),
                           fontSize: 24,
                           fontWeight: FontWeight.w700,
                         ),
@@ -222,7 +222,7 @@ class PetugasBerandaPage extends StatelessWidget {
                       ),
                     ],
                   ),
-                  SizedBox(height: 8),
+
                   _buildSetorBaru(),
                 ],
               ),

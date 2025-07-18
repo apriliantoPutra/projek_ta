@@ -224,13 +224,6 @@ class _PetugasSetorLangsungSelesaiState
                         children: [
                           Stack(
                             children: [
-                              // Container(
-                              //   height: 24,
-                              //   decoration: BoxDecoration(
-                              //     borderRadius: BorderRadius.circular(12),
-                              //     color: Colors.black,
-                              //   ),
-                              // ),
                               Row(
                                 children:
                                     processedSetoran.map((item) {
