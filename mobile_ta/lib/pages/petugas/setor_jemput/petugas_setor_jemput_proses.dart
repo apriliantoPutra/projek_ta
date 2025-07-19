@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:math';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:http/http.dart' as http;
 import 'package:mobile_ta/constants/constants.dart';
@@ -455,23 +456,27 @@ class _PetugasSetorJemputProsesState extends State<PetugasSetorJemputProses> {
 
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Colors.greenAccent,
+        backgroundColor: Color(0xFF128d54),
         elevation: 0,
         centerTitle: true,
         title: Column(
           children: [
             Text(
               "Setor Jemput Sampah",
-              style: TextStyle(fontSize: 24, fontWeight: FontWeight.w600),
+              style: GoogleFonts.poppins(
+                fontSize: 24,
+                fontWeight: FontWeight.w700,
+                color: Colors.white,
+              ),
             ),
             Text(
               "Proses",
-              style: TextStyle(fontSize: 14, color: Colors.grey[600]),
+              style: GoogleFonts.poppins(fontSize: 14, color: Colors.white),
             ),
           ],
         ),
         leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: Colors.black),
+          icon: Icon(Icons.arrow_back, color: Colors.white),
           onPressed:
               () => Navigator.pushAndRemoveUntil(
                 context,
@@ -482,6 +487,7 @@ class _PetugasSetorJemputProsesState extends State<PetugasSetorJemputProses> {
               ),
         ),
       ),
+
       body: SingleChildScrollView(
         padding: EdgeInsets.all(16),
         child: Column(
@@ -491,10 +497,10 @@ class _PetugasSetorJemputProsesState extends State<PetugasSetorJemputProses> {
               padding: EdgeInsets.all(16),
               decoration: BoxDecoration(
                 color: Colors.white,
-                borderRadius: BorderRadius.circular(16),
+                borderRadius: BorderRadius.circular(20),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.grey.withOpacity(0.2),
+                    color: Colors.green.withOpacity(0.2),
                     blurRadius: 8,
                     offset: Offset(0, 4),
                   ),
@@ -511,7 +517,7 @@ class _PetugasSetorJemputProsesState extends State<PetugasSetorJemputProses> {
                   Expanded(
                     child: Text(
                       namaPengguna,
-                      style: TextStyle(
+                      style: GoogleFonts.poppins(
                         fontSize: 20,
                         fontWeight: FontWeight.w600,
                       ),
@@ -526,15 +532,25 @@ class _PetugasSetorJemputProsesState extends State<PetugasSetorJemputProses> {
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: Colors.greenAccent.shade100,
-                borderRadius: BorderRadius.circular(16),
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(20),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.green.withOpacity(0.2),
+                    blurRadius: 8,
+                    offset: Offset(0, 4),
+                  ),
+                ],
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
+                  Text(
                     "Lokasi",
-                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                    style: GoogleFonts.poppins(
+                      fontWeight: FontWeight.w600,
+                      fontSize: 20,
+                    ),
                   ),
                   const SizedBox(height: 8),
                   _buildMapImage(),
@@ -557,9 +573,9 @@ class _PetugasSetorJemputProsesState extends State<PetugasSetorJemputProses> {
                         );
                       },
                       icon: const Icon(Icons.map),
-                      label: const Text("Detail Map"),
+                      label: Text("Detail Map", style: GoogleFonts.poppins()),
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.green,
+                        backgroundColor: Color(0xFF128d54),
                         foregroundColor: Colors.white,
                         padding: const EdgeInsets.symmetric(vertical: 14),
                         shape: RoundedRectangleBorder(
@@ -568,18 +584,28 @@ class _PetugasSetorJemputProsesState extends State<PetugasSetorJemputProses> {
                       ),
                     ),
                   ),
-                  const SizedBox(height: 10),
                 ],
               ),
             ),
-            const SizedBox(height: 16),
+            SizedBox(height: 16),
+            Text(
+              "Estimasi Berat Sampah",
+              style: GoogleFonts.poppins(fontSize: 16),
+            ),
+            SizedBox(height: 8),
             // Waste Visualization
             Container(
               padding: EdgeInsets.all(16),
-              margin: EdgeInsets.symmetric(vertical: 16),
               decoration: BoxDecoration(
-                color: Colors.greenAccent.shade100,
-                borderRadius: BorderRadius.circular(16),
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(20),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.green.withOpacity(0.20),
+                    blurRadius: 16,
+                    offset: Offset(0, 6),
+                  ),
+                ],
               ),
               child: Column(
                 children: [
@@ -610,12 +636,14 @@ class _PetugasSetorJemputProsesState extends State<PetugasSetorJemputProses> {
                               );
                             }).toList(),
                       ),
-                      Center(
-                        child: Text(
-                          "${totalBerat.toStringAsFixed(1)}kg",
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
+                      Positioned.fill(
+                        child: Center(
+                          child: Text(
+                            "${totalBerat.toStringAsFixed(1)}kg",
+                            style: GoogleFonts.poppins(
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                            ),
                           ),
                         ),
                       ),
@@ -632,10 +660,21 @@ class _PetugasSetorJemputProsesState extends State<PetugasSetorJemputProses> {
                             color: _parseHexColor(item['warna']),
                           ),
                           SizedBox(width: 8),
-                          Expanded(child: Text(item['nama'])),
-                          Text("${item['berat']?.toStringAsFixed(2)}kg"),
+                          Expanded(
+                            child: Text(
+                              item['nama'],
+                              style: GoogleFonts.poppins(),
+                            ),
+                          ),
+                          Text(
+                            "${item['berat']?.toStringAsFixed(2)}kg",
+                            style: GoogleFonts.poppins(),
+                          ),
                           SizedBox(width: 16),
-                          Text("Rp${item['subtotal']}"),
+                          Text(
+                            "Rp${item['subtotal']}",
+                            style: GoogleFonts.poppins(),
+                          ),
                         ],
                       ),
                     ),
@@ -644,12 +683,25 @@ class _PetugasSetorJemputProsesState extends State<PetugasSetorJemputProses> {
               ),
             ),
 
+            SizedBox(height: 16),
+            Text(
+              "Estimasi Harga Sampah",
+              style: GoogleFonts.poppins(fontSize: 16),
+            ),
+            SizedBox(height: 8),
             // Estimasi Insentif
             Container(
               padding: EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: Colors.greenAccent.shade100,
-                borderRadius: BorderRadius.circular(16),
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(20),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.green.withOpacity(0.10),
+                    blurRadius: 16,
+                    offset: Offset(0, 6),
+                  ),
+                ],
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -657,15 +709,18 @@ class _PetugasSetorJemputProsesState extends State<PetugasSetorJemputProses> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text('Estimasi harga sampah anda'),
-                      Text('Rp $totalHarga'),
+                      Text(
+                        'Estimasi harga sampah anda',
+                        style: GoogleFonts.poppins(),
+                      ),
+                      Text('Rp $totalHarga', style: GoogleFonts.poppins()),
                     ],
                   ),
                   SizedBox(height: 4),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      const Text("Jarak"),
+                      Text("Jarak", style: GoogleFonts.poppins()),
                       Text(
                         _formatDistance(
                           _calculateDistanceInKm(
@@ -682,8 +737,11 @@ class _PetugasSetorJemputProsesState extends State<PetugasSetorJemputProses> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      const Text("Biaya Layanan (Ongkir)"),
-                      Text('Rp $biayaLayanan'),
+                      Text(
+                        "Biaya Layanan (Ongkir)",
+                        style: GoogleFonts.poppins(),
+                      ),
+                      Text('Rp $biayaLayanan', style: GoogleFonts.poppins()),
                     ],
                   ),
                   Divider(),
@@ -692,14 +750,14 @@ class _PetugasSetorJemputProsesState extends State<PetugasSetorJemputProses> {
                     children: [
                       Text(
                         'Perkiraan Insentif',
-                        style: TextStyle(fontWeight: FontWeight.bold),
+                        style: GoogleFonts.poppins(fontWeight: FontWeight.bold),
                       ),
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.end,
                         children: [
                           Text(
                             'Rp ${estimatedTotal >= 0 ? estimatedTotal : 0}',
-                            style: TextStyle(
+                            style: GoogleFonts.poppins(
                               fontWeight: FontWeight.bold,
                               color: isTotalValid ? Colors.black : Colors.red,
                             ),
@@ -717,13 +775,26 @@ class _PetugasSetorJemputProsesState extends State<PetugasSetorJemputProses> {
               ),
             ),
 
-            SizedBox(height: 10),
+            SizedBox(height: 16),
+
+            Text(
+              "Masukkan Berat Sampah",
+              style: GoogleFonts.poppins(fontSize: 16),
+            ),
+            SizedBox(height: 8),
             // Editable Waste List
             Container(
               padding: EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: Colors.greenAccent.shade100,
-                borderRadius: BorderRadius.circular(16),
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(20),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.green.withOpacity(0.20),
+                    blurRadius: 16,
+                    offset: Offset(0, 6),
+                  ),
+                ],
               ),
               child: Column(
                 children: [
@@ -738,12 +809,19 @@ class _PetugasSetorJemputProsesState extends State<PetugasSetorJemputProses> {
                             flex: 2,
                             child: DropdownButtonFormField<int?>(
                               value: item['jenis_sampah_id'],
-                              hint: Text('Pilih jenis'),
+                              hint: Text(
+                                'Pilih jenis',
+                                style: GoogleFonts.poppins(), // Added Poppins
+                              ),
                               items:
                                   _jenisSampahOptions.map((option) {
                                     return DropdownMenuItem<int?>(
                                       value: option['id'] as int?,
-                                      child: Text(option['nama_sampah']),
+                                      child: Text(
+                                        option['nama_sampah'],
+                                        style:
+                                            GoogleFonts.poppins(), // Added Poppins
+                                      ),
                                     );
                                   }).toList(),
                               onChanged: (value) {
@@ -753,55 +831,97 @@ class _PetugasSetorJemputProsesState extends State<PetugasSetorJemputProses> {
                                   _recalculateTotals();
                                 });
                               },
+                              style: GoogleFonts.poppins(
+                                color: Colors.black,
+                                fontSize: 14,
+                              ), // Added for dropdown text
+                              dropdownColor:
+                                  Colors.white, // Optional: better readability
                             ),
                           ),
                           SizedBox(width: 8),
                           Expanded(
-                            child: TextFormField(
-                              initialValue: item['berat']?.toString(),
-                              keyboardType: TextInputType.numberWithOptions(
-                                decimal: true,
-                              ),
-                              decoration: InputDecoration(
-                                hintText: 'Berat (kg)',
-                                errorText: item['error'],
-                              ),
-                              onChanged: (value) {
-                                if (value.isEmpty) {
-                                  setState(() {
-                                    _jenisSampahList[index]['berat'] = null;
-                                    _jenisSampahList[index]['error'] = null;
-                                    _recalculateTotals();
-                                  });
-                                  return;
-                                }
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                TextFormField(
+                                  initialValue: item['berat']?.toString(),
+                                  keyboardType: TextInputType.numberWithOptions(
+                                    decimal: true,
+                                  ),
+                                  decoration: InputDecoration(
+                                    hintText: 'Berat (kg)',
+                                    hintStyle: GoogleFonts.poppins(
+                                      fontSize: 14,
+                                    ), // Added Poppins
+                                    // errorText: item['error'], // Hapus errorText di sini
+                                  ),
+                                  style: GoogleFonts.poppins(
+                                    fontSize: 16,
+                                  ), // Added for input text
+                                  onChanged: (value) {
+                                    if (value.isEmpty) {
+                                      setState(() {
+                                        _jenisSampahList[index]['berat'] = null;
+                                        _jenisSampahList[index]['error'] = null;
+                                        _recalculateTotals();
+                                      });
+                                      return;
+                                    }
 
-                                final parsed = double.tryParse(value);
-                                String? error;
+                                    final parsed = double.tryParse(value);
+                                    String? error;
 
-                                if (parsed == null) {
-                                  error = 'Harus berupa angka';
-                                } else if (parsed < 0.5) {
-                                  error = 'Minimum 0.5 kg';
-                                } else if (parsed > 50) {
-                                  error = 'Maksimum 50 kg';
-                                } else if (!RegExp(
-                                  r'^\d+(\.\d{1,2})?$',
-                                ).hasMatch(value)) {
-                                  error = 'Maksimal 2 angka desimal';
-                                }
+                                    if (parsed == null) {
+                                      error = 'Harus berupa angka';
+                                    } else if (parsed < 0.5) {
+                                      error = 'Minimum 0.5 kg';
+                                    } else if (parsed > 50) {
+                                      error = 'Maksimum 50 kg';
+                                    } else if (!RegExp(
+                                      r'^\d+(\.\d{1,2})?$',
+                                    ).hasMatch(value)) {
+                                      error = 'Maksimal 2 angka desimal';
+                                    }
 
-                                setState(() {
-                                  if (error != null) {
-                                    _jenisSampahList[index]['berat'] = null;
-                                    _jenisSampahList[index]['error'] = error;
-                                  } else {
-                                    _jenisSampahList[index]['berat'] = parsed;
-                                    _jenisSampahList[index]['error'] = null;
-                                  }
-                                  _recalculateTotals();
-                                });
-                              },
+                                    setState(() {
+                                      if (error != null) {
+                                        _jenisSampahList[index]['berat'] = null;
+                                        _jenisSampahList[index]['error'] =
+                                            error;
+                                      } else {
+                                        _jenisSampahList[index]['berat'] =
+                                            parsed;
+                                        _jenisSampahList[index]['error'] = null;
+                                      }
+                                      _recalculateTotals();
+                                    });
+                                  },
+                                ),
+                                if (item['error'] != null)
+                                  Padding(
+                                    padding: const EdgeInsets.only(top: 4),
+                                    child: Container(
+                                      width: double.infinity,
+                                      padding: const EdgeInsets.symmetric(
+                                        vertical: 6,
+                                        horizontal: 10,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color: Colors.red.withOpacity(0.08),
+                                        borderRadius: BorderRadius.circular(6),
+                                      ),
+                                      child: Text(
+                                        item['error'],
+                                        style: GoogleFonts.poppins(
+                                          color: Colors.red[700],
+                                          fontSize: 13,
+                                          fontWeight: FontWeight.w500,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                              ],
                             ),
                           ),
                           IconButton(
@@ -826,7 +946,11 @@ class _PetugasSetorJemputProsesState extends State<PetugasSetorJemputProses> {
                     icon: Icon(Icons.add, color: Colors.green),
                     label: Text(
                       'Tambah Jenis Sampah',
-                      style: TextStyle(color: Colors.green),
+                      style: GoogleFonts.poppins(
+                        // Added Poppins
+                        color: Colors.green,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ),
                 ],
@@ -840,7 +964,7 @@ class _PetugasSetorJemputProsesState extends State<PetugasSetorJemputProses> {
                 onPressed:
                     (isLoading || !isTotalValid) ? null : konfirmasiSetoran,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Color(0xFF8FD14F),
+                  backgroundColor: Color(0xFF128d54),
                   padding: EdgeInsets.symmetric(vertical: 16, horizontal: 32),
                 ),
                 child:
@@ -855,7 +979,10 @@ class _PetugasSetorJemputProsesState extends State<PetugasSetorJemputProses> {
                         )
                         : Text(
                           "Konfirmasi Setoran",
-                          style: TextStyle(color: Colors.white),
+                          style: GoogleFonts.poppins(
+                            color: Colors.white,
+                            fontSize: 14,
+                          ),
                         ),
               ),
             ),

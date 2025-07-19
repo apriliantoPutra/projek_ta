@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class VideoCard extends StatelessWidget {
   final String imageUrl;
@@ -52,7 +53,7 @@ class VideoCard extends StatelessWidget {
                   Text(
                     title,
                     textAlign: TextAlign.center,
-                    style: TextStyle(
+                    style: GoogleFonts.poppins(
                       fontWeight: FontWeight.bold,
                       fontSize: 16,
                       color: Colors.black,
@@ -61,15 +62,16 @@ class VideoCard extends StatelessWidget {
                   SizedBox(height: 4),
                   Text(
                     date,
-                    style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                    style: TextStyle(fontSize: 7, color: Colors.black),
                   ),
+
                   Spacer(),
                   SizedBox(
                     width: double.infinity,
                     child: ElevatedButton(
                       onPressed: onTap ?? () {},
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.green.shade600,
+                        backgroundColor: Color(0xff128d54),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(8),
                         ),
@@ -77,7 +79,7 @@ class VideoCard extends StatelessWidget {
                       ),
                       child: Text(
                         'Tonton Video',
-                        style: TextStyle(color: Colors.white),
+                        style: GoogleFonts.poppins(color: Colors.white),
                       ),
                     ),
                   ),

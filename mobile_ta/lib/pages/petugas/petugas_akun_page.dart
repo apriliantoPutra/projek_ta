@@ -50,14 +50,15 @@ class PetugasAkunPage extends StatelessWidget {
     return Scaffold(
       // backgroundColor: Colors.white,
       appBar: AppBar(
+        automaticallyImplyLeading: false,
         backgroundColor: Colors.white,
         elevation: 0,
         centerTitle: true,
         title: Text(
           "Akun Saya",
-          style: TextStyle(
-            fontWeight: FontWeight.w500,
-            color: Colors.black,
+          style: GoogleFonts.poppins(
+            fontWeight: FontWeight.bold,
+            color: Color(0xFF128d54),
             fontSize: 24,
           ),
         ),
@@ -219,11 +220,11 @@ class PetugasAkunPage extends StatelessWidget {
       padding: const EdgeInsets.only(bottom: 16.0),
       child: Container(
         decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: [Color(0xff15a864), Color(0xFF128d54)],
-              begin: Alignment.bottomCenter,
-              end: Alignment.topCenter,
-            ),
+          gradient: LinearGradient(
+            colors: [Color(0xff15a864), Color(0xFF128d54)],
+            begin: Alignment.bottomCenter,
+            end: Alignment.topCenter,
+          ),
           borderRadius: BorderRadius.circular(16),
         ),
         child: ListTile(

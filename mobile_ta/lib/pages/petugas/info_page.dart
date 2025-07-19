@@ -33,7 +33,7 @@ class PetugasInfoPage extends StatelessWidget {
             style: GoogleFonts.poppins(
               fontSize: 20,
               fontWeight: FontWeight.bold,
-              color: Colors.green,
+              color: Color(0xFF128d54),
             ),
           ),
           const SizedBox(height: 12),
@@ -65,7 +65,7 @@ class PetugasInfoPage extends StatelessWidget {
             style: GoogleFonts.poppins(
               fontSize: 20,
               fontWeight: FontWeight.bold,
-              color: Colors.green,
+              color: Color(0xFF128d54),
             ),
           ),
           const SizedBox(height: 12),
@@ -101,7 +101,7 @@ class PetugasInfoPage extends StatelessWidget {
             style: GoogleFonts.poppins(
               fontSize: 20,
               fontWeight: FontWeight.bold,
-              color: Colors.green,
+              color: Color(0xFF128d54),
             ),
           ),
           const SizedBox(height: 12),
@@ -139,7 +139,7 @@ class PetugasInfoPage extends StatelessWidget {
       contentPadding: EdgeInsets.zero,
       leading: CircleAvatar(
         backgroundColor: Colors.green.shade100,
-        child: Icon(icon, color: Colors.green.shade700),
+        child: Icon(icon, color: Color(0xFF128d54)),
       ),
       title: Text(
         title,
