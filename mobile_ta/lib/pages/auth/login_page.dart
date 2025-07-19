@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:mobile_ta/pages/auth/register_page.dart';
@@ -6,7 +7,6 @@ import 'package:mobile_ta/widget/petugas_main_widget.dart';
 import 'package:mobile_ta/widget/warga_main_widget.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:google_fonts/google_fonts.dart';
-import '../../constants/constants.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -26,7 +26,7 @@ class _LoginPageState extends State<LoginPage> {
     });
 
     final response = await http.post(
-      Uri.parse('$baseUrl/authenticate'),
+      Uri.parse('${dotenv.env['URL']}/authenticate'),
       body: {
         'username': _usernameController.text,
         'password': _passwordController.text,

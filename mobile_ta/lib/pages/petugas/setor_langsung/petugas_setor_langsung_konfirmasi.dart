@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
 import 'package:mobile_ta/constants/constants.dart';
 import 'package:mobile_ta/pages/petugas/setor_langsung/petugas_setor_langsung_selesai.dart';
@@ -61,7 +62,7 @@ class _PetugasSetorLangsungKonfirmasiState
         jenisData = jenisSampahCache[jenisId]!;
       } else {
         final response = await http.get(
-          Uri.parse('$baseUrl/jenis-sampah/$jenisId'),
+          Uri.parse('${dotenv.env['URL']}/jenis-sampah/$jenisId'),
           headers: {
             'Authorization': 'Bearer $token',
             'Accept': 'application/json',
@@ -107,7 +108,7 @@ class _PetugasSetorLangsungKonfirmasiState
 
     try {
       final resp = await http.post(
-        Uri.parse('$baseUrl/setor-langsung/detail-sampah/${widget.id}'),
+        Uri.parse('${dotenv.env['URL']}/setor-langsung/detail-sampah/${widget.id}'),
         headers: {
           'Authorization': 'Bearer $token',
           'Content-Type': 'application/json',

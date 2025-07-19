@@ -179,7 +179,9 @@ class WargaBerandaPage extends StatelessWidget {
                         onTap: () {
                           Navigator.push(
                             context,
-                            MaterialPageRoute(builder: (context) => WargaInfoPage()),
+                            MaterialPageRoute(
+                              builder: (context) => WargaInfoPage(),
+                            ),
                           );
                         },
                       ),
@@ -263,28 +265,40 @@ class WargaBerandaPage extends StatelessWidget {
                     ),
                   ),
                   SizedBox(height: 12),
-                  Wrap(
-                    spacing: 5, // Jarak horizontal antar card
-                    runSpacing: 5, // Jarak vertikal antar baris
-                    children:
-                        artikelList.map((artikel) {
-                          return EduCard(
-                            imageUrl: artikel['gambar_url'],
-                            title: artikel['judul_artikel'],
-                            date: artikel['tanggal_format'],
-                            onTap: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder:
-                                      (context) => WargaDetailArtikelPage(
-                                        id: artikel['id'],
-                                      ),
-                                ),
-                              );
-                            },
-                          );
-                        }).toList(),
+
+                  // Artikel dibuat grid 2 kolom
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 0),
+                    child: GridView.builder(
+                      shrinkWrap: true,
+                      physics: NeverScrollableScrollPhysics(),
+                      itemCount: artikelList.length,
+                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: 2,
+                        // crossAxisSpacing: 16,
+                        mainAxisSpacing: 16,
+                        childAspectRatio: 0.85,
+                      ),
+                      itemBuilder: (context, index) {
+                        final artikel = artikelList[index];
+                        return EduCard(
+                          imageUrl: artikel['gambar_url'],
+                          title: artikel['judul_artikel'],
+                          date: artikel['tanggal_format'],
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder:
+                                    (context) => WargaDetailArtikelPage(
+                                      id: artikel['id'],
+                                    ),
+                              ),
+                            );
+                          },
+                        );
+                      },
+                    ),
                   ),
                 ],
               ),

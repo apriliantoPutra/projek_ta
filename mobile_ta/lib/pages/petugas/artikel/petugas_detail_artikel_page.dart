@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -19,7 +20,9 @@ class _PetugasDetailArtikelPage extends State<PetugasDetailArtikelPage> {
   Map<String, dynamic>? artikel;
 
   Future<void> fetchArtikelDetail() async {
-    final response = await http.get(Uri.parse('$baseUrl/artikel/${widget.id}'));
+    final response = await http.get(
+      Uri.parse('${dotenv.env['URL']}/artikel/${widget.id}'),
+    );
 
     if (response.statusCode == 200) {
       final data = json.decode(response.body)['data'];

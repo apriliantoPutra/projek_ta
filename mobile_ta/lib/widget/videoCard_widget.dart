@@ -19,67 +19,88 @@ class VideoCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       width: 195,
-      margin: EdgeInsets.only(right: 12),
+      margin: const EdgeInsets.only(right: 12),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: Colors.black12,
-            blurRadius: 4,
-            spreadRadius: 4,
-            offset: Offset(0, 0),
+            color: Colors.black.withOpacity(0.1),
+            blurRadius: 6,
+            offset: const Offset(0, 2),
           ),
         ],
       ),
       child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // Gambar dengan fixed aspect ratio
           ClipRRect(
-            borderRadius: BorderRadius.vertical(top: Radius.circular(12)),
-            child: Image.network(
-              imageUrl,
-              width: double.infinity,
-              height: 120,
-              fit: BoxFit.cover,
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
+            child: AspectRatio(
+              aspectRatio: 16 / 9,
+              child: Image.network(
+                imageUrl,
+                fit: BoxFit.cover,
+                errorBuilder:
+                    (_, __, ___) => Container(
+                      color: Colors.grey[200],
+                      child: const Icon(Icons.image_not_supported, size: 40),
+                    ),
+              ),
             ),
           ),
+
+          // Konten dengan padding dan ukuran tetap
           Expanded(
-            // agar kolom dalam Padding mengisi sisa tinggi Container
             child: Padding(
-              padding: const EdgeInsets.fromLTRB(12, 12, 12, 16),
+              padding: const EdgeInsets.all(12),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  // Judul dengan line clamping
                   Text(
                     title,
-                    textAlign: TextAlign.center,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
                     style: GoogleFonts.poppins(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16,
-                      color: Colors.black,
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                      height: 1.25, // Line height disesuaikan
                     ),
                   ),
-                  SizedBox(height: 4),
+
+                  const SizedBox(height: 4),
+                  // Tanggal
                   Text(
                     date,
-                    style: TextStyle(fontSize: 7, color: Colors.black),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(fontSize: 12, color: Colors.grey[600]),
                   ),
 
-                  Spacer(),
+                  const Spacer(),
+                  // Tombol dengan fixed height
                   SizedBox(
                     width: double.infinity,
+                    height: 32, // Fixed height
                     child: ElevatedButton(
-                      onPressed: onTap ?? () {},
+                      onPressed: onTap,
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Color(0xff128d54),
+                        backgroundColor: const Color(0xFF128d54),
+                        padding: EdgeInsets.zero,
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
+                          borderRadius: BorderRadius.circular(6),
                         ),
-                        padding: EdgeInsets.symmetric(vertical: 8),
                       ),
                       child: Text(
                         'Tonton Video',
-                        style: GoogleFonts.poppins(color: Colors.white),
+                        overflow: TextOverflow.ellipsis,
+                        style: GoogleFonts.poppins(
+                          fontSize: 14,
+                          color: Colors.white,
+                        ),
                       ),
                     ),
                   ),

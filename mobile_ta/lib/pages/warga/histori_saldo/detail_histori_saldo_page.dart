@@ -1,9 +1,9 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:intl/intl.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:mobile_ta/constants/constants.dart'; // pastikan baseUrl ada di sini
 
 class DetailHistoriSaldoPage extends StatefulWidget {
   final int id;
@@ -38,7 +38,7 @@ class _DetailHistoriSaldoPageState extends State<DetailHistoriSaldoPage> {
       }
 
       final response = await http.get(
-        Uri.parse('$baseUrl/histori-tarik-saldo/${widget.id}'),
+        Uri.parse('${dotenv.env['URL']}/histori-tarik-saldo/${widget.id}'),
         headers: {
           'Authorization': 'Bearer $token',
           'Accept': 'application/json',

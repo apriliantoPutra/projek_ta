@@ -1,7 +1,7 @@
 import 'dart:convert';
 
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
-import 'package:mobile_ta/constants/constants.dart';
 import 'package:mobile_ta/models/notification_model.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -13,7 +13,7 @@ class NotificationService {
     if (token == null) return [];
 
     final response = await http.get(
-      Uri.parse('$baseUrl/notifikasi'),
+      Uri.parse('${dotenv.env['URL']}/notifikasi'),
       headers: {'Authorization': 'Bearer $token', 'Accept': 'application/json'},
     );
 

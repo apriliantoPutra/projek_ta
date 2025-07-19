@@ -12,6 +12,7 @@ class ArtikelController extends Controller
     {
         $artikels = Artikel::orderBy('created_at', 'desc')->get()->map(function ($artikel) {
             $artikel->gambar_url = asset('storage/' . $artikel->gambar_artikel);
+            $artikel->tanggal_format = \Carbon\Carbon::parse($artikel->created_at)->translatedFormat('j F Y');
             return $artikel;
         });
 
@@ -48,6 +49,7 @@ class ArtikelController extends Controller
         }
 
         $artikel->gambar_url = asset('storage/' . $artikel->gambar_artikel);
+        $artikel->tanggal_format = \Carbon\Carbon::parse($artikel->created_at)->translatedFormat('j F Y');
 
         return response()->json([
             'success' => true,

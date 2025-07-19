@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
-import 'package:mobile_ta/constants/constants.dart';
 import 'package:mobile_ta/pages/warga/histori_saldo/kumpulan_histori_saldo_page.dart';
 import 'package:mobile_ta/pages/warga/info_page.dart';
 import 'package:mobile_ta/pages/warga/notifikasi_page.dart';
@@ -36,7 +36,7 @@ class _WargaAkunPageState extends State<WargaAkunPage> {
     if (token == null) return;
 
     final response = await http.post(
-      Uri.parse('$baseUrl/logout'),
+      Uri.parse('${dotenv.env['URL']}/logout'),
       headers: {'Authorization': 'Bearer $token', 'Accept': 'application/json'},
     );
 
@@ -65,7 +65,7 @@ class _WargaAkunPageState extends State<WargaAkunPage> {
     }
 
     final response = await http.get(
-      Uri.parse('$baseUrl/permintaan-tarik-saldo'),
+      Uri.parse('${dotenv.env['URL']}/permintaan-tarik-saldo'),
       headers: {'Authorization': 'Bearer $token', 'Accept': 'application/json'},
     );
 

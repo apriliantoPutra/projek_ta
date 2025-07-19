@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
 import 'package:mobile_ta/constants/constants.dart';
@@ -86,7 +87,7 @@ class _PetugasTambahProfilPageState extends State<PetugasTambahProfilPage> {
       SharedPreferences prefs = await SharedPreferences.getInstance();
       String? token = prefs.getString('token');
 
-      var uri = Uri.parse('$baseUrl/profil');
+      var uri = Uri.parse('${dotenv.env['URL']}/profil');
       var request = http.MultipartRequest('POST', uri);
       request.headers['Authorization'] = 'Bearer $token';
 

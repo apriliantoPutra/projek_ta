@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:math';
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:http/http.dart' as http;
@@ -189,7 +190,7 @@ class _PetugasSetorJemputProsesState extends State<PetugasSetorJemputProses> {
     }
 
     final response = await http.get(
-      Uri.parse('$baseUrl/bank-sampah/1'),
+      Uri.parse('${dotenv.env['URL']}/bank-sampah/1'),
       headers: {'Authorization': 'Bearer $token', 'Accept': 'application/json'},
     );
 
@@ -211,7 +212,7 @@ class _PetugasSetorJemputProsesState extends State<PetugasSetorJemputProses> {
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('token') ?? '';
     final resp = await http.get(
-      Uri.parse('$baseUrl/setor-jemput/${widget.id}'),
+      Uri.parse('${dotenv.env['URL']}/setor-jemput/${widget.id}'),
       headers: {'Authorization': 'Bearer $token', 'Accept': 'application/json'},
     );
 
@@ -233,7 +234,7 @@ class _PetugasSetorJemputProsesState extends State<PetugasSetorJemputProses> {
     if (token == null) return;
 
     final response = await http.get(
-      Uri.parse('$baseUrl/jenis-sampah'),
+      Uri.parse('${dotenv.env['URL']}/jenis-sampah'),
       headers: {'Authorization': 'Bearer $token', 'Accept': 'application/json'},
     );
 
@@ -274,7 +275,7 @@ class _PetugasSetorJemputProsesState extends State<PetugasSetorJemputProses> {
       final jenisId = item['jenis_sampah_id'] as int;
       if (!jenisSampahCache.containsKey(jenisId)) {
         final response = await http.get(
-          Uri.parse('$baseUrl/jenis-sampah/$jenisId'),
+          Uri.parse('${dotenv.env['URL']}/jenis-sampah/$jenisId'),
           headers: {
             'Authorization': 'Bearer $token',
             'Accept': 'application/json',
@@ -361,7 +362,7 @@ class _PetugasSetorJemputProsesState extends State<PetugasSetorJemputProses> {
       }
 
       final response = await http.patch(
-        Uri.parse('$baseUrl/setor-jemput/konfirmasi/${widget.id}'),
+        Uri.parse('${dotenv.env['URL']}/setor-jemput/konfirmasi/${widget.id}'),
         headers: {
           'Authorization': 'Bearer $token',
           'Content-Type': 'application/json',

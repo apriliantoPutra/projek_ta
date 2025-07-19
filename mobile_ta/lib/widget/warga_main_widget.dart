@@ -2,11 +2,11 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:mobile_ta/constants/constants.dart';
 import 'package:mobile_ta/pages/warga/akun_page.dart';
 import 'package:mobile_ta/pages/warga/edukasi_page.dart';
 import 'package:mobile_ta/pages/warga/setor_page.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import '../pages/warga/beranda_page.dart';
 import '../pages/warga/tambah_profil_page.dart';
 
@@ -45,7 +45,9 @@ class _WargaMainWrapperState extends State<WargaMainWrapper> {
 
   Future<void> loadTotalSampah() async {
     try {
-      final response = await http.get(Uri.parse('$baseUrl/total-berat'));
+      final response = await http.get(
+        Uri.parse('${dotenv.env['URL']}/total-berat'),
+      );
       if (response.statusCode == 200) {
         final jsonData = json.decode(response.body);
         setState(() {
@@ -87,7 +89,9 @@ class _WargaMainWrapperState extends State<WargaMainWrapper> {
 
   Future<void> loadArtikel() async {
     try {
-      final response = await http.get(Uri.parse('$baseUrl/artikel/terbaru'));
+      final response = await http.get(
+        Uri.parse('${dotenv.env['URL']}/artikel/terbaru'),
+      );
       if (response.statusCode == 200) {
         final jsonData = json.decode(response.body);
         setState(() {
@@ -101,7 +105,9 @@ class _WargaMainWrapperState extends State<WargaMainWrapper> {
 
   Future<void> loadVideo() async {
     try {
-      final response = await http.get(Uri.parse('$baseUrl/video/terbaru'));
+      final response = await http.get(
+        Uri.parse('${dotenv.env['URL']}/video/terbaru'),
+      );
       if (response.statusCode == 200) {
         final jsonData = json.decode(response.body);
         setState(() {
@@ -123,7 +129,7 @@ class _WargaMainWrapperState extends State<WargaMainWrapper> {
     }
 
     final response = await http.get(
-      Uri.parse('$baseUrl/profil'),
+      Uri.parse('${dotenv.env['URL']}/profil'),
       headers: {'Authorization': 'Bearer $token', 'Accept': 'application/json'},
     );
 
@@ -148,7 +154,7 @@ class _WargaMainWrapperState extends State<WargaMainWrapper> {
     }
 
     final response = await http.get(
-      Uri.parse('$baseUrl/akun'),
+      Uri.parse('${dotenv.env['URL']}/akun'),
       headers: {'Authorization': 'Bearer $token', 'Accept': 'application/json'},
     );
 
@@ -171,7 +177,7 @@ class _WargaMainWrapperState extends State<WargaMainWrapper> {
     }
 
     final response = await http.get(
-      Uri.parse('$baseUrl/saldo'),
+      Uri.parse('${dotenv.env['URL']}/saldo'),
       headers: {'Authorization': 'Bearer $token', 'Accept': 'application/json'},
     );
 

@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
 import 'package:mobile_ta/constants/constants.dart';
 import 'package:mobile_ta/widget/petugas_main_widget.dart';
@@ -44,7 +45,7 @@ class _PetugasSetorLangsungSelesaiState
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('token') ?? '';
     final resp = await http.get(
-      Uri.parse('$baseUrl/setor-langsung/selesai/${widget.id}'),
+      Uri.parse('${dotenv.env['URL']}/setor-langsung/selesai/${widget.id}'),
       headers: {'Authorization': 'Bearer $token', 'Accept': 'application/json'},
     );
     if (resp.statusCode == 200) {
@@ -74,7 +75,7 @@ class _PetugasSetorLangsungSelesaiState
 
       if (!jenisSampahCache.containsKey(jenisId)) {
         final response = await http.get(
-          Uri.parse('$baseUrl/jenis-sampah/$jenisId'),
+          Uri.parse('${dotenv.env['URL']}/jenis-sampah/$jenisId'),
           headers: {
             'Authorization': 'Bearer $token',
             'Accept': 'application/json',

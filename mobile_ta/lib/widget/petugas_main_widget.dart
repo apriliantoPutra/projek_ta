@@ -1,8 +1,8 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
-import 'package:mobile_ta/constants/constants.dart';
 import 'package:mobile_ta/pages/petugas/petugas_akun_page.dart';
 import 'package:mobile_ta/pages/petugas/petugas_konten_page.dart';
 import 'package:mobile_ta/pages/petugas/petugas_setor_page.dart';
@@ -58,7 +58,7 @@ class _WargaMainWrapperState extends State<PetugasMainWrapper> {
 
   Future<void> loadArtikel() async {
     try {
-      final response = await http.get(Uri.parse('$baseUrl/artikel/terbaru'));
+      final response = await http.get(Uri.parse('${dotenv.env['URL']}/artikel/terbaru'));
       if (response.statusCode == 200) {
         final jsonData = json.decode(response.body);
         setState(() {
@@ -72,7 +72,7 @@ class _WargaMainWrapperState extends State<PetugasMainWrapper> {
 
   Future<void> loadVideo() async {
     try {
-      final response = await http.get(Uri.parse('$baseUrl/video/terbaru'));
+      final response = await http.get(Uri.parse('${dotenv.env['URL']}/video/terbaru'));
       if (response.statusCode == 200) {
         final jsonData = json.decode(response.body);
         setState(() {
@@ -94,7 +94,7 @@ class _WargaMainWrapperState extends State<PetugasMainWrapper> {
     }
     try {
       final response = await http.get(
-        Uri.parse('$baseUrl/setor-baru'),
+        Uri.parse('${dotenv.env['URL']}/setor-baru'),
         headers: {
           'Authorization': 'Bearer $token',
           'Accept': 'application/json',
@@ -121,7 +121,7 @@ class _WargaMainWrapperState extends State<PetugasMainWrapper> {
     }
 
     final response = await http.get(
-      Uri.parse('$baseUrl/profil'),
+      Uri.parse('${dotenv.env['URL']}/profil'),
       headers: {'Authorization': 'Bearer $token', 'Accept': 'application/json'},
     );
 
@@ -146,7 +146,7 @@ class _WargaMainWrapperState extends State<PetugasMainWrapper> {
     }
 
     final response = await http.get(
-      Uri.parse('$baseUrl/akun'),
+      Uri.parse('${dotenv.env['URL']}/akun'),
       headers: {'Authorization': 'Bearer $token', 'Accept': 'application/json'},
     );
 

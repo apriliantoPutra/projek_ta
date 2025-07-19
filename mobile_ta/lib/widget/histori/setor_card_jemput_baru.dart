@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:mobile_ta/pages/petugas/setor_jemput/petugas_setor_jemput_baru.dart';
 import 'package:mobile_ta/pages/warga/histori_setor/setor_jemput/histori_setor_baru_jemput_page.dart';
 
 class HistoriSetorCardJemputBaru extends StatelessWidget {

@@ -1,8 +1,8 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
-import 'package:mobile_ta/constants/constants.dart';
 import 'package:mobile_ta/widget/histori/setor_card_jemput_baru.dart';
 import 'package:mobile_ta/widget/histori/setor_card_jemput_batal.dart';
 import 'package:mobile_ta/widget/histori/setor_card_jemput_proses.dart';
@@ -40,7 +40,7 @@ class _KumpulanHistoriSetorPageState extends State<KumpulanHistoriSetorPage>
       return [];
     }
     final response = await http.get(
-      Uri.parse('$baseUrl/histori-setor-baru'),
+      Uri.parse('${dotenv.env['URL']}/histori-setor-baru'),
       headers: {'Authorization': 'Bearer $token', 'Accept': 'application/json'},
     );
 
@@ -61,7 +61,7 @@ class _KumpulanHistoriSetorPageState extends State<KumpulanHistoriSetorPage>
       return [];
     }
     final response = await http.get(
-      Uri.parse('$baseUrl/histori-setor-proses'),
+      Uri.parse('${dotenv.env['URL']}/histori-setor-proses'),
       headers: {'Authorization': 'Bearer $token', 'Accept': 'application/json'},
     );
 
@@ -82,7 +82,7 @@ class _KumpulanHistoriSetorPageState extends State<KumpulanHistoriSetorPage>
       return [];
     }
     final response = await http.get(
-      Uri.parse('$baseUrl/histori-setor-selesai'),
+      Uri.parse('${dotenv.env['URL']}/histori-setor-selesai'),
       headers: {'Authorization': 'Bearer $token', 'Accept': 'application/json'},
     );
 
@@ -103,7 +103,7 @@ class _KumpulanHistoriSetorPageState extends State<KumpulanHistoriSetorPage>
       return [];
     }
     final response = await http.get(
-      Uri.parse('$baseUrl/histori-setor-batal'),
+      Uri.parse('${dotenv.env['URL']}/histori-setor-batal'),
       headers: {'Authorization': 'Bearer $token', 'Accept': 'application/json'},
     );
 

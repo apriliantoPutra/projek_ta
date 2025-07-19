@@ -2,10 +2,10 @@ import 'dart:convert';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
-import 'package:mobile_ta/constants/constants.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:mobile_ta/pages/warga/setor_jemput/status_page.dart';
 
@@ -185,7 +185,7 @@ class _WargaKonfirmasiSetorJemputPageState
       }
 
       final response = await http.get(
-        Uri.parse('$baseUrl/bank-sampah/1'),
+        Uri.parse('${dotenv.env['URL']}/bank-sampah/1'),
         headers: {
           'Authorization': 'Bearer $token',
           'Accept': 'application/json',
@@ -219,7 +219,7 @@ class _WargaKonfirmasiSetorJemputPageState
 
       if (!jenisSampahCache.containsKey(jenisId)) {
         final response = await http.get(
-          Uri.parse('$baseUrl/jenis-sampah/$jenisId'),
+          Uri.parse('${dotenv.env['URL']}/jenis-sampah/$jenisId'),
           headers: {
             'Authorization': 'Bearer $token',
             'Accept': 'application/json',
@@ -302,7 +302,7 @@ class _WargaKonfirmasiSetorJemputPageState
           };
         }).toList();
 
-    final url = Uri.parse("$baseUrl/setor-jemput");
+    final url = Uri.parse("${dotenv.env['URL']}/setor-jemput");
     try {
       setState(() {
         isLoading = true;

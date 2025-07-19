@@ -1,8 +1,8 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
-import 'package:mobile_ta/constants/constants.dart';
 import 'package:mobile_ta/widget/histori/tarik_saldo_card.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -26,7 +26,7 @@ class _KumpulanHistoriSaldoPageState extends State<KumpulanHistoriSaldoPage> {
       return [];
     }
     final response = await http.get(
-      Uri.parse('$baseUrl/histori-tarik-saldo'),
+      Uri.parse('${dotenv.env['URL']}/histori-tarik-saldo'),
       headers: {'Authorization': 'Bearer $token', 'Accept': 'application/json'},
     );
 

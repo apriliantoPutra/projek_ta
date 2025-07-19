@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:intl/intl.dart';
 import 'package:flutter_html/flutter_html.dart';
-import 'package:mobile_ta/constants/constants.dart';
 
 class WargaDetailArtikelPage extends StatefulWidget {
   final int id;
@@ -18,7 +18,7 @@ class _WargaDetailArtikelPageState extends State<WargaDetailArtikelPage> {
   Map<String, dynamic>? artikel;
 
   Future<void> fetchArtikelDetail() async {
-    final response = await http.get(Uri.parse('$baseUrl/artikel/${widget.id}'));
+    final response = await http.get(Uri.parse('${dotenv.env['URL']}/artikel/${widget.id}'));
 
     if (response.statusCode == 200) {
       final data = json.decode(response.body)['data'];

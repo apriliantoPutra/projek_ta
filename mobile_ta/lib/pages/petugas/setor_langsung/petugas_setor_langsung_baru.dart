@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:http/http.dart' as http;
 import 'package:mobile_ta/constants/constants.dart';
@@ -52,7 +53,7 @@ class _PetugasSetorLangsungBaruState extends State<PetugasSetorLangsungBaru> {
       return;
     }
     final response = await http.get(
-      Uri.parse('$baseUrl/jenis-sampah'),
+      Uri.parse('${dotenv.env['URL']}/jenis-sampah'),
       headers: {'Authorization': 'Bearer $token', 'Accept': 'application/json'},
     );
     if (response.statusCode == 200) {
@@ -69,7 +70,7 @@ class _PetugasSetorLangsungBaruState extends State<PetugasSetorLangsungBaru> {
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('token') ?? '';
     final resp = await http.get(
-      Uri.parse('$baseUrl/setor-langsung/${widget.id}'),
+      Uri.parse('${dotenv.env['URL']}/setor-langsung/${widget.id}'),
       headers: {'Authorization': 'Bearer $token', 'Accept': 'application/json'},
     );
     if (resp.statusCode == 200) {

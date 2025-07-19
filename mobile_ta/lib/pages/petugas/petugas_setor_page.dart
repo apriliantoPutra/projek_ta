@@ -1,8 +1,8 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
-import 'package:mobile_ta/constants/constants.dart';
 import 'package:mobile_ta/widget/setor_card/setor_card_jemput_baru.dart';
 import 'package:mobile_ta/widget/setor_card/setor_card_jemput_proses.dart';
 import 'package:mobile_ta/widget/setor_card/setor_card_jemput_selesai.dart';
@@ -34,7 +34,7 @@ class _PetugasSetorPageState extends State<PetugasSetorPage>
       return [];
     }
     final response = await http.get(
-      Uri.parse('$baseUrl/setor-baru'),
+      Uri.parse('${dotenv.env['URL']}/setor-baru'),
       headers: {'Authorization': 'Bearer $token', 'Accept': 'application/json'},
     );
 
@@ -55,7 +55,7 @@ class _PetugasSetorPageState extends State<PetugasSetorPage>
       return [];
     }
     final response = await http.get(
-      Uri.parse('$baseUrl/setor-proses'),
+      Uri.parse('${dotenv.env['URL']}/setor-proses'),
       headers: {'Authorization': 'Bearer $token', 'Accept': 'application/json'},
     );
 
@@ -76,7 +76,7 @@ class _PetugasSetorPageState extends State<PetugasSetorPage>
       return [];
     }
     final response = await http.get(
-      Uri.parse('$baseUrl/setor-selesai'),
+      Uri.parse('${dotenv.env['URL']}/setor-selesai'),
       headers: {'Authorization': 'Bearer $token', 'Accept': 'application/json'},
     );
 
@@ -151,21 +151,21 @@ class _PetugasSetorPageState extends State<PetugasSetorPage>
                     child: Container(
                       height: 40,
                       alignment: Alignment.center,
-                      child: Text("Setor\nBaru", textAlign: TextAlign.center),
+                      child: Text("Baru", textAlign: TextAlign.center),
                     ),
                   ),
                   Tab(
                     child: Container(
                       height: 40,
                       alignment: Alignment.center,
-                      child: Text("Setor Proses", textAlign: TextAlign.center),
+                      child: Text("Proses", textAlign: TextAlign.center),
                     ),
                   ),
                   Tab(
                     child: Container(
                       height: 40,
                       alignment: Alignment.center,
-                      child: Text("Setor Selesai", textAlign: TextAlign.center),
+                      child: Text("Selesai", textAlign: TextAlign.center),
                     ),
                   ),
                 ],

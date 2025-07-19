@@ -12,6 +12,7 @@ class VideoController extends Controller
     {
         $videos = Video::orderBy('created_at', 'desc')->get()->map(function ($videos) {
             $videos->video_url = asset('storage/' . $videos->video);
+            $videos->tanggal_format = \Carbon\Carbon::parse($videos->created_at)->translatedFormat('j F Y');
             return $videos;
         });
 
@@ -24,6 +25,7 @@ class VideoController extends Controller
     {
         $videos = Video::orderBy('created_at', 'desc')->take(5)->get()->map(function ($videos) {
             $videos->video_url = asset('storage/' . $videos->video);
+            $videos->tanggal_format = \Carbon\Carbon::parse($videos->created_at)->translatedFormat('j F Y');
             return $videos;
         });
 
@@ -45,6 +47,7 @@ class VideoController extends Controller
         }
 
         $video->video_url = asset('storage/' . $video->video);
+        $video->tanggal_format = \Carbon\Carbon::parse($video->created_at)->translatedFormat('j F Y');
 
         return response()->json([
             'success' => true,

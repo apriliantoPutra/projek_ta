@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:mobile_ta/pages/warga/artikel/detail_page.dart';
 import 'package:mobile_ta/pages/warga/artikel/kumpulan_page.dart';
 import 'package:mobile_ta/pages/warga/video/detail_page.dart';
@@ -40,28 +41,31 @@ class WargaEdukasiPage extends StatelessWidget {
           children: [
             SizedBox(height: 8),
             Container(
-              margin: EdgeInsets.symmetric(horizontal: 16),
               width: double.infinity,
-              // height: 100,
+              // height: 70,
               padding: EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: Color(0xff8fd14f),
-                borderRadius: BorderRadius.all(Radius.circular(16)),
+                gradient: LinearGradient(
+                  colors: [Color(0xFF6BBE44), Color(0xFF128d54)],
+                  begin: Alignment.bottomCenter,
+                  end: Alignment.topCenter,
+                ),
+                borderRadius: BorderRadius.all(Radius.circular(20)),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.15),
+                    color: Colors.green.withOpacity(0.15),
                     offset: Offset(0, 4),
-                    blurRadius: 4,
+                    blurRadius: 8,
                     spreadRadius: 1,
                   ),
                 ],
               ),
-              alignment: Alignment.center, // Menengahkan isi
+              alignment: Alignment.center,
               child: Text.rich(
                 TextSpan(
                   text:
                       "Baca artikel dan tonton video seru tentang cara mudah mengelola sampah. Siap jadi ",
-                  style: TextStyle(
+                  style: GoogleFonts.poppins(
                     fontSize: 16,
                     fontWeight: FontWeight.w500,
                     color: Colors.white,
@@ -69,9 +73,9 @@ class WargaEdukasiPage extends StatelessWidget {
                   children: [
                     TextSpan(
                       text: "#PahlawanLingkungan?",
-                      style: TextStyle(
-                        color: Colors.green.shade800,
-                        fontWeight: FontWeight.w600,
+                      style: GoogleFonts.poppins(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w700,
                       ),
                     ),
                   ],
@@ -79,7 +83,6 @@ class WargaEdukasiPage extends StatelessWidget {
                 textAlign: TextAlign.center,
               ),
             ),
-
             SizedBox(height: 16),
             Container(
               // margin: EdgeInsets.only(top: 16),
@@ -92,8 +95,8 @@ class WargaEdukasiPage extends StatelessWidget {
                 ),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black12,
-                    blurRadius: 6,
+                    color: Colors.green.withOpacity(0.10),
+                    blurRadius: 12,
                     offset: Offset(0, -4),
                   ),
                 ],
@@ -106,10 +109,10 @@ class WargaEdukasiPage extends StatelessWidget {
                     children: [
                       Text(
                         "Video Terbaru",
-                        style: TextStyle(
+                        style: GoogleFonts.poppins(
                           fontSize: 20,
                           fontWeight: FontWeight.bold,
-                          color: Color(0xFF8fd14f),
+                          color: Color(0xFF128d54),
                         ),
                       ),
                       TextButton(
@@ -123,10 +126,10 @@ class WargaEdukasiPage extends StatelessWidget {
                         },
                         child: Text(
                           "Lainnya",
-                          style: TextStyle(
-                            fontSize: 14,
+                          style: GoogleFonts.poppins(
+                            fontSize: 16,
                             fontWeight: FontWeight.w500,
-                            color: Color(0xFF8fd14f),
+                            color: Color(0xFF128d54),
                           ),
                         ),
                       ),
@@ -161,16 +164,17 @@ class WargaEdukasiPage extends StatelessWidget {
                       },
                     ),
                   ),
-                  SizedBox(height: 12),
+                  SizedBox(height: 16),
+                  // Artikel Section
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
                         "Artikel Terbaru",
-                        style: TextStyle(
+                        style: GoogleFonts.poppins(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
-                          color: Color(0xFF8fd14f),
+                          color: Color(0xFF128d54),
                         ),
                       ),
                       TextButton(
@@ -178,45 +182,55 @@ class WargaEdukasiPage extends StatelessWidget {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (context) => WargaKumpulanArtikelPage(),
+                              builder:
+                                  (context) => WargaKumpulanArtikelPage(),
                             ),
                           );
                         },
                         child: Text(
                           "Lainnya",
-                          style: TextStyle(
-                            fontSize: 14,
+                          style: GoogleFonts.poppins(
+                            fontSize: 16,
                             fontWeight: FontWeight.w500,
-                            color: Color(0xFF8fd14f),
+                            color: Color(0xFF128d54),
                           ),
                         ),
                       ),
                     ],
                   ),
                   SizedBox(height: 12),
-
-                  Wrap(
-                    spacing: 5, // Jarak horizontal antar card
-                    runSpacing: 5, // Jarak vertikal antar baris
-                    children:
-                        artikelList.map((artikel) {
-                          return EduCard(
-                            imageUrl: artikel['gambar_url'],
-                            title: artikel['judul_artikel'],
-                            date: artikel['tanggal_format'],
-                            onTap: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder:
-                                      (context) => WargaDetailArtikelPage(
-                                        id: artikel['id'],
-                                      ),
-                                ),
-                              );
-                            },
-                          );
-                        }).toList(),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 0),
+                    child: GridView.builder(
+                      shrinkWrap: true,
+                      physics: NeverScrollableScrollPhysics(),
+                      itemCount: artikelList.length,
+                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: 2,
+                        crossAxisSpacing: 16,
+                        mainAxisSpacing: 16,
+                        childAspectRatio: 0.85,
+                      ),
+                      itemBuilder: (context, index) {
+                        final artikel = artikelList[index];
+                        return EduCard(
+                          imageUrl: artikel['gambar_url'],
+                          title: artikel['judul_artikel'],
+                          date: artikel['tanggal_format'],
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder:
+                                    (context) => WargaDetailArtikelPage(
+                                      id: artikel['id'],
+                                    ),
+                              ),
+                            );
+                          },
+                        );
+                      },
+                    ),
                   ),
                 ],
               ),
