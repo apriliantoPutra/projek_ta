@@ -12,6 +12,10 @@ class VideoController extends Controller
     {
         $videos = Video::orderBy('created_at', 'desc')->get()->map(function ($videos) {
             $videos->video_url = asset('storage/' . $videos->video);
+            $videos->thumbnail_url = $videos->thumbnail
+                ? asset('storage/' . $videos->thumbnail)
+                : 'https://i.pinimg.com/736x/2d/d3/79/2dd379968693700ec12af8f1974b491e.jpg';
+
             $videos->tanggal_format = \Carbon\Carbon::parse($videos->created_at)->translatedFormat('j F Y');
             return $videos;
         });
@@ -25,6 +29,9 @@ class VideoController extends Controller
     {
         $videos = Video::orderBy('created_at', 'desc')->take(5)->get()->map(function ($videos) {
             $videos->video_url = asset('storage/' . $videos->video);
+            $videos->thumbnail_url = $videos->thumbnail
+                ? asset('storage/' . $videos->thumbnail)
+                : 'https://i.pinimg.com/736x/2d/d3/79/2dd379968693700ec12af8f1974b491e.jpg';
             $videos->tanggal_format = \Carbon\Carbon::parse($videos->created_at)->translatedFormat('j F Y');
             return $videos;
         });
@@ -47,6 +54,9 @@ class VideoController extends Controller
         }
 
         $video->video_url = asset('storage/' . $video->video);
+        $video->thumbnail_url = $video->thumbnail
+            ? asset('storage/' . $video->thumbnail)
+            : 'https://i.pinimg.com/736x/2d/d3/79/2dd379968693700ec12af8f1974b491e.jpg';
         $video->tanggal_format = \Carbon\Carbon::parse($video->created_at)->translatedFormat('j F Y');
 
         return response()->json([

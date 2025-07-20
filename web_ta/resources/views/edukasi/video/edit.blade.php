@@ -11,7 +11,8 @@
             </div>
 
             <!-- Form -->
-            <form action="{{ route('Video-Update', $data->id) }}" method="POST" enctype="multipart/form-data" class="space-y-6">
+            <form action="{{ route('Video-Update', $data->id) }}" method="POST" enctype="multipart/form-data"
+                class="space-y-6">
                 @csrf
                 @method('put')
                 <!-- Judul -->
@@ -48,6 +49,19 @@
                     @endif
                 </div>
 
+                <div>
+                    <label for="thumbnail" class="block text-sm font-medium text-gray-700 mb-1">Gambar Thumbnail</label>
+                    <input type="file" name="thumbnail" id="thumbnail" accept="image/*"
+                        class="w-full border border-gray-300 rounded-md px-4 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500">
+
+                    @if ($data->thumbnail)
+                        <div class="mt-3">
+                            <p class="text-sm text-gray-500 mb-1">Gambar Saat Ini:</p>
+                            <img src="{{ asset('storage/' . $data->thumbnail) }}" alt="Gambar Thumbnail"
+                                class="w-48 rounded shadow-md border border-gray-200">
+                        </div>
+                    @endif
+                </div>
 
                 <!-- Tombol -->
                 <div class="flex justify-end gap-4">

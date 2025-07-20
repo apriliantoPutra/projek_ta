@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:mobile_ta/pages/warga/artikel/detail_page.dart';
 import 'package:mobile_ta/pages/warga/chatbot_page.dart';
+import 'package:mobile_ta/pages/warga/daftar_sampah_page.dart';
 import 'package:mobile_ta/pages/warga/histori_setor/kumpulan_histori_setor_page.dart';
 import 'package:mobile_ta/pages/warga/info_page.dart';
 import 'package:mobile_ta/pages/warga/kalkulator/kalkulator_setor_sampah_page.dart';
+import 'package:mobile_ta/pages/warga/notifikasi_page.dart';
 import 'package:mobile_ta/pages/warga/video/detail_page.dart';
 import 'package:mobile_ta/widget/videoCard_widget.dart';
+import 'package:mobile_ta/widget/warga_main_widget.dart';
 import '../../widget/eduCard_widget.dart';
 
 class WargaBerandaPage extends StatelessWidget {
@@ -63,12 +66,15 @@ class WargaBerandaPage extends StatelessWidget {
             Row(
               children: [
                 IconButton(
-                  icon: Icon(Icons.settings, color: Colors.black),
-                  onPressed: () {},
-                ),
-                IconButton(
                   icon: Icon(Icons.notifications, color: Colors.black),
-                  onPressed: () {},
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => WargaNotifikasiPage(),
+                      ),
+                    );
+                  },
                 ),
               ],
             ),
@@ -174,13 +180,13 @@ class WargaBerandaPage extends StatelessWidget {
                         },
                       ),
                       _menuItem(
-                        Icons.info_outline,
-                        "Info",
+                        Icons.recycling,
+                        "Daftar Sampah",
                         onTap: () {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (context) => WargaInfoPage(),
+                              builder: (context) => WargaDaftarSampahPage(),
                             ),
                           );
                         },
@@ -223,7 +229,14 @@ class WargaBerandaPage extends StatelessWidget {
                       ),
                       TextButton(
                         onPressed: () {
-                          // Aksi saat ditekan
+                          Navigator.pushAndRemoveUntil(
+                            context,
+                            MaterialPageRoute(
+                              builder:
+                                  (context) => WargaMainWrapper(initialMenu: 2),
+                            ),
+                            (Route<dynamic> route) => false,
+                          );
                         },
                         child: Text(
                           "Lainnya",
@@ -245,8 +258,7 @@ class WargaBerandaPage extends StatelessWidget {
                       itemBuilder: (context, index) {
                         final video = videoList[index];
                         return VideoCard(
-                          imageUrl:
-                              'https://i.pinimg.com/736x/2d/d3/79/2dd379968693700ec12af8f1974b491e.jpg',
+                          imageUrl: video['thumbnail_url'] ?? '',
                           title: video['judul_video'] ?? '',
                           date: video['tanggal_format'] ?? '',
                           onTap: () {

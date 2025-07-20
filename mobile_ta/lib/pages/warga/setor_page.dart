@@ -4,8 +4,7 @@ import 'setor_langsung/index_page.dart';
 
 class WargaSetorPage extends StatelessWidget {
   final Map<String, dynamic>? profilData;
-  const WargaSetorPage({Key? key, this.profilData})
-    : super(key: key);
+  const WargaSetorPage({Key? key, this.profilData}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -85,7 +84,10 @@ class WargaSetorPage extends StatelessWidget {
               onTap: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => WargaSetorJemput( profilData: profilData)),
+                  MaterialPageRoute(
+                    builder:
+                        (context) => WargaSetorJemput(profilData: profilData),
+                  ),
                 );
               },
               borderRadius: BorderRadius.circular(16),
@@ -115,7 +117,7 @@ class WargaSetorPage extends StatelessWidget {
                     ),
                     SizedBox(height: 8),
                     Text(
-                      'Setor Jemput adalah layanan penjemputan sampah ke rumah pengguna oleh petugas Bank Sampah, dengan tambahan biaya sebesar Rp4.000 per kilometer.',
+                      'Setor Jemput adalah layanan penjemputan sampah ke rumah pengguna oleh petugas Bank Sampah, dengan tambahan biaya sebesar Rp1.000 per kilometer.',
                       style: TextStyle(color: Colors.white),
                       textAlign: TextAlign.center,
                     ),

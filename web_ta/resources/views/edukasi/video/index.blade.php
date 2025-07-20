@@ -33,6 +33,7 @@
                         <tr>
                             <th class="px-5 py-3">#</th>
                             <th class="px-5 py-3">Judul</th>
+                            <th class="px-5 py-3">Thumbnail</th>
                             <th class="px-5 py-3">Tanggal</th>
                             <th class="px-5 py-3">Aksi</th>
                         </tr>
@@ -42,6 +43,9 @@
                             <tr class="hover:bg-gray-50">
                                 <td class="px-5 py-3">{{ $loop->iteration }}</td>
                                 <td class="px-5 py-3">{{ $video->judul_video }}</td>
+                                <td class="px-5 py-3">
+                                    <img src="{{ asset('storage/' . $video->thumbnail) }}" alt="Thumbnail Video"
+                                        class="w-16 h-16 object-cover rounded shadow">
                                 <td class="px-5 py-3">
                                     {{ \Carbon\Carbon::parse($video->created_at)->translatedFormat('j F Y') }}</td>
                                 <td class="px-5 py-3 space-x-2">

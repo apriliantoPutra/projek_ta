@@ -104,7 +104,7 @@ class _PetugasSetorJemputProsesState extends State<PetugasSetorJemputProses> {
     }
   }
 
-  void _recalculateTotals() {
+  void _recalculateTotals() async {
     totalBerat = 0;
     totalHarga = 0;
     processedSetoran.clear();
@@ -113,26 +113,70 @@ class _PetugasSetorJemputProsesState extends State<PetugasSetorJemputProses> {
       final jenisId = item['jenis_sampah_id'] as int?;
       final berat = item['berat'] as double?;
 
-      if (jenisId != null &&
-          berat != null &&
-          jenisSampahCache.containsKey(jenisId)) {
+      if (jenisId != null && berat != null) {
+        // 1. Cek cache dulu
+        if (!jenisSampahCache.containsKey(jenisId)) {
+          try {
+            // 2. Jika tidak ada di cache, ambil dari API detail
+            final prefs = await SharedPreferences.getInstance();
+            final token = prefs.getString('token');
+
+            if (token != null) {
+              final response = await http.get(
+                Uri.parse('${dotenv.env['URL']}/jenis-sampah/$jenisId'),
+                headers: {
+                  'Authorization': 'Bearer $token',
+                  'Accept': 'application/json',
+                },
+              );
+
+              if (response.statusCode == 200) {
+                final data = json.decode(response.body)['data'];
+                jenisSampahCache[jenisId] = {
+                  'nama': data['nama_sampah'] as String,
+                  'harga': data['harga_per_satuan'] as int,
+                  'warna': data['warna_indikasi'] as String,
+                };
+              }
+            }
+          } catch (e) {
+            debugPrint('Gagal mengambil detail jenis sampah: $e');
+            // 3. Jika gagal, coba cari di options
+            final jenisOption = _jenisSampahOptions.firstWhere(
+              (option) => option['id'] == jenisId,
+              orElse: () => {},
+            );
+
+            if (jenisOption.isNotEmpty) {
+              jenisSampahCache[jenisId] = {
+                'nama': jenisOption['nama_sampah'] as String,
+                'harga': jenisOption['harga_per_satuan'] as int,
+                'warna': jenisOption['warna_indikasi'] as String,
+              };
+            }
+          }
+        }
+
         final jenisInfo = jenisSampahCache[jenisId];
-        final harga = (jenisInfo?['harga'] ?? 0) as int;
-        final subtotal = (berat * harga).round();
+        if (jenisInfo != null) {
+          final harga = (jenisInfo['harga'] ?? 0) as int;
+          final subtotal = (berat * harga).round();
 
-        totalBerat += berat;
-        totalHarga += subtotal;
+          totalBerat += berat;
+          totalHarga += subtotal;
 
-        processedSetoran.add({
-          'nama': jenisInfo?['nama'] ?? 'Unknown',
-          'berat': berat,
-          'subtotal': subtotal,
-          'warna': jenisInfo?['warna'] ?? '#999999',
-        });
+          processedSetoran.add({
+            'nama': jenisInfo['nama'] ?? 'Unknown',
+            'berat': berat,
+            'subtotal': subtotal,
+            'warna': jenisInfo['warna'] ?? '#999999',
+          });
+        }
       }
     }
 
     calculateServiceFee();
+    setState(() {});
   }
 
   void _updateMarkers() {
@@ -190,7 +234,7 @@ class _PetugasSetorJemputProsesState extends State<PetugasSetorJemputProses> {
     }
 
     final response = await http.get(
-      Uri.parse('${dotenv.env['URL']}/bank-sampah/1'),
+      Uri.parse('${dotenv.env['URL']}/bank-sampah'),
       headers: {'Authorization': 'Bearer $token', 'Accept': 'application/json'},
     );
 
@@ -252,11 +296,11 @@ class _PetugasSetorJemputProsesState extends State<PetugasSetorJemputProses> {
 
   Future<void> processInitialData() async {
     if (pengajuanDetailSetor == null) return;
+    await fetchJenisSampahOptions();
 
     final setoranSampah =
         pengajuanDetailSetor!['input_detail']['setoran_sampah'] as List;
 
-    // Convert initial data to editable format
     _jenisSampahList =
         setoranSampah.map<Map<String, dynamic>>((item) {
           return {
@@ -266,32 +310,52 @@ class _PetugasSetorJemputProsesState extends State<PetugasSetorJemputProses> {
           };
         }).toList();
 
-    // Cache jenis sampah data
+    // Gunakan endpoint detail untuk data awal
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('token');
-    if (token == null) return;
 
-    for (var item in setoranSampah) {
-      final jenisId = item['jenis_sampah_id'] as int;
-      if (!jenisSampahCache.containsKey(jenisId)) {
-        final response = await http.get(
-          Uri.parse('${dotenv.env['URL']}/jenis-sampah/$jenisId'),
-          headers: {
-            'Authorization': 'Bearer $token',
-            'Accept': 'application/json',
-          },
-        );
+    if (token != null) {
+      for (var item in setoranSampah) {
+        final jenisId = item['jenis_sampah_id'] as int;
+        if (!jenisSampahCache.containsKey(jenisId)) {
+          try {
+            final response = await http.get(
+              Uri.parse('${dotenv.env['URL']}/jenis-sampah/$jenisId'),
+              headers: {
+                'Authorization': 'Bearer $token',
+                'Accept': 'application/json',
+              },
+            );
 
-        if (response.statusCode == 200) {
-          final data = json.decode(response.body)['data'];
-          jenisSampahCache[jenisId] = {
-            'nama': data['nama_sampah'] as String,
-            'harga': data['harga_per_satuan'] as int,
-            'warna': data['warna_indikasi'] as String,
-          };
+            if (response.statusCode == 200) {
+              final data = json.decode(response.body)['data'];
+              jenisSampahCache[jenisId] = {
+                'nama': data['nama_sampah'] as String,
+                'harga': data['harga_per_satuan'] as int,
+                'warna': data['warna_indikasi'] as String,
+              };
+            }
+          } catch (e) {
+            debugPrint('Gagal mengambil detail jenis sampah: $e');
+            // Fallback ke options jika gagal
+            final jenisOption = _jenisSampahOptions.firstWhere(
+              (option) => option['id'] == jenisId,
+              orElse: () => {},
+            );
+
+            if (jenisOption.isNotEmpty) {
+              jenisSampahCache[jenisId] = {
+                'nama': jenisOption['nama_sampah'] as String,
+                'harga': jenisOption['harga_per_satuan'] as int,
+                'warna': jenisOption['warna_indikasi'] as String,
+              };
+            }
+          }
         }
       }
     }
+
+    _recalculateTotals();
   }
 
   void _removeJenisSampah(int index) {
@@ -339,7 +403,9 @@ class _PetugasSetorJemputProsesState extends State<PetugasSetorJemputProses> {
     if (token == null) return;
 
     try {
-      // Gunakan data terbaru dari state
+      // Pastikan perhitungan terbaru
+      _recalculateTotals();
+
       final setoranSampah =
           _jenisSampahList.map((item) {
             return {
@@ -348,8 +414,6 @@ class _PetugasSetorJemputProsesState extends State<PetugasSetorJemputProses> {
             };
           }).toList();
 
-      // Pastikan perhitungan terbaru
-      _recalculateTotals();
       final totalAkhir = totalHarga - biayaLayanan;
 
       if (totalAkhir <= 0) {

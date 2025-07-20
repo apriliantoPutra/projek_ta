@@ -14,8 +14,8 @@ return new class extends Migration
         Schema::create('input_detail_setors', function (Blueprint $table) {
             $table->id();
             $table->foreignId('pengajuan_id')->constrained('pengajuan_setor');
-            $table->foreignId('petugas_id')->constrained('akun');
-            $table->json('setoran_sampah');
+            $table->foreignId('petugas_id')->nullable()->constrained('akun');
+            $table->json('setoran_sampah')->nullable();
             $table->float('total_berat');
             $table->integer('total_harga');
             $table->string('status_setor');

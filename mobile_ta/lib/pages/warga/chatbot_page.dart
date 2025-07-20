@@ -1,6 +1,8 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
+import 'package:flutter_markdown/flutter_markdown.dart';
 
 class ChatbotPage extends StatefulWidget {
   const ChatbotPage({super.key});
@@ -18,8 +20,6 @@ class _ChatbotPageState extends State<ChatbotPage> {
   bool _isGenerating = false;
 
   final String openRouterUrl = "https://openrouter.ai/api/v1/chat/completions";
-  final String apiKey =
-      "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";
 
   Future<void> _sendMessage() async {
     final text = _controller.text.trim();
@@ -39,7 +39,7 @@ class _ChatbotPageState extends State<ChatbotPage> {
         Uri.parse(openRouterUrl),
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': 'Bearer $apiKey',
+          'Authorization': 'Bearer ${dotenv.env['API_KEY']}',
         },
         body: jsonEncode({
           "model": "deepseek/deepseek-r1:free",
@@ -229,13 +229,15 @@ class _ChatbotPageState extends State<ChatbotPage> {
                   : Theme.of(context).colorScheme.surfaceVariant,
           borderRadius: BorderRadius.circular(20),
         ),
-        child: Text(
-          message.text,
-          style: TextStyle(
-            color:
-                message.isUser
-                    ? Theme.of(context).colorScheme.onPrimaryContainer
-                    : Theme.of(context).colorScheme.onSurfaceVariant,
+        child: MarkdownBody(
+          data: message.text,
+          styleSheet: MarkdownStyleSheet.fromTheme(Theme.of(context)).copyWith(
+            p: TextStyle(
+              color:
+                  message.isUser
+                      ? Theme.of(context).colorScheme.onPrimaryContainer
+                      : Theme.of(context).colorScheme.onSurfaceVariant,
+            ),
           ),
         ),
       ),

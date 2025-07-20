@@ -18,7 +18,7 @@ class _HasilSetorSampahPageState extends State<HasilSetorSampahPage> {
   List<Map<String, dynamic>> processedSetoran = [];
   double totalBerat = 0.0;
   int totalHarga = 0;
-  int biayaLayanan = 0; // Tetap 0
+  int biayaLayanan = 0;
   bool isLoading = true;
 
   @override
@@ -111,32 +111,6 @@ class _HasilSetorSampahPageState extends State<HasilSetorSampahPage> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Container(
-                        padding: const EdgeInsets.all(16),
-                        margin: const EdgeInsets.only(bottom: 16),
-                        decoration: BoxDecoration(
-                          color: Colors.greenAccent.shade400,
-                          borderRadius: BorderRadius.circular(16),
-                        ),
-                        child: const Column(
-                          children: [
-                            Text(
-                              'Setor Jemput',
-                              style: TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.white,
-                              ),
-                            ),
-                            SizedBox(height: 8),
-                            Text(
-                              'Setor Jemput adalah layanan penjemputan sampah ke rumah pengguna oleh petugas Bank Sampah, dengan tambahan biaya sebesar Rp4.000 per kilometer.',
-                              style: TextStyle(color: Colors.white),
-                              textAlign: TextAlign.center,
-                            ),
-                          ],
-                        ),
-                      ),
                       const Text(
                         'Jenis dan Berat Sampah',
                         style: TextStyle(
@@ -240,22 +214,6 @@ class _HasilSetorSampahPageState extends State<HasilSetorSampahPage> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                const Text('Estimasi harga sampah anda'),
-                                Text('Rp $totalHarga'),
-                              ],
-                            ),
-                            const SizedBox(height: 4),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: const [
-                                Text('Biaya Layanan'),
-                                Text('-Rp 0'),
-                              ],
-                            ),
-                            const Divider(),
                             Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [

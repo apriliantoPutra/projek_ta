@@ -96,8 +96,7 @@ class _WargaKumpulanVideoPageState extends State<WargaKumpulanVideoPage> {
                     itemBuilder: (context, index) {
                       final edukasiVideo = videoList[index];
                       return VideoCard(
-                        imageUrl:
-                            'https://i.pinimg.com/736x/2d/d3/79/2dd379968693700ec12af8f1974b491e.jpg',
+                        imageUrl: edukasiVideo['thumbnail_url'],
                         title: edukasiVideo['judul_video'],
                         date: formatDate(edukasiVideo['created_at']),
                         onTap: () {

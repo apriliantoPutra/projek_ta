@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
+import 'package:mobile_ta/pages/warga/daftar_sampah_page.dart';
 import 'package:mobile_ta/pages/warga/kalkulator/hasil_setor_sampah_page.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -130,69 +131,103 @@ class _KalkulatorSetorSampahPageState extends State<KalkulatorSetorSampahPage> {
                     ..._jenisSampahList.asMap().entries.map((entry) {
                       final index = entry.key;
                       final item = entry.value;
+
                       return Padding(
                         padding: const EdgeInsets.only(bottom: 8.0),
-                        child: Row(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Expanded(
-                              flex: 2,
-                              child: DropdownButtonFormField<int>(
-                                value: item['jenis_sampah_id'],
-                                hint: Text('Pilih jenis'),
-                                items:
-                                    _jenisSampahOptions.map((option) {
-                                      return DropdownMenuItem<int>(
-                                        value: option['id'],
-                                        child: Text(option['nama_sampah']),
-                                      );
-                                    }).toList(),
-                                onChanged: (value) {
-                                  setState(() {
-                                    _jenisSampahList[index]['jenis_sampah_id'] =
-                                        value;
-                                  });
-                                },
-                              ),
-                            ),
-                            SizedBox(width: 8),
-                            Expanded(
-                              child: TextFormField(
-                                keyboardType: TextInputType.numberWithOptions(
-                                  decimal: true,
+                            Row(
+                              children: [
+                                Expanded(
+                                  flex: 2,
+                                  child: DropdownButtonFormField<int>(
+                                    value: item['jenis_sampah_id'],
+                                    hint: const Text('Pilih jenis'),
+                                    items:
+                                        _jenisSampahOptions.map((option) {
+                                          return DropdownMenuItem<int>(
+                                            value: option['id'],
+                                            child: Text(option['nama_sampah']),
+                                          );
+                                        }).toList(),
+                                    onChanged: (value) {
+                                      setState(() {
+                                        _jenisSampahList[index]['jenis_sampah_id'] =
+                                            value;
+                                      });
+                                    },
+                                  ),
                                 ),
-                                decoration: InputDecoration(
-                                  hintText: 'Berat',
-                                  errorText:
-                                      _jenisSampahList[index]['error'] ?? null,
+                                SizedBox(width: 8),
+                                Expanded(
+                                  child: TextFormField(
+                                    initialValue: item['berat']?.toString(),
+                                    keyboardType:
+                                        const TextInputType.numberWithOptions(
+                                          decimal: true,
+                                        ),
+                                    decoration: const InputDecoration(
+                                      hintText: 'Berat',
+                                      // errorText dihapus agar error ditampilkan manual
+                                    ),
+                                    onChanged: (value) {
+                                      final parsed = double.tryParse(value);
+                                      String? error;
+
+                                      if (value.isEmpty) {
+                                        error = null;
+                                      } else if (parsed == null) {
+                                        error = 'Harus berupa angka';
+                                      } else if (parsed < 0.5) {
+                                        error = 'Minimum 0.5 kg';
+                                      } else if (parsed > 50) {
+                                        error = 'Maksimum 50 kg';
+                                      } else if (!RegExp(
+                                        r'^\d+(\.\d{1,2})?$',
+                                      ).hasMatch(value)) {
+                                        error = 'Maksimal 2 angka desimal';
+                                      }
+
+                                      setState(() {
+                                        if (error != null) {
+                                          _jenisSampahList[index]['berat'] =
+                                              null;
+                                          _jenisSampahList[index]['error'] =
+                                              error;
+                                        } else {
+                                          _jenisSampahList[index]['berat'] =
+                                              parsed;
+                                          _jenisSampahList[index]['error'] =
+                                              null;
+                                        }
+                                      });
+                                    },
+                                  ),
                                 ),
-                                onChanged: (value) {
-                                  final parsed = double.tryParse(value);
-                                  String? error;
-
-                                  if (parsed == null) {
-                                    error = 'Harus berupa angka';
-                                  } else if (parsed < 0.5) {
-                                    error = 'Minimum 0.5 kg';
-                                  } else if (parsed > 50) {
-                                    error = 'Maksimum 50 kg';
-                                  } else if (!RegExp(
-                                    r'^\d+(\.\d)?$',
-                                  ).hasMatch(value)) {
-                                    error = 'Maksimal 1 angka desimal';
-                                  }
-
-                                  setState(() {
-                                    if (error != null) {
-                                      _jenisSampahList[index]['berat'] = null;
-                                      _jenisSampahList[index]['error'] = error;
-                                    } else {
-                                      _jenisSampahList[index]['berat'] = parsed;
-                                      _jenisSampahList[index]['error'] = null;
-                                    }
-                                  });
-                                },
-                              ),
+                              ],
                             ),
+                            if (item['error'] != null)
+                              Container(
+                                margin: const EdgeInsets.only(top: 4),
+                                width: double.infinity,
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 6,
+                                  horizontal: 10,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: Colors.red.withOpacity(0.08),
+                                  borderRadius: BorderRadius.circular(6),
+                                ),
+                                child: Text(
+                                  item['error'],
+                                  style: TextStyle(
+                                    color: Colors.red.shade700,
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                              ),
                           ],
                         ),
                       );
@@ -204,6 +239,7 @@ class _KalkulatorSetorSampahPageState extends State<KalkulatorSetorSampahPage> {
                           _jenisSampahList.add({
                             'jenis_sampah_id': null,
                             'berat': null,
+                            'error': null,
                           });
                         });
                       },
@@ -217,68 +253,99 @@ class _KalkulatorSetorSampahPageState extends State<KalkulatorSetorSampahPage> {
                 ),
               ),
               SizedBox(height: 20),
-              Center(
-                child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.greenAccent.shade400,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  ElevatedButton.icon(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.greenAccent.shade400,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      padding: EdgeInsets.symmetric(
+                        horizontal: 20,
+                        vertical: 14,
+                      ),
                     ),
-                    padding: EdgeInsets.symmetric(horizontal: 30, vertical: 14),
-                  ),
-                  onPressed: () {
-                    final hasError = _jenisSampahList.any(
-                      (item) => item['error'] != null,
-                    );
-                    final isAnyEmpty = _jenisSampahList.any(
-                      (item) =>
-                          item['jenis_sampah_id'] == null ||
-                          item['berat'] == null,
-                    );
-
-                    if (hasError) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text('Tolong perbaiki input berat.')),
-                      );
-                      return;
-                    }
-
-                    if (isAnyEmpty) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text(
-                            'Harap isi semua jenis sampah dan berat.',
-                          ),
+                    icon: Icon(Icons.list_alt),
+                    label: Text(
+                      'Daftar Sampah',
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const WargaDaftarSampahPage(),
                         ),
                       );
-                      return;
-                    }
-
-                    final dataSetor =
-                        _jenisSampahList
-                            .map(
-                              (item) => {
-                                'jenis_sampah_id': item['jenis_sampah_id'],
-                                'berat': item['berat'],
-                              },
-                            )
-                            .toList();
-
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder:
-                            (context) =>
-                                HasilSetorSampahPage(dataSetoran: dataSetor),
-                      ),
-                    );
-                  },
-
-                  child: Text(
-                    'Lihat Hasil',
-                    style: TextStyle(fontWeight: FontWeight.bold),
+                    },
                   ),
-                ),
+                  SizedBox(width: 16),
+                  ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.greenAccent.shade400,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      padding: EdgeInsets.symmetric(
+                        horizontal: 30,
+                        vertical: 14,
+                      ),
+                    ),
+                    onPressed: () {
+                      final hasError = _jenisSampahList.any(
+                        (item) => item['error'] != null,
+                      );
+                      final isAnyEmpty = _jenisSampahList.any(
+                        (item) =>
+                            item['jenis_sampah_id'] == null ||
+                            item['berat'] == null,
+                      );
+
+                      if (hasError) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text('Tolong perbaiki input berat.'),
+                          ),
+                        );
+                        return;
+                      }
+
+                      if (isAnyEmpty) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(
+                              'Harap isi semua jenis sampah dan berat.',
+                            ),
+                          ),
+                        );
+                        return;
+                      }
+
+                      final dataSetor =
+                          _jenisSampahList.map((item) {
+                            return {
+                              'jenis_sampah_id': item['jenis_sampah_id'],
+                              'berat': item['berat'],
+                            };
+                          }).toList();
+
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder:
+                              (context) =>
+                                  HasilSetorSampahPage(dataSetoran: dataSetor),
+                        ),
+                      );
+                    },
+                    child: Text(
+                      'Lihat Hasil',
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                ],
               ),
             ],
           ),

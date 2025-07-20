@@ -37,7 +37,42 @@ class MasterDataController extends Controller
 
     public function bankSampahIndex()
     {
-        $bankSampah = BankSampah::all();
+        $item = BankSampah::with('user.profil', 'layananJemput')->first();
+
+        if (!$item) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Data tidak ditemukan'
+            ], 404);
+        }
+        $profil = $item->user->profil;
+        $koordinat = str_replace(' ', '', $item->koordinat_bank_sampah); // Hilangkan spasi
+        $koordinatParts = explode(',', $koordinat);
+        $latitude = $koordinatParts[0] ?? null;
+        $longitude = $koordinatParts[1] ?? null;
+
+        $bankSampah = [
+            'id' => $item->id,
+            'admin_id' => $item->admin_id,
+            'nama_bank_sampah' => $item->nama_bank_sampah,
+            'deskripsi_bank_sampah' => $item->deskripsi_bank_sampah,
+            'alamat_bank_sampah' => $item->alamat_bank_sampah,
+            'koordinat_bank_sampah' => $koordinat,
+            'latitude' => $latitude,
+            'longitude' => $longitude,
+            'ongkir_per_jarak' => $item->layananJemput->ongkir_per_jarak,
+            'user' => [
+                'username' => $item->user->username,
+                'email' => $item->user->email,
+                'role' => $item->user->role,
+                'profil' => [
+                    'nama_pengguna' => $profil->nama_pengguna,
+                    'no_hp_pengguna' => $profil->no_hp_pengguna,
+                    'gambar_pengguna' => $profil->gambar_pengguna,
+                    'gambar_url' => asset('storage/' . $profil->gambar_pengguna),
+                ]
+            ],
+        ];
         return response()->json([
             'success' => true,
             'data' => $bankSampah

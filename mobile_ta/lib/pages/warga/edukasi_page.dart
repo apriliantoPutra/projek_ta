@@ -146,7 +146,7 @@ class WargaEdukasiPage extends StatelessWidget {
                         final video = videoList[index];
                         return VideoCard(
                           imageUrl:
-                              'https://i.pinimg.com/736x/2d/d3/79/2dd379968693700ec12af8f1974b491e.jpg',
+                              video['thumbnail_url'] ?? '',
                           title: video['judul_video'] ?? '',
                           date: video['tanggal_format'] ?? '',
                           onTap: () {

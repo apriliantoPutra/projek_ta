@@ -136,7 +136,7 @@ class _HistoriSetorBaruLangsungPageState
       }
 
       final response = await http.get(
-        Uri.parse('${dotenv.env['URL']}/bank-sampah/1'),
+        Uri.parse('${dotenv.env['URL']}/bank-sampah'),
         headers: {
           'Authorization': 'Bearer $token',
           'Accept': 'application/json',

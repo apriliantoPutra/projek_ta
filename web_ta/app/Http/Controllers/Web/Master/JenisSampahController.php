@@ -37,7 +37,6 @@ class JenisSampahController extends Controller
     {
         $validated = $request->validate([
             'nama_sampah' => 'required|string|unique:jenis_sampah,nama_sampah',
-            'satuan' => 'required|string',
             'harga_per_satuan' => 'required|integer',
             'warna_indikasi' => 'required|string',
         ]);
@@ -73,7 +72,6 @@ class JenisSampahController extends Controller
     {
         $validated = $request->validate([
             'nama_sampah' => 'required|string|unique:jenis_sampah,nama_sampah,' . $id,
-            'satuan' => 'required|string',
             'harga_per_satuan' => 'required|integer',
             'warna_indikasi' => 'required|string',
         ]);

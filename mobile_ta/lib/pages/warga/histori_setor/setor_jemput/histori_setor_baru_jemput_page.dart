@@ -26,7 +26,6 @@ class HistoriSetorBaruJemputPage extends StatefulWidget {
 
 class _HistoriSetorBaruJemputPageState
     extends State<HistoriSetorBaruJemputPage> {
-  Map<String, dynamic>? profilData;
   Map<String, dynamic>? bankSampah;
   Map<String, dynamic>? pengajuanDetailSetor;
 
@@ -180,7 +179,7 @@ class _HistoriSetorBaruJemputPageState
     }
 
     final response = await http.get(
-      Uri.parse('${dotenv.env['URL']}/bank-sampah/1'),
+      Uri.parse('${dotenv.env['URL']}/bank-sampah'),
       headers: {'Authorization': 'Bearer $token', 'Accept': 'application/json'},
     );
 
