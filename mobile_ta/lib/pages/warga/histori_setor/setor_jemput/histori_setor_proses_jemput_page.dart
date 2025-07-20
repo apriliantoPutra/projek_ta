@@ -2,9 +2,9 @@ import 'dart:convert';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:http/http.dart' as http;
-import 'package:mobile_ta/constants/constants.dart';
 import 'package:mobile_ta/pages/warga/detail_map/map_bank_sampah_map_warga_page.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -181,7 +181,7 @@ class HistoriSetorProsesJemputPageState
     }
 
     final response = await http.get(
-      Uri.parse('$baseUrl/bank-sampah/1'),
+      Uri.parse('${dotenv.env['URL']}/bank-sampah'),
       headers: {'Authorization': 'Bearer $token', 'Accept': 'application/json'},
     );
 
@@ -203,7 +203,7 @@ class HistoriSetorProsesJemputPageState
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('token') ?? '';
     final resp = await http.get(
-      Uri.parse('$baseUrl/setor-jemput/${widget.id}'),
+      Uri.parse('${dotenv.env['URL']}/setor-jemput/${widget.id}'),
       headers: {'Authorization': 'Bearer $token', 'Accept': 'application/json'},
     );
     if (resp.statusCode == 200) {
@@ -225,7 +225,7 @@ class HistoriSetorProsesJemputPageState
       final int jenisId = item['jenis_sampah_id'];
       if (!jenisSampahCache.containsKey(jenisId)) {
         final response = await http.get(
-          Uri.parse('$baseUrl/jenis-sampah/$jenisId'),
+          Uri.parse('${dotenv.env['URL']}/jenis-sampah/$jenisId'),
           headers: {
             'Authorization': 'Bearer $token',
             'Accept': 'application/json',

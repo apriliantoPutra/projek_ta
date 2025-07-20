@@ -1,10 +1,10 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
-import 'package:mobile_ta/constants/constants.dart' as constants;
 import 'package:mobile_ta/pages/petugas/video/petugas_detail_video_page.dart';
 import 'package:mobile_ta/widget/videoCard_widget.dart';
 
@@ -20,7 +20,7 @@ class _PetugasKumpulanVideoPageState extends State<PetugasKumpulanVideoPage> {
   late Future<List<dynamic>> _videoList;
 
   Future<List<dynamic>> fetchVideo() async {
-    final response = await http.get(Uri.parse('${constants.baseUrl}/video'));
+    final response = await http.get(Uri.parse('${dotenv.env['URL']}/video'));
 
     if (response.statusCode == 200) {
       final jsonData = json.decode(response.body);
@@ -81,29 +81,38 @@ class _PetugasKumpulanVideoPageState extends State<PetugasKumpulanVideoPage> {
                   width: double.infinity,
                   padding: EdgeInsets.all(16),
 
-                  child: Wrap(
-                    spacing: 5,
-                    runSpacing: 5,
-                    children:
-                        videoList.map((edukasi_video) {
-                          return VideoCard(
-                            imageUrl:
-                                'https://i.pinimg.com/736x/2d/d3/79/2dd379968693700ec12af8f1974b491e.jpg',
-                            title: edukasi_video['judul_video'],
-                            date: formatDate(edukasi_video['created_at']),
-                            onTap: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder:
-                                      (context) => PetugasDetailVideoPage(
-                                        videoId: edukasi_video['id'],
-                                      ),
-                                ),
-                              );
-                            },
+                  child: GridView.builder(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    itemCount: videoList.length,
+                    gridDelegate:
+                        const SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: 2,
+                          crossAxisSpacing: 12,
+                          mainAxisSpacing: 12,
+                          childAspectRatio:
+                              0.75, // Sesuaikan dengan tinggi/lebar VideoCard
+                        ),
+                    itemBuilder: (context, index) {
+                      final edukasiVideo = videoList[index];
+                      return VideoCard(
+                        imageUrl: edukasiVideo['thumbnail_url'] ?? '',
+                        title: edukasiVideo['judul_video'],
+                        date: formatDate(edukasiVideo['created_at']),
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder:
+                                  (context) => PetugasDetailVideoPage(
+                                    videoId: edukasiVideo['id'],
+                                  ),
+                            ),
                           );
-                        }).toList(),
+                        },
+                      );
+                    },
                   ),
                 ),
               ],

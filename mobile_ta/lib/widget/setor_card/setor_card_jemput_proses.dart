@@ -61,13 +61,14 @@ class SetorCardJemputProses extends StatelessWidget {
                 Text(
                   namaPengguna,
                   style: TextStyle(
-                    fontSize: width * 16,
+                    fontSize: 16, 
                     fontWeight: FontWeight.w700,
                     color: Colors.white,
                   ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
+
                 Text(
                   "Setor Jemput",
                   style: TextStyle(fontSize: width * 0.04, color: Colors.white),

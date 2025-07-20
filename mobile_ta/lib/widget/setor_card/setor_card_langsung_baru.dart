@@ -62,7 +62,7 @@ class SetorCardLangsungBaru extends StatelessWidget {
                 Text(
                   namaPengguna,
                   style: TextStyle(
-                    fontSize: 20, // ~18 pada 400dp
+                    fontSize: 16,
                     fontWeight: FontWeight.w700,
                     color: Colors.white,
                   ),

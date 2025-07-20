@@ -11,5 +11,6 @@ class Video extends Model
         'judul_video',
         'deskripsi_video',
         'video',
+        'thumbnail',
     ];
 }

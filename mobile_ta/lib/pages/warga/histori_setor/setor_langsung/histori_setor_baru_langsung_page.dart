@@ -1,8 +1,8 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:http/http.dart' as http;
-import 'package:mobile_ta/constants/constants.dart';
 import 'package:mobile_ta/pages/warga/detail_map/map_bank_sampah_page.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -136,7 +136,7 @@ class _HistoriSetorBaruLangsungPageState
       }
 
       final response = await http.get(
-        Uri.parse('$baseUrl/bank-sampah/1'),
+        Uri.parse('${dotenv.env['URL']}/bank-sampah'),
         headers: {
           'Authorization': 'Bearer $token',
           'Accept': 'application/json',

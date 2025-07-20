@@ -62,7 +62,7 @@ class SetorCardJemputBaru extends StatelessWidget {
                 Text(
                   namaPengguna,
                   style: const TextStyle(
-                    fontSize: 20,
+                    fontSize: 16,
                     fontWeight: FontWeight.w700,
                     color: Colors.white,
                   ),

@@ -1,12 +1,12 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 import 'package:media_kit/media_kit.dart';
 import 'package:media_kit_video/media_kit_video.dart';
-import 'package:mobile_ta/constants/constants.dart' as constants;
 
 class PetugasDetailVideoPage extends StatefulWidget {
   final int videoId;
@@ -45,7 +45,7 @@ class _PetugasDetailVideoPageState extends State<PetugasDetailVideoPage> {
   Future<void> fetchVideoDetail() async {
     try {
       final response = await http.get(
-        Uri.parse('${constants.baseUrl}/video/${widget.videoId}'),
+        Uri.parse('${dotenv.env['URL']}/video/${widget.videoId}'),
       );
 
       if (response.statusCode == 200) {

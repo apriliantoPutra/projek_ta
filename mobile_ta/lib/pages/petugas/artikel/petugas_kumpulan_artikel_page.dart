@@ -1,10 +1,10 @@
 import 'dart:convert';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
-import 'package:mobile_ta/constants/constants.dart';
 import 'package:mobile_ta/pages/petugas/artikel/petugas_detail_artikel_page.dart';
 import 'package:mobile_ta/widget/eduCard_widget.dart';
 
@@ -21,7 +21,7 @@ class _PetugasKumpulanArtikelPageState
   late Future<List<dynamic>> _artikelList;
 
   Future<List<dynamic>> fetchArtikel() async {
-    final response = await http.get(Uri.parse('$baseUrl/artikel'));
+    final response = await http.get(Uri.parse('${dotenv.env['URL']}/artikel'));
 
     if (response.statusCode == 200) {
       final jsonData = json.decode(response.body);

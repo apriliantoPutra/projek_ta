@@ -11,11 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('kategori_sampah', function (Blueprint $table) {
+        Schema::create('jenis_sampah', function (Blueprint $table) {
             $table->id();
-            $table->string('jenis_sampah')->unique();
-            $table->decimal('berat_sampah');
-            $table->integer('harga_sampah');
+            $table->string('nama_sampah')->unique();
+            $table->string('satuan')->default('kg');
+            $table->integer('harga_per_satuan');
             $table->string('warna_indikasi');
             $table->timestamps();
         });
@@ -26,6 +26,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('kategori_sampah');
+        Schema::dropIfExists('jenis_sampah');
     }
 };

@@ -17,7 +17,7 @@ return new class extends Migration
             $table->string('nama_pengguna')->unique();
             $table->string('alamat_pengguna');
             $table->string('no_hp_pengguna')->unique();
-            $table->string('gambar_pengguna');
+            $table->string('gambar_pengguna')->nullable();
             $table->string('koordinat_pengguna');
 
 

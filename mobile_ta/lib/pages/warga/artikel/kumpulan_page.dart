@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:intl/intl.dart';
@@ -19,7 +20,7 @@ class _WargaKumpulanArtikelPageState extends State<WargaKumpulanArtikelPage> {
   late Future<List<dynamic>> _artikelList;
 
   Future<List<dynamic>> fetchArtikel() async {
-    final response = await http.get(Uri.parse('$baseUrl/artikel'));
+    final response = await http.get(Uri.parse('${dotenv.env['URL']}/artikel'));
 
     if (response.statusCode == 200) {
       final jsonData = json.decode(response.body);
@@ -81,28 +82,37 @@ class _WargaKumpulanArtikelPageState extends State<WargaKumpulanArtikelPage> {
                       bottomRight: Radius.circular(20),
                     ),
                   ),
-                  child: Wrap(
-                    spacing: 5,
-                    runSpacing: 5,
-                    children:
-                        artikelList.map((artikel) {
-                          return EduCard(
-                            imageUrl: artikel['gambar_url'],
-                            title: artikel['judul_artikel'],
-                            date: formatDate(artikel['created_at']),
-                            onTap: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder:
-                                      (context) => WargaDetailArtikelPage(
-                                        id: artikel['id'],
-                                      ),
-                                ),
-                              );
-                            },
+                  child: GridView.builder(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    gridDelegate:
+                        const SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: 2,
+                          crossAxisSpacing: 12,
+                          mainAxisSpacing: 12,
+                          childAspectRatio:
+                              0.75, // Sesuaikan ini sesuai ukuran EduCard
+                        ),
+                    itemCount: artikelList.length,
+                    itemBuilder: (context, index) {
+                      final artikel = artikelList[index];
+                      return EduCard(
+                        imageUrl: artikel['gambar_url'],
+                        title: artikel['judul_artikel'],
+                        date: artikel['tanggal_format'],
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder:
+                                  (context) =>
+                                      WargaDetailArtikelPage(id: artikel['id']),
+                            ),
                           );
-                        }).toList(),
+                        },
+                      );
+                    },
                   ),
                 ),
               ],

@@ -11,7 +11,8 @@ class ArtikelController extends Controller
     public function index()
     {
         $artikels = Artikel::orderBy('created_at', 'desc')->get()->map(function ($artikel) {
-            $artikel->gambar_url = asset('storage/' . $artikel->gambar_artikel);
+            $artikel->gambar_url = $artikel->gambar_artikel ? asset('storage/' . $artikel->gambar_artikel) : 'https://i.pinimg.com/736x/2d/d3/79/2dd379968693700ec12af8f1974b491e.jpg';
+            $artikel->tanggal_format = \Carbon\Carbon::parse($artikel->created_at)->translatedFormat('j F Y');
             return $artikel;
         });
 
@@ -23,7 +24,7 @@ class ArtikelController extends Controller
     public function terbaru()
     {
         $artikels = Artikel::orderBy('created_at', 'desc')->take(5)->get()->map(function ($artikel) {
-            $artikel->gambar_url = asset('storage/' . $artikel->gambar_artikel);
+            $artikel->gambar_url = $artikel->gambar_artikel ? asset('storage/' . $artikel->gambar_artikel) : 'https://i.pinimg.com/736x/2d/d3/79/2dd379968693700ec12af8f1974b491e.jpg';
             $artikel->tanggal_format = \Carbon\Carbon::parse($artikel->created_at)->translatedFormat('j F Y');
             return $artikel;
         });
@@ -47,7 +48,8 @@ class ArtikelController extends Controller
             ], 404);
         }
 
-        $artikel->gambar_url = asset('storage/' . $artikel->gambar_artikel);
+        $artikel->gambar_url = $artikel->gambar_artikel ? asset('storage/' . $artikel->gambar_artikel) : 'https://i.pinimg.com/736x/2d/d3/79/2dd379968693700ec12af8f1974b491e.jpg';
+        $artikel->tanggal_format = \Carbon\Carbon::parse($artikel->created_at)->translatedFormat('j F Y');
 
         return response()->json([
             'success' => true,

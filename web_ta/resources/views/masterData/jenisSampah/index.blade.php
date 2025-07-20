@@ -32,10 +32,9 @@
                         <tr>
                             <th class="px-5 py-3">#</th>
                             <th class="px-5 py-3">Nama Sampah</th>
-                            <th class="px-5 py-3">Satuan</th>
-                            <th class="px-5 py-3">Harga/satuan</th>
-                            <th class="px-5 py-3">Total Sampah</th>
+                            <th class="px-5 py-3">Harga/kg</th>
                             <th class="px-5 py-3">warna Indikasi</th>
+                            <th class="px-5 py-3">Total Sampah</th>
                             <th class="px-5 py-3">Aksi</th>
                         </tr>
                     </thead>
@@ -47,21 +46,17 @@
                                 <td class="px-5 py-3">{{ $jenis_sampah->nama_sampah }}</td>
 
                                 <td class="px-5 py-3">
-                                    {{ $jenis_sampah->satuan }}
-                                </td>
-
-                                <td class="px-5 py-3">
                                     {{ $jenis_sampah->harga_per_satuan }}
                                 </td>
-                                <td class="px-5 py-3">
-                                    {{ $jenis_sampah->totalSampah->total_berat }}
-                                </td>
+
                                 <td class="px-5 py-3">
                                     <div class="w-6 h-6 rounded-full border border-gray-300"
                                         style="background-color: {{ $jenis_sampah->warna_indikasi }};" title="Plastik">
                                     </div>
                                 </td>
-
+                                <td class="px-5 py-3">
+                                    {{ $jenis_sampah->totalSampah->total_berat }}
+                                </td>
                                 {{-- Aksi --}}
                                 <td class="px-5 py-3 space-x-2">
                                     <a href="{{ route('Jenis-Sampah-Edit', $jenis_sampah->id) }}"

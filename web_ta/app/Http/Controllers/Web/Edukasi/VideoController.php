@@ -40,14 +40,17 @@ class VideoController extends Controller
             'judul_video' => 'required|string',
             'deskripsi_video' => 'required|string',
             'video' => 'nullable|file|mimes:mp4,mov,avi,mpeg|max:51200',
-
-
+            'thumbnail' => 'nullable|image|mimes:jpg,png,jpeg|max:5096',
         ]);
 
         try {
             if ($request->hasFile('video')) {
                 $filaname = time() . '_' . uniqid() . '.' . $request->file('video')->getClientOriginalExtension();
                 $validated['video'] = $request->file('video')->storeAs('video', $filaname, 'public');
+            }
+            if ($request->hasFile('thumbnail')) {
+                $filaname = time() . '_' . uniqid() . '.' . $request->file('thumbnail')->getClientOriginalExtension();
+                $validated['thumbnail'] = $request->file('thumbnail')->storeAs('img/thumbnail', $filaname, 'public');
             }
 
             Video::create($validated);
@@ -75,6 +78,7 @@ class VideoController extends Controller
             'judul_video' => 'required|string',
             'deskripsi_video' => 'required|string',
             'video' => 'nullable|file|mimes:mp4,mov,avi,mpeg|max:51200',
+            'thumbnail' => 'nullable|image|mimes:jpg,png,jpeg|max:5096',
         ]);
         $datas = Video::find($id);
         if ($request->hasFile('video')) {
@@ -85,6 +89,15 @@ class VideoController extends Controller
 
             $filaname = time() . '_' . uniqid() . '.' . $request->file('video')->getClientOriginalExtension();
             $validated['video'] = $request->file('video')->storeAs('video', $filaname, 'public');
+        }
+        if ($request->hasFile('thumbnail')) {
+            // Hapus thumbnail lama jika ada
+            if ($datas->thumbnail) {
+                Storage::disk('public')->delete($datas->thumbnail);
+            }
+
+            $filaname = time() . '_' . uniqid() . '.' . $request->file('thumbnail')->getClientOriginalExtension();
+            $validated['thumbnail'] = $request->file('thumbnail')->storeAs('img/thumbnail', $filaname, 'public');
         }
 
         $datas->update($validated);

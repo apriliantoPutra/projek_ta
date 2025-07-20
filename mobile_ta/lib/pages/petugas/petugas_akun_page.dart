@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
-import 'package:mobile_ta/constants/constants.dart';
 import 'package:mobile_ta/pages/petugas/info_page.dart';
 import 'package:mobile_ta/pages/petugas/notifikasi_page.dart';
 import 'package:mobile_ta/pages/petugas/petugas_edit_profil_page.dart';
@@ -24,7 +24,7 @@ class PetugasAkunPage extends StatelessWidget {
     }
 
     final response = await http.post(
-      Uri.parse('$baseUrl/logout'),
+      Uri.parse('${dotenv.env['URL']}/logout'),
       headers: {'Authorization': 'Bearer $token', 'Accept': 'application/json'},
     );
 

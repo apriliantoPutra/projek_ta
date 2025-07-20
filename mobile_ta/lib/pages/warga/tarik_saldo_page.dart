@@ -1,9 +1,9 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
-import 'package:mobile_ta/constants/constants.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../widget/warga_main_widget.dart';
 
@@ -70,7 +70,7 @@ class _WargaTarikSaldoPageState extends State<WargaTarikSaldoPage> {
       return;
     }
 
-    final url = Uri.parse("$baseUrl/pengajuan-tarik-saldo");
+    final url = Uri.parse("${dotenv.env['URL']}/pengajuan-tarik-saldo");
     try {
       final response = await http.post(
         url,

@@ -6,6 +6,7 @@ import 'package:mobile_ta/widget/petugas_main_widget.dart';
 import 'package:mobile_ta/widget/setor_card/setor_card_jemput_baru.dart';
 import 'package:mobile_ta/widget/setor_card/setor_card_langsung_baru.dart';
 import 'package:mobile_ta/widget/videoCard_widget.dart';
+import 'package:mobile_ta/pages/petugas/notifikasi_page.dart';
 import '../../widget/eduCard_widget.dart';
 
 class PetugasBerandaPage extends StatelessWidget {
@@ -57,12 +58,15 @@ class PetugasBerandaPage extends StatelessWidget {
             Row(
               children: [
                 IconButton(
-                  icon: Icon(Icons.settings, color: Colors.black),
-                  onPressed: () {},
-                ),
-                IconButton(
                   icon: Icon(Icons.notifications, color: Colors.black),
-                  onPressed: () {},
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => PetugasNotifikasiPage(),
+                      ),
+                    );
+                  },
                 ),
               ],
             ),
@@ -298,7 +302,7 @@ class PetugasBerandaPage extends StatelessWidget {
                         final video = videoList[index];
                         return VideoCard(
                           imageUrl:
-                              'https://i.pinimg.com/736x/2d/d3/79/2dd379968693700ec12af8f1974b491e.jpg',
+                              video['thumbnail_url'] ?? '',
                           title: video['judul_video'] ?? '',
                           date: video['tanggal_format'] ?? '',
                           onTap: () {
