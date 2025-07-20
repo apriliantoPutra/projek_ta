@@ -15,7 +15,6 @@ use App\Http\Controllers\Api\SetorLangsungController;
 use App\Http\Controllers\Api\TarikSaldoController as ApiTarikSaldoController;
 use App\Http\Controllers\Api\TotalSampahController;
 use App\Http\Controllers\Api\VideoController;
-use App\Http\Controllers\PengajuanPetugasController;
 use Illuminate\Support\Facades\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -67,7 +66,6 @@ Route::prefix('v1')->group(function () {
             Route::get('/baru', [SetorJemputController::class, 'listPengajuanBaru']);
             Route::get('/proses', [SetorJemputController::class, 'listPengajuanProses']);
             Route::get('/selesai', [SetorJemputController::class, 'listPengajuanSelesai']);
-
             Route::get('/{id}', [SetorJemputController::class, 'showPengajuan']);
 
             Route::patch('/terima-pengajuan/{id}', [SetorJemputController::class, 'terimaPengajuan']);
@@ -85,10 +83,8 @@ Route::prefix('v1')->group(function () {
         Route::get('/histori-setor-proses', [HistoriController::class, 'listSetorProses']);
         Route::get('/histori-setor-selesai', [HistoriController::class, 'listSetorSelesai']);
         Route::get('/histori-setor-batal', [HistoriController::class, 'listSetorBatal']);
-
         Route::get('/histori-setor-detai/{id}', [HistoriController::class, 'detailSetor']);
 
-        Route::post('/chatbot', [ChatBotController::class, 'store']);
 
         Route::get('/notifikasi', [NotificationController::class, 'detailNotifikasi']);
 

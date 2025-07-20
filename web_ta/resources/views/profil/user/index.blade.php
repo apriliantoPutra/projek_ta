@@ -35,11 +35,7 @@
                             </div>
                         </div>
 
-                        <div>
-                            <label class="text-sm font-medium text-gray-600">Alamat</label>
-                            <div class="mt-1 p-3 bg-gray-50 rounded-md border shadow-sm text-gray-800">
-                                {{ $profil->alamat_pengguna }}</div>
-                        </div>
+
 
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
@@ -50,8 +46,23 @@
                             <div>
                                 <label class="text-sm font-medium text-gray-600">Koordinat Lokasi</label>
                                 <div class="mt-1 p-3 bg-gray-50 rounded-md border shadow-sm text-gray-800">
+                                    {{ $profil->alamat_pengguna }}</div>
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="text-sm font-medium text-gray-600">Titik Koordinat</label>
+                                <div class="mt-1 p-3 bg-gray-50 rounded-md border shadow-sm text-gray-800">
                                     {{ $profil->koordinat_pengguna }}</div>
                             </div>
+                            @if ($akun->role == 'warga')
+                                <div>
+                                    <label class="text-sm font-medium text-gray-600">Total Saldo (Rp)</label>
+                                    <div class="mt-1 p-3 bg-gray-50 rounded-md border shadow-sm text-gray-800">
+                                        {{ $saldo->total_saldo ?? 'Belum ada Saldo' }}</div>
+                                </div>
+                            @endif
+
                         </div>
                     </div>
                 </div>

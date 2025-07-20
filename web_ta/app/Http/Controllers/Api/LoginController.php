@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\LoginRequest;
 use App\Models\User;
 use GrahamCampbell\ResultType\Success;
 use Illuminate\Http\Request;
@@ -59,7 +60,11 @@ class LoginController extends Controller
         }
     }
 
-    public function authenticate(Request $request)
+    /**
+     * @group Auth
+     * Authenticate user menggunakan username & password
+     */
+    public function authenticate(LoginRequest $request) // pakai LoginRequest
     {
         if (!Auth::attempt($request->only('username', 'password'))) {
             return response()->json([
@@ -67,6 +72,7 @@ class LoginController extends Controller
                 'message' => 'Invalid Credentials'
             ], 400);
         }
+
         $akun = User::where('username', $request['username'])->firstOrFail();
         $token = $akun->createToken('auth_token')->plainTextToken;
 
@@ -76,6 +82,7 @@ class LoginController extends Controller
             'data' => $akun
         ]);
     }
+
 
     public function logout(Request $request)
     {

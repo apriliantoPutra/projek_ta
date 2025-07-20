@@ -30,10 +30,7 @@
                         <option value="" disabled>Pilih Satuan</option>
                         <option value="kg" {{ old('satuan', $jenis_sampah->satuan) == 'kg' ? 'selected' : '' }}>Kilogram
                             (kg)</option>
-                        <option value="gram" {{ old('satuan', $jenis_sampah->satuan) == 'gram' ? 'selected' : '' }}>Gram
-                        </option>
-                        <option value="liter" {{ old('satuan', $jenis_sampah->satuan) == 'liter' ? 'selected' : '' }}>Liter
-                        </option>
+
                         <option value="pcs" {{ old('satuan', $jenis_sampah->satuan) == 'pcs' ? 'selected' : '' }}>Pieces
                             (pcs)</option>
                     </select>

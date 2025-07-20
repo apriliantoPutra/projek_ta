@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Bank Sampah</title>
-    <link rel="icon" href="{{ asset('img/logo.png') }}" type="image/png">
+    <link rel="icon" href="{{ asset('img/green.png') }}" type="image/png">
     @vite('resources/css/app.css')
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet"
         integrity="sha384-rbsA2VBKQhggwzxH7pPCaAqO46MgnOM80zW1RWuH61DGLwZJEdK2Kadq2F9CUG65" crossorigin="anonymous">
@@ -24,7 +24,7 @@
             <div class="flex items-center justify-center p-5 ">
                 <div class="p-8 border border-slate-400 bg-white rounded-xl shadow-lg w-full max-w-md">
                     <div class="mb-5 flex justify-center">
-                        <img src="img/logo.png" alt="Logo" class="w-28">
+                        <img src="img/green.png" alt="Logo" class="w-28">
                     </div>
                     <h2 class="text-xl font-bold text-center text-gray-800 mb-4">Selamat Datang di Bank Sampah</h2>
                     @if (session()->has('loginError'))

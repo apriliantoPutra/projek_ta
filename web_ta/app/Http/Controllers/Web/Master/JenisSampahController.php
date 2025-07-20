@@ -13,19 +13,21 @@ class JenisSampahController extends Controller
 {
     public function index(Request $request)
     {
-        $query = JenisSampah::query();
+        $query = JenisSampah::with('totalSampah');
 
         if ($request->filled('search')) {
-            $query->where(function ($q) use ($request) {
-                $q->where('nama_sampah', 'like', '%' . $request->search . '%');
-            });
+            $query->where('nama_sampah', 'like', '%' . $request->search . '%');
         }
-
 
         $datas = $query->orderBy('nama_sampah')->paginate(10)->withQueryString();
 
-        return view('masterData.jenisSampah.index', ['headerTitle' => 'Data Sampah', 'search' => $request->search, 'data' => $datas]);
+        return view('masterData.jenisSampah.index', [
+            'headerTitle' => 'Data Sampah',
+            'search' => $request->search,
+            'data' => $datas
+        ]);
     }
+
     public function create()
     {
 

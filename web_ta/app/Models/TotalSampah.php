@@ -12,13 +12,5 @@ class TotalSampah extends Model
         'sampah_id',
         'total_berat',
     ];
-    /**
-     * Get all of the JenisSampah for the TotalSampah
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany
-     */
-    public function JenisSampah(): HasMany
-    {
-        return $this->hasMany(JenisSampah::class, 'sampah_id');
-    }
+    
 }

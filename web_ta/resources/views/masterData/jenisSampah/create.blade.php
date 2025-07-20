@@ -27,8 +27,6 @@
                         required>
                         <option value="" disabled selected>Pilih Satuan</option>
                         <option value="kg">Kilogram (kg)</option>
-                        <option value="gram">Gram</option>
-                        <option value="liter">Liter</option>
                         <option value="pcs">Pieces (pcs)</option>
                     </select>
                 </div>
