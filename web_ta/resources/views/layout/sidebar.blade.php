@@ -88,10 +88,21 @@
 
         <!-- Bagian Bawah (Footer) -->
         <div class="px-4 py-4 border-t border-gray-700">
+            @php
+                use App\Models\Profil;
+
+                $user = auth()->user();
+                $profil = Profil::where('akun_id', $user->id)->first();
+                $gambar = $profil->gambar_pengguna
+                    ? asset('storage/' . $profil->gambar_pengguna)
+                    : 'https://i.pravatar.cc/150?img=12';
+                $nama = $profil->nama_pengguna;
+            @endphp
+
             <div class="flex items-center space-x-3 mb-3">
-                <img src="/img/profile.jpeg" alt="Foto Profil" class="w-16 h-16 rounded-full object-cover">
+                <img src="{{ $gambar }}" alt="Foto Profil" class="w-16 h-16 rounded-full object-cover">
                 <div>
-                    <p class="font-medium text-white">Nama User</p>
+                    <p class="font-medium text-white">{{ $nama }}</p>
                     <p class="text-xs text-gray-400">Admin</p>
                 </div>
             </div>

@@ -18,7 +18,7 @@ class NotificationController extends Controller
                 ->orWhere('akun_id', '=', $akunId); // notifikasi khusus user
         })
             ->orderBy('sent_at', 'desc')
-            ->limit(6)
+            ->limit(4)
             ->get();
 
 

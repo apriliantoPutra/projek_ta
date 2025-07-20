@@ -77,7 +77,7 @@
                         @empty
                             <tr>
                                 <td colspan="5" class="px-5 py-8 text-center text-gray-500 italic">
-                                    Tidak ada data akun.
+                                    Tidak ada data edukasi artikel.
                                 </td>
                             </tr>
                         @endforelse
