@@ -107,4 +107,5 @@ Route::prefix('v1')->group(function () {
     });
 
     Route::get('/total-berat', [TotalSampahController::class, 'totalSampah']);
+    Route::get('/total-berat-botol', [TotalSampahController::class, 'totalSampahBotol']);
 });

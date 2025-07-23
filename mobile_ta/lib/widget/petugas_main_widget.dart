@@ -26,6 +26,9 @@ class _WargaMainWrapperState extends State<PetugasMainWrapper> {
   List<dynamic> videoList = [];
   List<dynamic> setorTerbaruList = [];
 
+  String? totalSampah;
+  String? totalSampahBotol;
+
   @override
   void initState() {
     super.initState();
@@ -50,15 +53,54 @@ class _WargaMainWrapperState extends State<PetugasMainWrapper> {
       await loadArtikel();
       await loadVideo();
       await loadSetorTerbaru();
+      await loadTotalSampah();
+      await loadTotalSampahBotol();
     }
     setState(() {
       isLoading = false;
     });
   }
 
+  Future<void> loadTotalSampah() async {
+    try {
+      final response = await http.get(
+        Uri.parse('${dotenv.env['URL']}/total-berat'),
+      );
+      if (response.statusCode == 200) {
+        final jsonData = json.decode(response.body);
+        setState(() {
+          totalSampah = jsonData['data'];
+        });
+      } else {
+        debugPrint('Gagal ambil total sampah: ${response.body}');
+      }
+    } catch (e) {
+      debugPrint('Error total sampah: $e');
+    }
+  }
+  Future<void> loadTotalSampahBotol() async {
+    try {
+      final response = await http.get(
+        Uri.parse('${dotenv.env['URL']}/total-berat'),
+      );
+      if (response.statusCode == 200) {
+        final jsonData = json.decode(response.body);
+        setState(() {
+          totalSampahBotol = jsonData['data'];
+        });
+      } else {
+        debugPrint('Gagal ambil total sampah: ${response.body}');
+      }
+    } catch (e) {
+      debugPrint('Error total sampah: $e');
+    }
+  }
+
   Future<void> loadArtikel() async {
     try {
-      final response = await http.get(Uri.parse('${dotenv.env['URL']}/artikel/terbaru'));
+      final response = await http.get(
+        Uri.parse('${dotenv.env['URL']}/artikel/terbaru'),
+      );
       if (response.statusCode == 200) {
         final jsonData = json.decode(response.body);
         setState(() {
@@ -72,7 +114,9 @@ class _WargaMainWrapperState extends State<PetugasMainWrapper> {
 
   Future<void> loadVideo() async {
     try {
-      final response = await http.get(Uri.parse('${dotenv.env['URL']}/video/terbaru'));
+      final response = await http.get(
+        Uri.parse('${dotenv.env['URL']}/video/terbaru'),
+      );
       if (response.statusCode == 200) {
         final jsonData = json.decode(response.body);
         setState(() {
@@ -175,6 +219,8 @@ class _WargaMainWrapperState extends State<PetugasMainWrapper> {
         artikelList: artikelList,
         videoList: videoList,
         setorTerbaruList: setorTerbaruList,
+        totalSampah: totalSampah,
+        totalSampahBotol: totalSampahBotol,
       ),
       PetugasSetorPage(),
       PetugasKontenPage(artikelList: artikelList, videoList: videoList),

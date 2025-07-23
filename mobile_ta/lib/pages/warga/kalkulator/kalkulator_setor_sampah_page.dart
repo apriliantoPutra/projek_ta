@@ -47,6 +47,14 @@ class _KalkulatorSetorSampahPageState extends State<KalkulatorSetorSampahPage> {
     }
   }
 
+  void _removeJenisSampah(int index) {
+    if (_jenisSampahList.length > 1) {
+      setState(() {
+        _jenisSampahList.removeAt(index);
+      });
+    }
+  }
+
   @override
   void initState() {
     super.initState();
@@ -120,14 +128,7 @@ class _KalkulatorSetorSampahPageState extends State<KalkulatorSetorSampahPage> {
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
                   color: Color(0xFF8fd14f).withOpacity(0.15),
-                  borderRadius: BorderRadius.circular(12),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.green.withOpacity(0.08),
-                      blurRadius: 6,
-                      offset: Offset(0, 2),
-                    ),
-                  ],
+                  borderRadius: BorderRadius.circular(14),
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -143,7 +144,7 @@ class _KalkulatorSetorSampahPageState extends State<KalkulatorSetorSampahPage> {
                             ),
                           ),
                         ),
-                        SizedBox(width: 8),
+                        const SizedBox(width: 8),
                         Expanded(
                           child: Text(
                             'Berat (kg)',
@@ -152,9 +153,10 @@ class _KalkulatorSetorSampahPageState extends State<KalkulatorSetorSampahPage> {
                             ),
                           ),
                         ),
+                        const SizedBox(width: 40),
                       ],
                     ),
-                    SizedBox(height: 8),
+                    const SizedBox(height: 8),
                     ..._jenisSampahList.asMap().entries.map((entry) {
                       final index = entry.key;
                       final item = entry.value;
@@ -202,7 +204,7 @@ class _KalkulatorSetorSampahPageState extends State<KalkulatorSetorSampahPage> {
                                     ),
                                   ),
                                 ),
-                                SizedBox(width: 8),
+                                const SizedBox(width: 8),
                                 Expanded(
                                   child: TextFormField(
                                     initialValue: item['berat']?.toString(),
@@ -257,6 +259,13 @@ class _KalkulatorSetorSampahPageState extends State<KalkulatorSetorSampahPage> {
                                     },
                                   ),
                                 ),
+                                IconButton(
+                                  icon: const Icon(
+                                    Icons.delete,
+                                    color: Colors.red,
+                                  ),
+                                  onPressed: () => _removeJenisSampah(index),
+                                ),
                               ],
                             ),
                             if (item['error'] != null)
@@ -284,7 +293,6 @@ class _KalkulatorSetorSampahPageState extends State<KalkulatorSetorSampahPage> {
                         ),
                       );
                     }).toList(),
-                    SizedBox(height: 8),
                     TextButton.icon(
                       onPressed: () {
                         setState(() {
@@ -298,7 +306,10 @@ class _KalkulatorSetorSampahPageState extends State<KalkulatorSetorSampahPage> {
                       icon: Icon(Icons.add, color: Color(0xFF128d54)),
                       label: Text(
                         'Tambah Jenis Sampah',
-                        style: GoogleFonts.poppins(color: Color(0xFF128d54)),
+                        style: GoogleFonts.poppins(
+                          color: Color(0xFF128d54),
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ),
                   ],
