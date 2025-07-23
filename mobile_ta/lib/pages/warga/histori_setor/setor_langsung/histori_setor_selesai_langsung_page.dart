@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:google_fonts/google_fonts.dart';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -7,7 +8,12 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class HistoriSetorSelesaiLangsungPage extends StatefulWidget {
   final int id;
-  const HistoriSetorSelesaiLangsungPage({required this.id, super.key});
+  const HistoriSetorSelesaiLangsungPage({
+    required this.id,
+    super.key,
+    required catatan,
+    required String tanggal,
+  });
 
   @override
   State<HistoriSetorSelesaiLangsungPage> createState() =>
@@ -109,160 +115,255 @@ class _HistoriSetorSelesaiLangsungPageState
   Widget build(BuildContext context) {
     if (isLoading || pengajuanDetailSetor == null) {
       return Scaffold(
-        appBar: AppBar(title: const Text("Setor Langsung Sampah")),
+        appBar: AppBar(
+          backgroundColor: Colors.white,
+          elevation: 0,
+          centerTitle: true,
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back, color: Color(0xFF128d54)),
+            onPressed: () => Navigator.pop(context),
+          ),
+          title: Text(
+            "Histori Setor Langsung",
+            style: GoogleFonts.poppins(
+              fontWeight: FontWeight.bold,
+              color: Color(0xFF128d54),
+              fontSize: 22,
+            ),
+          ),
+        ),
         body: const Center(child: CircularProgressIndicator()),
       );
     }
-    
+
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Colors.greenAccent.shade400,
+        backgroundColor: Colors.white,
         elevation: 0,
         centerTitle: true,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          icon: const Icon(Icons.arrow_back, color: Color(0xFF128d54)),
           onPressed: () => Navigator.pop(context),
         ),
-        title: const Text(
+        title: Text(
           'Histori Setor Langsung',
-          style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
+          style: GoogleFonts.poppins(
+            fontWeight: FontWeight.bold,
+            color: Color(0xFF128d54),
+            fontSize: 22,
+          ),
         ),
       ),
-      body: ListView(
+      body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
-        children: [
-          const Text(
-            'Jenis dan Berat Sampah',
-            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 10),
-
-          // Grafik Sampah
-          Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: Colors.greenAccent.shade100,
-              borderRadius: BorderRadius.circular(16),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Stack(
-                  children: [
-                    Container(
-                      height: 24,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(12),
-                        color: Colors.grey[300],
-                      ),
+        child: Column(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(18),
+              margin: const EdgeInsets.only(bottom: 18),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [Color(0xFF6BBE44), Color(0xFF128d54)],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+                borderRadius: BorderRadius.circular(20),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.green.withOpacity(0.12),
+                    offset: Offset(0, 4),
+                    blurRadius: 12,
+                    spreadRadius: 1,
+                  ),
+                ],
+              ),
+              child: Column(
+                children: [
+                  Text(
+                    'Detail Setor Langsung',
+                    style: GoogleFonts.poppins(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
                     ),
-                    Row(
-                      children:
-                          processedSetoran.map((item) {
-                            final double proportion =
-                                item['berat'] / totalBerat;
-                            return Expanded(
-                              flex: (proportion * 1000).round(),
-                              child: Container(
-                                height: 24,
-                                decoration: BoxDecoration(
-                                  color: Color(
-                                    int.parse(
-                                      item['warna'].toString().replaceAll(
-                                        '#',
-                                        '0xff',
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    'Berikut detail penyetoran dan estimasi insentif.',
+                    style: GoogleFonts.poppins(
+                      color: Colors.white,
+                      fontSize: 14,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ],
+              ),
+            ),
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(16),
+              margin: const EdgeInsets.only(bottom: 18),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(20),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.green.withOpacity(0.10),
+                    blurRadius: 16,
+                    offset: Offset(0, 6),
+                  ),
+                ],
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Jenis dan Berat Sampah',
+                    style: GoogleFonts.poppins(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFF128d54),
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  Stack(
+                    children: [
+                      Container(
+                        height: 24,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(12),
+                          color: Colors.grey[300],
+                        ),
+                      ),
+                      Row(
+                        children:
+                            processedSetoran.map((item) {
+                              final double proportion =
+                                  item['berat'] / totalBerat;
+                              return Expanded(
+                                flex: (proportion * 1000).round(),
+                                child: Container(
+                                  height: 24,
+                                  decoration: BoxDecoration(
+                                    color: Color(
+                                      int.parse(
+                                        item['warna'].toString().replaceAll(
+                                          '#',
+                                          '0xff',
+                                        ),
                                       ),
                                     ),
                                   ),
                                 ),
-                              ),
-                            );
-                          }).toList(),
-                    ),
-                    Positioned.fill(
-                      child: Center(
-                        child: Text(
-                          '${totalBerat.toStringAsFixed(1)}kg',
-                          style: const TextStyle(
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
-                          ),
-                        ),
+                              );
+                            }).toList(),
                       ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 12),
-                ...processedSetoran.map((item) {
-                  return Padding(
-                    padding: const EdgeInsets.only(bottom: 8.0),
-                    child: Row(
-                      children: [
-                        Icon(
-                          Icons.square,
-                          color: Color(
-                            int.parse(
-                              item['warna'].toString().replaceAll('#', '0xff'),
+                      Positioned.fill(
+                        child: Center(
+                          child: Text(
+                            '${totalBerat.toStringAsFixed(1)} kg',
+                            style: GoogleFonts.poppins(
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
                             ),
                           ),
                         ),
-                        const SizedBox(width: 6),
-                        Expanded(child: Text(item['nama'])),
-                        Text('${item['berat']}kg'),
-                        const SizedBox(width: 16),
-                        Text('Rp ${item['subtotal']}'),
-                      ],
-                    ),
-                  );
-                }).toList(),
-              ],
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  ...processedSetoran.map((item) {
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: 8.0),
+                      child: Row(
+                        children: [
+                          Icon(
+                            Icons.square,
+                            color: Color(
+                              int.parse(
+                                item['warna'].toString().replaceAll(
+                                  '#',
+                                  '0xff',
+                                ),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 6),
+                          Expanded(
+                            child: Text(
+                              item['nama'],
+                              style: GoogleFonts.poppins(),
+                            ),
+                          ),
+                          Text(
+                            '${item['berat']} kg',
+                            style: GoogleFonts.poppins(),
+                          ),
+                          const SizedBox(width: 16),
+                          Text(
+                            'Rp ${item['subtotal']}',
+                            style: GoogleFonts.poppins(),
+                          ),
+                        ],
+                      ),
+                    );
+                  }).toList(),
+                ],
+              ),
             ),
-          ),
-
-          const SizedBox(height: 20),
-
-          const Text(
-            'Estimasi Insentif',
-            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 10),
-
-          // Estimasi Insentif
-          Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: Colors.greenAccent.shade100,
-              borderRadius: BorderRadius.circular(16),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    const Text('Total harga sampah'),
-                    Text('Rp $totalHarga'),
-                  ],
-                ),
-                const SizedBox(height: 4),
-
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    const Text(
-                      'Total Insentif',
-                      style: TextStyle(fontWeight: FontWeight.bold),
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(16),
+              margin: const EdgeInsets.only(bottom: 18),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(20),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.green.withOpacity(0.10),
+                    blurRadius: 16,
+                    offset: Offset(0, 6),
+                  ),
+                ],
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Estimasi Insentif',
+                    style: GoogleFonts.poppins(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFF128d54),
                     ),
-                    Text(
-                      'Rp ${totalHarga - biayaLayanan}',
-                      style: const TextStyle(fontWeight: FontWeight.bold),
-                    ),
-                  ],
-                ),
-              ],
+                  ),
+                  const SizedBox(height: 10),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text('Total harga sampah', style: GoogleFonts.poppins()),
+                      Text('Rp $totalHarga', style: GoogleFonts.poppins()),
+                    ],
+                  ),
+                  const SizedBox(height: 4),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'Total Insentif',
+                        style: GoogleFonts.poppins(fontWeight: FontWeight.bold),
+                      ),
+                      Text(
+                        'Rp ${totalHarga - biayaLayanan}',
+                        style: GoogleFonts.poppins(fontWeight: FontWeight.bold),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

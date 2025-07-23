@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:mobile_ta/models/notification_model.dart';
 import 'package:mobile_ta/services/notification_service.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:mobile_ta/widget/notifikasi_card.dart';
 
 class WargaNotifikasiPage extends StatelessWidget {
   const WargaNotifikasiPage({super.key});
@@ -12,16 +14,20 @@ class WargaNotifikasiPage extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Colors.greenAccent.shade400,
+        backgroundColor: Colors.white,
         elevation: 0,
         centerTitle: true,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          icon: const Icon(Icons.arrow_back, color: Color(0xFF128d54)),
           onPressed: () => Navigator.pop(context),
         ),
-        title: const Text(
-          'Notifikasi',
-          style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
+        title: Text(
+          'Setor Langsung',
+          style: GoogleFonts.poppins(
+            fontWeight: FontWeight.bold,
+            color: Color(0xFF128d54),
+            fontSize: 22,
+          ),
         ),
       ),
       body: Padding(
@@ -47,46 +53,10 @@ class WargaNotifikasiPage extends StatelessWidget {
               itemCount: notifs.length,
               itemBuilder: (context, index) {
                 final notif = notifs[index];
-                return Container(
-                  width: width * 0.95,
-                  margin: const EdgeInsets.symmetric(
-                    vertical: 6,
-                    horizontal: 8,
-                  ),
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: const Color(0xff8fd14f),
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        notif.title,
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
-                          fontSize: width * 0.045,
-                        ),
-                      ),
-                      const SizedBox(height: 6),
-                      Text(
-                        DateFormat('dd/MM/yyyy – HH:mm').format(notif.sentAt),
-                        style: TextStyle(
-                          color: Colors.white70,
-                          fontSize: width * 0.035,
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        notif.body,
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: width * 0.04,
-                        ),
-                      ),
-                    ],
-                  ),
+                return NotifikasiCard(
+                  title: notif.title,
+                  date: DateFormat('dd/MM/yyyy – HH:mm').format(notif.sentAt),
+                  body: notif.body,
                 );
               },
             );

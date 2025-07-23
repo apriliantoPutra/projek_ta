@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class WargaInfoPage extends StatelessWidget {
   const WargaInfoPage({super.key});
@@ -6,56 +7,65 @@ class WargaInfoPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey.shade100,
+      backgroundColor: Colors.white,
       appBar: AppBar(
-        backgroundColor: Colors.greenAccent.shade400,
+        backgroundColor: Color(0xFF128d54),
         elevation: 0,
         centerTitle: true,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.white),
           onPressed: () => Navigator.pop(context),
         ),
-        title: const Text(
+        title: Text(
           'Info Aplikasi',
-          style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
+          style: GoogleFonts.poppins(
+            fontSize: 24,
+            color: Colors.white,
+            fontWeight: FontWeight.w700,
+          ),
         ),
       ),
       body: ListView(
         padding: const EdgeInsets.all(24),
         children: [
-          const Text(
+          Text(
             'Tentang Aplikasi',
-            style: TextStyle(
+            style: GoogleFonts.poppins(
               fontSize: 20,
               fontWeight: FontWeight.bold,
-              color: Colors.green,
+              color: Color(0xFF128d54),
             ),
           ),
           const SizedBox(height: 12),
-          const Text(
+          Text(
             'Aplikasi Bank Sampah adalah solusi digital yang memudahkan warga dalam melakukan penyetoran sampah kepada petugas bank sampah.',
-            style: TextStyle(fontSize: 16),
+            style: GoogleFonts.poppins(fontSize: 16),
           ),
           const SizedBox(height: 12),
-          const Text(
+          Text(
             'Terdapat dua metode penyetoran sampah:',
-            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+            style: GoogleFonts.poppins(
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+            ),
           ),
           const SizedBox(height: 6),
-          const Text(
+          Text(
             "• Setor Langsung: Warga membawa sampah ke lokasi bank sampah.",
+            style: GoogleFonts.poppins(fontSize: 16),
           ),
-          const Text(
+          Text(
             "• Setor Jemput: Petugas akan menjemput sampah dari rumah warga.",
+            style: GoogleFonts.poppins(fontSize: 16),
           ),
           const SizedBox(height: 24),
 
-          const Text(
+          Text(
             'Fitur Utama',
-            style: TextStyle(
+            style: GoogleFonts.poppins(
               fontSize: 20,
               fontWeight: FontWeight.bold,
-              color: Colors.green,
+              color: Color(0xFF128d54),
             ),
           ),
           const SizedBox(height: 12),
@@ -86,17 +96,17 @@ class WargaInfoPage extends StatelessWidget {
           ),
           const SizedBox(height: 24),
 
-          const Text(
+          Text(
             'Cara Penggunaan',
-            style: TextStyle(
+            style: GoogleFonts.poppins(
               fontSize: 20,
               fontWeight: FontWeight.bold,
-              color: Colors.green,
+              color: Color(0xFF128d54),
             ),
           ),
           const SizedBox(height: 12),
           _buildStepItem(1, 'Masuk ke aplikasi menggunakan akun Anda.'),
-          _buildStepItem(2, 'Buka menu “Setor Sampah” di halaman utama.'),
+          _buildStepItem(2, 'Buka menu "Setor Sampah" di halaman utama.'),
           _buildStepItem(3, 'Pilih jenis setor: langsung atau jemput.'),
           _buildStepItem(4, 'Isi detail pengajuan dan kirim.'),
           _buildStepItem(
@@ -109,10 +119,13 @@ class WargaInfoPage extends StatelessWidget {
           ),
           const SizedBox(height: 32),
 
-          const Center(
+          Center(
             child: Text(
               "Versi Aplikasi: 1.0.0",
-              style: TextStyle(fontStyle: FontStyle.italic, color: Colors.grey),
+              style: GoogleFonts.poppins(
+                fontStyle: FontStyle.italic,
+                color: Colors.grey,
+              ),
             ),
           ),
           const SizedBox(height: 20),
@@ -126,10 +139,13 @@ class WargaInfoPage extends StatelessWidget {
       contentPadding: EdgeInsets.zero,
       leading: CircleAvatar(
         backgroundColor: Colors.green.shade100,
-        child: Icon(icon, color: Colors.green.shade700),
+        child: Icon(icon, color: Color(0xFF128d54)),
       ),
-      title: Text(title, style: const TextStyle(fontWeight: FontWeight.bold)),
-      subtitle: Text(subtitle),
+      title: Text(
+        title,
+        style: GoogleFonts.poppins(fontWeight: FontWeight.bold),
+      ),
+      subtitle: Text(subtitle, style: GoogleFonts.poppins()),
     );
   }
 
@@ -141,9 +157,9 @@ class WargaInfoPage extends StatelessWidget {
         children: [
           Text(
             "$number. ",
-            style: const TextStyle(fontWeight: FontWeight.bold),
+            style: GoogleFonts.poppins(fontWeight: FontWeight.bold),
           ),
-          Expanded(child: Text(description)),
+          Expanded(child: Text(description, style: GoogleFonts.poppins())),
         ],
       ),
     );

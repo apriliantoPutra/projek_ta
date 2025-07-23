@@ -4,6 +4,7 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:intl/intl.dart';
 import 'package:flutter_html/flutter_html.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class WargaDetailArtikelPage extends StatefulWidget {
   final int id;
@@ -18,7 +19,9 @@ class _WargaDetailArtikelPageState extends State<WargaDetailArtikelPage> {
   Map<String, dynamic>? artikel;
 
   Future<void> fetchArtikelDetail() async {
-    final response = await http.get(Uri.parse('${dotenv.env['URL']}/artikel/${widget.id}'));
+    final response = await http.get(
+      Uri.parse('${dotenv.env['URL']}/artikel/${widget.id}'),
+    );
 
     if (response.statusCode == 200) {
       final data = json.decode(response.body)['data'];
@@ -45,16 +48,20 @@ class _WargaDetailArtikelPageState extends State<WargaDetailArtikelPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Color(0xFF8fd14f),
+        backgroundColor: Color(0xFF128d54),
         elevation: 0,
         centerTitle: true,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.white),
           onPressed: () => Navigator.pop(context),
         ),
-        title: const Text(
+        title: Text(
           'Edukasi Artikel',
-          style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
+          style: GoogleFonts.poppins(
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
+            fontSize: 24,
+          ),
         ),
       ),
       body:
@@ -80,10 +87,10 @@ class _WargaDetailArtikelPageState extends State<WargaDetailArtikelPage> {
                     // Judul
                     Text(
                       artikel!['judul_artikel'],
-                      style: const TextStyle(
+                      style: GoogleFonts.poppins(
                         fontSize: 20,
                         fontWeight: FontWeight.bold,
-                        color: Colors.black87,
+                        color: Color(0xFF128d54),
                       ),
                       textAlign: TextAlign.center,
                     ),
@@ -97,7 +104,7 @@ class _WargaDetailArtikelPageState extends State<WargaDetailArtikelPage> {
                         const SizedBox(width: 4),
                         Text(
                           artikel!['nama_author'],
-                          style: const TextStyle(color: Colors.grey),
+                          style: GoogleFonts.poppins(color: Colors.grey),
                         ),
                         const SizedBox(width: 10),
                         const Icon(
@@ -108,7 +115,7 @@ class _WargaDetailArtikelPageState extends State<WargaDetailArtikelPage> {
                         const SizedBox(width: 4),
                         Text(
                           formatTanggal(artikel!['created_at']),
-                          style: const TextStyle(color: Colors.grey),
+                          style: GoogleFonts.poppins(color: Colors.grey),
                         ),
                       ],
                     ),
@@ -122,6 +129,7 @@ class _WargaDetailArtikelPageState extends State<WargaDetailArtikelPage> {
                           fontSize: FontSize(16.0),
                           lineHeight: LineHeight(1.6),
                           textAlign: TextAlign.justify,
+                          fontFamily: GoogleFonts.poppins().fontFamily,
                         ),
                         "strong": Style(fontWeight: FontWeight.bold),
                       },

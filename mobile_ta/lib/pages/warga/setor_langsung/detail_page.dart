@@ -7,6 +7,7 @@ import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 import 'package:mobile_ta/pages/warga/setor_langsung/status_page.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class WargaDetailSetorLangsung extends StatefulWidget {
   final String tanggal;
@@ -257,16 +258,20 @@ class _WargaDetailSetorLangsungState extends State<WargaDetailSetorLangsung> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Colors.greenAccent.shade400,
+        backgroundColor: Colors.white,
         elevation: 0,
         centerTitle: true,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          icon: Icon(Icons.arrow_back, color: Color(0xFF128d54)),
           onPressed: () => Navigator.pop(context),
         ),
-        title: const Text(
+        title: Text(
           'Setor Langsung',
-          style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
+          style: GoogleFonts.poppins(
+            fontWeight: FontWeight.bold,
+            color: Color(0xFF128d54),
+            fontSize: 22,
+          ),
         ),
       ),
       body: ListView(
@@ -276,19 +281,40 @@ class _WargaDetailSetorLangsungState extends State<WargaDetailSetorLangsung> {
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: Colors.greenAccent.shade100,
-              borderRadius: BorderRadius.circular(12),
+              gradient: LinearGradient(
+                colors: [Color(0xFF6BBE44), Color(0xFF128d54)],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+              borderRadius: BorderRadius.circular(18),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.green.withOpacity(0.10),
+                  blurRadius: 12,
+                  offset: Offset(0, 4),
+                ),
+              ],
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
+                Text(
                   "Detail Penyetoran",
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                  style: GoogleFonts.poppins(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
+                    color: Colors.white,
+                  ),
                 ),
                 const SizedBox(height: 8),
-                Text("Tanggal: ${widget.tanggal}"),
-                Text("Catatan: ${widget.catatan ?? "-"}"),
+                Text(
+                  "Tanggal: ${widget.tanggal}",
+                  style: GoogleFonts.poppins(color: Colors.white),
+                ),
+                Text(
+                  "Catatan: ${widget.catatan ?? "-"}",
+                  style: GoogleFonts.poppins(color: Colors.white),
+                ),
               ],
             ),
           ),
@@ -299,25 +325,36 @@ class _WargaDetailSetorLangsungState extends State<WargaDetailSetorLangsung> {
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: Colors.green.shade50,
-              borderRadius: BorderRadius.circular(12),
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(18),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.green.withOpacity(0.08),
+                  blurRadius: 10,
+                  offset: Offset(0, 2),
+                ),
+              ],
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
+                Text(
                   "Informasi Bank Sampah",
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                  style: GoogleFonts.poppins(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
+                    color: Color(0xFF128d54),
+                  ),
                 ),
                 const SizedBox(height: 8),
                 Text(
                   "Nama: $namaBank",
-                  style: const TextStyle(fontWeight: FontWeight.w600),
+                  style: GoogleFonts.poppins(fontWeight: FontWeight.w600),
                 ),
                 const SizedBox(height: 4),
-                Text("Deskripsi: $deskripsiBank"),
+                Text("Deskripsi: $deskripsiBank", style: GoogleFonts.poppins()),
                 const SizedBox(height: 4),
-                Text("Alamat: $alamatBank"),
+                Text("Alamat: $alamatBank", style: GoogleFonts.poppins()),
                 const SizedBox(height: 12),
                 _buildMapImage(),
               ],
@@ -330,50 +367,67 @@ class _WargaDetailSetorLangsungState extends State<WargaDetailSetorLangsung> {
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: Colors.greenAccent.shade100,
-              borderRadius: BorderRadius.circular(12),
+              color: Color(0xFFF1F8E9),
+              borderRadius: BorderRadius.circular(18),
+              border: Border.all(color: Color(0xFFB2DFDB)),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
+                Text(
                   "Kontak Admin",
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                  style: GoogleFonts.poppins(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
+                    color: Color(0xFF128d54),
+                  ),
                 ),
                 const SizedBox(height: 8),
-                Text("Nama: $namaAdmin"),
-                Text("Email: $emailAdmin"),
-                Text("No HP: $noHpAdmin"),
+                Text("Nama: $namaAdmin", style: GoogleFonts.poppins()),
+                Text("Email: $emailAdmin", style: GoogleFonts.poppins()),
+                Text("No HP: $noHpAdmin", style: GoogleFonts.poppins()),
               ],
             ),
           ),
           const SizedBox(height: 32),
 
           // Tombol Konfirmasi
-          ElevatedButton(
-            onPressed: isLoading ? null : storePengajuanSetorLangsung,
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.greenAccent.shade400,
-              padding: const EdgeInsets.all(16),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton(
+              onPressed: isLoading ? null : storePengajuanSetorLangsung,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Color(0xFF128d54),
+                padding: const EdgeInsets.all(16),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                elevation: 2,
               ),
-            ),
-            child:
-                isLoading
-                    ? const SizedBox(
-                      height: 20,
-                      width: 20,
-                      child: CircularProgressIndicator(
-                        valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                        strokeWidth: 2,
+              child:
+                  isLoading
+                      ? const SizedBox(
+                        height: 20,
+                        width: 20,
+                        child: CircularProgressIndicator(
+                          valueColor: AlwaysStoppedAnimation<Color>(
+                            Colors.white,
+                          ),
+                          strokeWidth: 2,
+                        ),
+                      )
+                      : Text(
+                        "Konfirmasi Setoran",
+                        style: GoogleFonts.poppins(
+                          fontSize: 16,
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
-                    )
-                    : const Text(
-                      "Konfirmasi Setoran",
-                      style: TextStyle(fontSize: 16),
-                    ),
+            ),
           ),
+
+          SizedBox(height: 16),
         ],
       ),
     );

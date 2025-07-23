@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:mobile_ta/pages/warga/histori_saldo/detail_histori_saldo_page.dart';
 
 class TarikSaldoCard extends StatelessWidget {
@@ -46,50 +47,64 @@ class TarikSaldoCard extends StatelessWidget {
     final jumlah = data['jumlah_saldo'] ?? 0;
     final status = data['status'] ?? '';
     final metode = data['metode'] ?? '';
+    final tanggal = data['tanggal_format'] ?? '';
 
     return Container(
       width: double.infinity,
-      margin: const EdgeInsets.symmetric(vertical: 6, horizontal: 8),
-      padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+      margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: const Color(0xff8fd14f),
-        borderRadius: BorderRadius.circular(16),
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(18),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.green.withOpacity(0.10),
+            blurRadius: 10,
+            offset: Offset(0, 2),
+          ),
+        ],
       ),
       child: Row(
         children: [
-          // Left info
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   formatCurrency(jumlah),
-                  style: const TextStyle(
+                  style: GoogleFonts.poppins(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
-                    color: Colors.white,
+                    color: Color(0xFF128d54),
                   ),
                 ),
                 const SizedBox(height: 6),
                 Text(
                   status,
-                  style: TextStyle(
+                  style: GoogleFonts.poppins(
                     color: getStatusColor(status),
                     fontWeight: FontWeight.w600,
+                    fontSize: 15,
                   ),
                 ),
                 const SizedBox(height: 4),
                 Text(
                   formatMetode(metode),
-                  style: const TextStyle(color: Colors.white70, fontSize: 13),
+                  style: GoogleFonts.poppins(
+                    color: Colors.grey[700],
+                    fontSize: 13,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  tanggal,
+                  style: GoogleFonts.poppins(color: Colors.grey, fontSize: 13),
                 ),
               ],
             ),
           ),
-
-          // Arrow
           IconButton(
-            icon: const Icon(Icons.arrow_forward, color: Colors.white),
+            icon: const Icon(Icons.arrow_forward_ios, color: Color(0xFF128d54)),
             onPressed: () {
               Navigator.push(
                 context,

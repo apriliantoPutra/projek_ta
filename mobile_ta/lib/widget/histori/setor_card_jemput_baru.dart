@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:mobile_ta/pages/warga/histori_setor/setor_jemput/histori_setor_baru_jemput_page.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class HistoriSetorCardJemputBaru extends StatelessWidget {
   final Map<String, dynamic> data;
@@ -20,46 +21,69 @@ class HistoriSetorCardJemputBaru extends StatelessWidget {
             : "-";
 
     return Container(
-      width: width * 0.95,
-      margin: const EdgeInsets.symmetric(vertical: 6, horizontal: 8),
-      padding: const EdgeInsets.all(16),
+      width: double.infinity,
+      margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 2),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: BoxDecoration(
-        color: const Color(0xff8fd14f),
-        borderRadius: BorderRadius.circular(16),
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(18),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.green.withOpacity(0.10),
+            blurRadius: 10,
+            offset: Offset(0, 2),
+          ),
+        ],
       ),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          // Informasi utama
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                "Setor Jemput",
-                style: TextStyle(
-                  fontSize: width * 0.045,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  "Setor Jemput",
+                  style: GoogleFonts.poppins(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: Color(0xFF128d54),
+                  ),
                 ),
-              ),
-              SizedBox(height: 4),
-              Text(
-                tanggal,
-                style: TextStyle(fontSize: width * 0.035, color: Colors.white),
-              ),
-            ],
+                const SizedBox(height: 4),
+                Text(
+                  tanggal,
+                  style: GoogleFonts.poppins(
+                    fontSize: 13,
+                    color: Colors.grey[700],
+                  ),
+                ),
+                if (catatan != null && catatan.toString().isNotEmpty) ...[
+                  const SizedBox(height: 4),
+                  Text(
+                    "Catatan: $catatan",
+                    style: GoogleFonts.poppins(
+                      fontSize: 13,
+                      color: Colors.black87,
+                    ),
+                  ),
+                ],
+              ],
+            ),
           ),
-          // Icon panah ke kanan
           IconButton(
-            icon: const Icon(Icons.arrow_forward_ios, color: Colors.white),
+            icon: const Icon(Icons.arrow_forward_ios, color: Color(0xFF128d54)),
             onPressed: () {
               Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) =>
-                          HistoriSetorBaruJemputPage(id: data['id'], tanggal: tanggal, catatan: catatan),
-                    ),
-                  );
+                context,
+                MaterialPageRoute(
+                  builder:
+                      (context) => HistoriSetorBaruJemputPage(
+                        id: data['id'],
+                        tanggal: tanggal,
+                        catatan: catatan,
+                      ),
+                ),
+              );
             },
           ),
         ],

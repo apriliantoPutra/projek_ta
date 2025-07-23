@@ -9,6 +9,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:mobile_ta/widget/warga_main_widget.dart';
 import 'package:path/path.dart' as Path;
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class WargaEditProfilPage extends StatefulWidget {
   final Map<String, dynamic>? profilData;
@@ -228,20 +229,24 @@ class _WargaEditProfilPageState extends State<WargaEditProfilPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Colors.greenAccent.shade400,
+        backgroundColor: Colors.white,
         elevation: 0,
         centerTitle: true,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          icon: const Icon(Icons.arrow_back, color: Color(0xFF128d54)),
           onPressed: () => Navigator.pop(context),
         ),
-        title: const Text(
+        title: Text(
           'Edit Profil',
-          style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
+          style: GoogleFonts.poppins(
+            fontWeight: FontWeight.bold,
+            color: Color(0xFF128d54),
+            fontSize: 24,
+          ),
         ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.check, color: Colors.white),
+            icon: const Icon(Icons.check, color: Color(0xFF128d54)),
             onPressed: _isLoading ? null : _submitForm,
           ),
         ],
@@ -286,8 +291,19 @@ class _WargaEditProfilPageState extends State<WargaEditProfilPage> {
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: Colors.greenAccent.shade400,
+                gradient: LinearGradient(
+                  colors: [Color(0xFF6BBE44), Color(0xFF128d54)],
+                  begin: Alignment.bottomCenter,
+                  end: Alignment.topCenter,
+                ),
                 borderRadius: BorderRadius.circular(20),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.green.withOpacity(0.10),
+                    blurRadius: 16,
+                    offset: Offset(0, 6),
+                  ),
+                ],
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -302,6 +318,7 @@ class _WargaEditProfilPageState extends State<WargaEditProfilPage> {
             ),
             const SizedBox(height: 20),
             _buildMapWidget(),
+            SizedBox(height: 16),
           ],
         ),
       ),
@@ -314,7 +331,7 @@ class _WargaEditProfilPageState extends State<WargaEditProfilPage> {
       children: [
         Text(
           label,
-          style: const TextStyle(
+          style: GoogleFonts.poppins(
             color: Colors.white,
             fontWeight: FontWeight.bold,
           ),
@@ -344,9 +361,12 @@ class _WargaEditProfilPageState extends State<WargaEditProfilPage> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
+        Text(
           "Titik Koordinat",
-          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+          style: GoogleFonts.poppins(
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
+          ),
         ),
         const SizedBox(height: 4),
         TextField(
@@ -369,10 +389,7 @@ class _WargaEditProfilPageState extends State<WargaEditProfilPage> {
               },
             ),
           ),
-          onChanged: (value) {
-            // Optional: Update map in real-time as user types
-            // _handleKoordinatChanged();
-          },
+          onChanged: (value) {},
           onSubmitted: (value) {
             _handleKoordinatChanged();
           },

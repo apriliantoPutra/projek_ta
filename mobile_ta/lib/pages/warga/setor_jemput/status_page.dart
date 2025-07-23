@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:mobile_ta/pages/warga/histori_setor/kumpulan_histori_setor_page.dart';
 import 'package:mobile_ta/widget/warga_main_widget.dart';
 
@@ -9,12 +10,16 @@ class WargaStatusTungguSetorJemput extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Colors.greenAccent.shade400,
+        backgroundColor: Colors.white,
         elevation: 0,
         centerTitle: true,
         title: Text(
           'Setor Jemput',
-          style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
+          style: GoogleFonts.poppins(
+            fontWeight: FontWeight.bold,
+            color: Color(0xFF128d54),
+            fontSize: 22,
+          ),
         ),
       ),
       body: SingleChildScrollView(
@@ -24,41 +29,68 @@ class WargaStatusTungguSetorJemput extends StatelessWidget {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const Text(
-                  "Pengajuan Sedang Diproses",
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.green,
+                Container(
+                  padding: const EdgeInsets.all(20),
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [Color(0xFF6BBE44), Color(0xFF128d54)],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
+                    borderRadius: BorderRadius.circular(18),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.green.withOpacity(0.10),
+                        blurRadius: 12,
+                        offset: Offset(0, 4),
+                      ),
+                    ],
                   ),
-                  textAlign: TextAlign.center,
+                  child: Column(
+                    children: [
+                      Text(
+                        "Pengajuan Sedang Diproses",
+                        style: GoogleFonts.poppins(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 12),
+                      Text(
+                        "Harap menunggu, petugas akan segera menerima dan menindaklanjuti pengajuan Anda.",
+                        style: GoogleFonts.poppins(
+                          fontSize: 16,
+                          color: Colors.white,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 32),
+                      const Icon(
+                        Icons.watch_later_outlined,
+                        size: 80,
+                        color: Colors.white,
+                      ),
+                      const SizedBox(height: 16),
+                      Text(
+                        "Terima kasih telah peduli lingkungan 🌱",
+                        style: GoogleFonts.poppins(
+                          fontStyle: FontStyle.italic,
+                          fontSize: 14,
+                          color: Colors.white,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ],
+                  ),
                 ),
-                const SizedBox(height: 12),
-                const Text(
-                  "Harap menunggu, petugas akan segera menerima dan menindaklanjuti pengajuan Anda.",
-                  style: TextStyle(fontSize: 16),
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 40),
-                Icon(
-                  Icons.watch_later_outlined,
-                  size: 80,
-                  color: Colors.greenAccent.shade700,
-                ),
-                const SizedBox(height: 16),
-                const Text(
-                  "Terima kasih telah peduli lingkungan 🌱",
-                  style: TextStyle(fontStyle: FontStyle.italic, fontSize: 14),
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 40),
-
-                /// Tombol Aksi
+                const SizedBox(height: 32),
                 _buildActionButton(
                   context,
                   icon: Icons.arrow_back,
                   label: "Kembali",
-                  color: Colors.green.shade600,
+                  color: Color(0xFF128d54),
                   onTap: () {
                     Navigator.pushReplacement(
                       context,
@@ -68,7 +100,6 @@ class WargaStatusTungguSetorJemput extends StatelessWidget {
                     );
                   },
                 ),
-
                 const SizedBox(height: 16),
                 _buildActionButton(
                   context,
@@ -105,7 +136,11 @@ class WargaStatusTungguSetorJemput extends StatelessWidget {
         icon: Icon(icon),
         label: Text(
           label,
-          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+          style: GoogleFonts.poppins(
+            fontSize: 16,
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
+          ),
         ),
         style: ElevatedButton.styleFrom(
           backgroundColor: color,
@@ -114,6 +149,7 @@ class WargaStatusTungguSetorJemput extends StatelessWidget {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
           ),
+          elevation: 2,
         ),
         onPressed: onTap,
       ),

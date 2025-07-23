@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:google_fonts/google_fonts.dart';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -56,35 +57,47 @@ class _KalkulatorSetorSampahPageState extends State<KalkulatorSetorSampahPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Colors.greenAccent.shade400,
+        backgroundColor: Colors.white,
         elevation: 0,
         centerTitle: true,
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: Colors.white),
-          onPressed: () => Navigator.pop(context),
-        ),
         title: Text(
-          'Kalkulator Setor Sampah',
-          style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
+          'Setor Sampah',
+          style: GoogleFonts.poppins(
+            fontWeight: FontWeight.bold,
+            color: Color(0xFF128d54),
+            fontSize: 24,
+          ),
         ),
       ),
       body: Padding(
-        padding: EdgeInsets.all(11),
+        padding: EdgeInsets.all(16),
         child: SingleChildScrollView(
           child: Column(
             children: [
               Container(
-                padding: EdgeInsets.all(16),
-                margin: EdgeInsets.only(bottom: 16),
+                padding: EdgeInsets.all(18),
+
                 decoration: BoxDecoration(
-                  color: Colors.greenAccent.shade400,
-                  borderRadius: BorderRadius.circular(16),
+                  gradient: LinearGradient(
+                    colors: [Color(0xFF6BBE44), Color(0xFF128d54)],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                  borderRadius: BorderRadius.circular(20),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.green.withOpacity(0.12),
+                      offset: Offset(0, 4),
+                      blurRadius: 12,
+                      spreadRadius: 1,
+                    ),
+                  ],
                 ),
                 child: Column(
                   children: [
                     Text(
                       'Kalkulator Setor Sampah',
-                      style: TextStyle(
+                      style: GoogleFonts.poppins(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
                         color: Colors.white,
@@ -92,37 +105,51 @@ class _KalkulatorSetorSampahPageState extends State<KalkulatorSetorSampahPage> {
                     ),
                     SizedBox(height: 8),
                     Text(
-                      'Kalkulator Setor Sampah adalah untuk menghitung berat dan harga tiap jenis sampah yang di input',
-                      style: TextStyle(color: Colors.white),
+                      'Kalkulator Setor Sampah adalah untuk menghitung berat dan harga tiap jenis sampah yang diinput.',
+                      style: GoogleFonts.poppins(
+                        color: Colors.white,
+                        fontSize: 14,
+                      ),
                       textAlign: TextAlign.center,
                     ),
                   ],
                 ),
               ),
-              SizedBox(height: 20),
+              SizedBox(height: 16),
               Container(
-                padding: const EdgeInsets.all(12),
+                padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: Colors.greenAccent.shade100,
+                  color: Color(0xFF8fd14f).withOpacity(0.15),
                   borderRadius: BorderRadius.circular(12),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.green.withOpacity(0.08),
+                      blurRadius: 6,
+                      offset: Offset(0, 2),
+                    ),
+                  ],
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Row(
-                      children: const [
+                      children: [
                         Expanded(
                           flex: 2,
                           child: Text(
                             'Jenis Sampah',
-                            style: TextStyle(fontWeight: FontWeight.bold),
+                            style: GoogleFonts.poppins(
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                         ),
                         SizedBox(width: 8),
                         Expanded(
                           child: Text(
                             'Berat (kg)',
-                            style: TextStyle(fontWeight: FontWeight.bold),
+                            style: GoogleFonts.poppins(
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                         ),
                       ],
@@ -143,12 +170,18 @@ class _KalkulatorSetorSampahPageState extends State<KalkulatorSetorSampahPage> {
                                   flex: 2,
                                   child: DropdownButtonFormField<int>(
                                     value: item['jenis_sampah_id'],
-                                    hint: const Text('Pilih jenis'),
+                                    hint: Text(
+                                      'Pilih jenis',
+                                      style: GoogleFonts.poppins(),
+                                    ),
                                     items:
                                         _jenisSampahOptions.map((option) {
                                           return DropdownMenuItem<int>(
                                             value: option['id'],
-                                            child: Text(option['nama_sampah']),
+                                            child: Text(
+                                              option['nama_sampah'],
+                                              style: GoogleFonts.poppins(),
+                                            ),
                                           );
                                         }).toList(),
                                     onChanged: (value) {
@@ -157,6 +190,16 @@ class _KalkulatorSetorSampahPageState extends State<KalkulatorSetorSampahPage> {
                                             value;
                                       });
                                     },
+                                    decoration: InputDecoration(
+                                      contentPadding:
+                                          const EdgeInsets.symmetric(
+                                            horizontal: 10,
+                                            vertical: 10,
+                                          ),
+                                      border: OutlineInputBorder(
+                                        borderRadius: BorderRadius.circular(10),
+                                      ),
+                                    ),
                                   ),
                                 ),
                                 SizedBox(width: 8),
@@ -164,13 +207,22 @@ class _KalkulatorSetorSampahPageState extends State<KalkulatorSetorSampahPage> {
                                   child: TextFormField(
                                     initialValue: item['berat']?.toString(),
                                     keyboardType:
-                                        const TextInputType.numberWithOptions(
+                                        TextInputType.numberWithOptions(
                                           decimal: true,
                                         ),
-                                    decoration: const InputDecoration(
+                                    decoration: InputDecoration(
                                       hintText: 'Berat',
-                                      // errorText dihapus agar error ditampilkan manual
+                                      hintStyle: GoogleFonts.poppins(),
+                                      contentPadding:
+                                          const EdgeInsets.symmetric(
+                                            horizontal: 10,
+                                            vertical: 10,
+                                          ),
+                                      border: OutlineInputBorder(
+                                        borderRadius: BorderRadius.circular(10),
+                                      ),
                                     ),
+                                    style: GoogleFonts.poppins(),
                                     onChanged: (value) {
                                       final parsed = double.tryParse(value);
                                       String? error;
@@ -221,7 +273,7 @@ class _KalkulatorSetorSampahPageState extends State<KalkulatorSetorSampahPage> {
                                 ),
                                 child: Text(
                                   item['error'],
-                                  style: TextStyle(
+                                  style: GoogleFonts.poppins(
                                     color: Colors.red.shade700,
                                     fontSize: 13,
                                     fontWeight: FontWeight.w500,
@@ -243,106 +295,116 @@ class _KalkulatorSetorSampahPageState extends State<KalkulatorSetorSampahPage> {
                           });
                         });
                       },
-                      icon: Icon(Icons.add, color: Colors.green),
+                      icon: Icon(Icons.add, color: Color(0xFF128d54)),
                       label: Text(
                         'Tambah Jenis Sampah',
-                        style: TextStyle(color: Colors.green),
+                        style: GoogleFonts.poppins(color: Color(0xFF128d54)),
                       ),
                     ),
                   ],
                 ),
               ),
-              SizedBox(height: 20),
+              SizedBox(height: 24),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  ElevatedButton.icon(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.greenAccent.shade400,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      padding: EdgeInsets.symmetric(
-                        horizontal: 20,
-                        vertical: 14,
-                      ),
-                    ),
-                    icon: Icon(Icons.list_alt),
-                    label: Text(
-                      'Daftar Sampah',
-                      style: TextStyle(fontWeight: FontWeight.bold),
-                    ),
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const WargaDaftarSampahPage(),
+                  Expanded(
+                    child: ElevatedButton.icon(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.white,
+                        side: BorderSide(color: Color(0xFFB2DFDB)),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
                         ),
-                      );
-                    },
+                        padding: EdgeInsets.symmetric(vertical: 14),
+                      ),
+                      icon: Icon(Icons.list_alt, color: Color(0xFF128d54)),
+                      label: Text(
+                        'Daftar Sampah',
+                        style: GoogleFonts.poppins(
+                          fontWeight: FontWeight.bold,
+                          color: Color(0xFF128d54),
+                        ),
+                      ),
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const WargaDaftarSampahPage(),
+                          ),
+                        );
+                      },
+                    ),
                   ),
                   SizedBox(width: 16),
-                  ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.greenAccent.shade400,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      padding: EdgeInsets.symmetric(
-                        horizontal: 30,
-                        vertical: 14,
-                      ),
-                    ),
-                    onPressed: () {
-                      final hasError = _jenisSampahList.any(
-                        (item) => item['error'] != null,
-                      );
-                      final isAnyEmpty = _jenisSampahList.any(
-                        (item) =>
-                            item['jenis_sampah_id'] == null ||
-                            item['berat'] == null,
-                      );
-
-                      if (hasError) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text('Tolong perbaiki input berat.'),
-                          ),
-                        );
-                        return;
-                      }
-
-                      if (isAnyEmpty) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text(
-                              'Harap isi semua jenis sampah dan berat.',
-                            ),
-                          ),
-                        );
-                        return;
-                      }
-
-                      final dataSetor =
-                          _jenisSampahList.map((item) {
-                            return {
-                              'jenis_sampah_id': item['jenis_sampah_id'],
-                              'berat': item['berat'],
-                            };
-                          }).toList();
-
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder:
-                              (context) =>
-                                  HasilSetorSampahPage(dataSetoran: dataSetor),
+                  Expanded(
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Color(0xFF128d54),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
                         ),
-                      );
-                    },
-                    child: Text(
-                      'Lihat Hasil',
-                      style: TextStyle(fontWeight: FontWeight.bold),
+                        padding: EdgeInsets.symmetric(vertical: 14),
+                      ),
+                      onPressed: () {
+                        final hasError = _jenisSampahList.any(
+                          (item) => item['error'] != null,
+                        );
+                        final isAnyEmpty = _jenisSampahList.any(
+                          (item) =>
+                              item['jenis_sampah_id'] == null ||
+                              item['berat'] == null,
+                        );
+
+                        if (hasError) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(
+                                'Tolong perbaiki input berat.',
+                                style: GoogleFonts.poppins(),
+                              ),
+                            ),
+                          );
+                          return;
+                        }
+
+                        if (isAnyEmpty) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(
+                                'Harap isi semua jenis sampah dan berat.',
+                                style: GoogleFonts.poppins(),
+                              ),
+                            ),
+                          );
+                          return;
+                        }
+
+                        final dataSetor =
+                            _jenisSampahList.map((item) {
+                              return {
+                                'jenis_sampah_id': item['jenis_sampah_id'],
+                                'berat': item['berat'],
+                              };
+                            }).toList();
+
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder:
+                                (context) => HasilSetorSampahPage(
+                                  dataSetoran: dataSetor,
+                                ),
+                          ),
+                        );
+                      },
+                      child: Text(
+                        'Lihat Hasil',
+                        style: GoogleFonts.poppins(
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                      ),
                     ),
                   ),
                 ],

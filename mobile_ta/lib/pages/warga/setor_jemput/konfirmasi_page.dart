@@ -8,6 +8,7 @@ import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:mobile_ta/pages/warga/setor_jemput/status_page.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class WargaKonfirmasiSetorJemputPage extends StatefulWidget {
   final List<Map<String, dynamic>> dataSetoran;
@@ -424,309 +425,427 @@ class _WargaKonfirmasiSetorJemputPageState
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Colors.greenAccent.shade400,
+        backgroundColor: const Color(0xFF128d54),
         elevation: 0,
         centerTitle: true,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.white),
           onPressed: () => Navigator.pop(context),
         ),
-        title: const Text(
-          'Setor Jemput',
-          style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
+        title: Text(
+          'Konfirmasi Setor Jemput',
+          style: GoogleFonts.poppins(
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
+            fontSize: 22,
+          ),
         ),
       ),
       body:
           isLoading
               ? const Center(child: CircularProgressIndicator())
-              : LayoutBuilder(
-                builder: (context, constraints) {
-                  final isWide = constraints.maxWidth > 600;
-                  return SingleChildScrollView(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 20,
-                    ),
-                    child: Center(
-                      child: ConstrainedBox(
-                        constraints: const BoxConstraints(maxWidth: 600),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: [
-                            // Visualisasi Jenis Sampah
-                            _buildCard(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
+              : SingleChildScrollView(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 20,
+                ),
+                child: Center(
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 600),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        // Komposisi Sampah
+                        Container(
+                          margin: const EdgeInsets.only(bottom: 20),
+                          padding: const EdgeInsets.all(16),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(16),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.green.withOpacity(0.08),
+                                blurRadius: 8,
+                                offset: Offset(0, 2),
+                              ),
+                            ],
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                "Komposisi Sampah",
+                                style: GoogleFonts.poppins(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                  color: Color(0xFF128d54),
+                                ),
+                              ),
+                              const SizedBox(height: 12),
+                              Stack(
                                 children: [
-                                  const Text(
-                                    "Komposisi Sampah",
-                                    style: TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.bold,
+                                  Container(
+                                    height: 24,
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(12),
+                                      color: Colors.grey[300],
                                     ),
                                   ),
-                                  const SizedBox(height: 12),
-                                  Stack(
-                                    children: [
-                                      Container(
-                                        height: 24,
-                                        decoration: BoxDecoration(
-                                          borderRadius: BorderRadius.circular(
-                                            12,
-                                          ),
-                                          color: Colors.grey[300],
-                                        ),
-                                      ),
-                                      Row(
-                                        children:
-                                            processedSetoran.map((item) {
-                                              final proportion =
-                                                  item['berat'] / totalBerat;
-                                              return Expanded(
-                                                flex:
-                                                    (proportion * 1000).round(),
-                                                child: Container(
-                                                  height: 24,
-                                                  decoration: BoxDecoration(
-                                                    color: Color(
-                                                      int.parse(
-                                                        item['warna']
-                                                            .toString()
-                                                            .replaceAll(
-                                                              '#',
-                                                              '0xff',
-                                                            ),
-                                                      ),
-                                                    ),
+                                  Row(
+                                    children:
+                                        processedSetoran.map((item) {
+                                          final proportion =
+                                              item['berat'] / totalBerat;
+                                          return Expanded(
+                                            flex: (proportion * 1000).round(),
+                                            child: Container(
+                                              height: 24,
+                                              decoration: BoxDecoration(
+                                                color: Color(
+                                                  int.parse(
+                                                    item['warna']
+                                                        .toString()
+                                                        .replaceAll(
+                                                          '#',
+                                                          '0xff',
+                                                        ),
                                                   ),
                                                 ),
-                                              );
-                                            }).toList(),
-                                      ),
-                                      Positioned.fill(
-                                        child: Center(
-                                          child: Text(
-                                            '${totalBerat.toStringAsFixed(1)} kg',
-                                            style: const TextStyle(
-                                              fontWeight: FontWeight.bold,
-                                              color: Colors.white,
-                                            ),
-                                          ),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                  const SizedBox(height: 12),
-                                  ...processedSetoran.map(
-                                    (item) => Padding(
-                                      padding: const EdgeInsets.only(bottom: 8),
-                                      child: Row(
-                                        children: [
-                                          Icon(
-                                            Icons.square,
-                                            color: Color(
-                                              int.parse(
-                                                item['warna']
-                                                    .toString()
-                                                    .replaceAll('#', '0xff'),
                                               ),
                                             ),
-                                          ),
-                                          const SizedBox(width: 8),
-                                          Expanded(child: Text(item['nama'])),
-                                          Text('${item['berat']} kg'),
-                                          const SizedBox(width: 16),
-                                          Text('Rp${item['subtotal']}'),
-                                        ],
-                                      ),
-                                    ),
+                                          );
+                                        }).toList(),
                                   ),
-                                ],
-                              ),
-                            ),
-                            _buildCard(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  const Text(
-                                    "Estimasi Insentif",
-                                    style: TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 12),
-                                  Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      const Text("Total Sampah"),
-                                      Text('Rp$totalHarga'),
-                                    ],
-                                  ),
-                                  const Divider(),
-                                  Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      const Text("Jarak"),
-                                      Text(
-                                        _formatDistance(
-                                          _calculateDistanceInKm(
-                                            latitudeWarga ?? 0,
-                                            longitudeWarga ?? 0,
-                                            latitudeBankSampah ?? 0,
-                                            longitudeBankSampah ?? 0,
-                                          ).toDouble(),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                  const Divider(),
-                                  Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      const Text("Biaya Layanan (Ongkir)"),
-                                      Text('Rp $biayaLayanan'),
-                                    ],
-                                  ),
-                                  const Divider(),
-                                  Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      const Text(
-                                        "Total Insentif",
-                                        style: TextStyle(
+                                  Positioned.fill(
+                                    child: Center(
+                                      child: Text(
+                                        '${totalBerat.toStringAsFixed(1)} kg',
+                                        style: GoogleFonts.poppins(
                                           fontWeight: FontWeight.bold,
+                                          color: Colors.white,
                                         ),
                                       ),
-                                      Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.end,
-                                        children: [
-                                          Text(
-                                            'Rp${totalHarga - biayaLayanan}',
-                                            style: TextStyle(
-                                              fontWeight: FontWeight.bold,
-                                              color:
-                                                  isTotalValid
-                                                      ? Colors.black
-                                                      : Colors.red,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 12),
+                              ...processedSetoran.map(
+                                (item) => Padding(
+                                  padding: const EdgeInsets.only(bottom: 8),
+                                  child: Row(
+                                    children: [
+                                      Icon(
+                                        Icons.square,
+                                        color: Color(
+                                          int.parse(
+                                            item['warna'].toString().replaceAll(
+                                              '#',
+                                              '0xff',
                                             ),
                                           ),
-                                          if (!isTotalValid)
-                                            Text(
-                                              totalError!,
-                                              style: TextStyle(
-                                                color: Colors.red,
-                                                fontSize: 12,
-                                              ),
-                                            ),
-                                        ],
+                                        ),
+                                      ),
+                                      const SizedBox(width: 8),
+                                      Expanded(
+                                        child: Text(
+                                          item['nama'],
+                                          style: GoogleFonts.poppins(),
+                                        ),
+                                      ),
+                                      Text(
+                                        '${item['berat']} kg',
+                                        style: GoogleFonts.poppins(),
+                                      ),
+                                      const SizedBox(width: 16),
+                                      Text(
+                                        'Rp${item['subtotal']}',
+                                        style: GoogleFonts.poppins(),
                                       ),
                                     ],
-                                  ),
-                                ],
-                              ),
-                            ),
-
-                            _buildCard(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  const Text(
-                                    "Detail Penyetoran",
-                                    style: TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 16,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 8),
-                                  Text("Tanggal: ${widget.tanggal}"),
-                                  Text("Catatan: ${widget.catatan ?? "-"}"),
-                                ],
-                              ),
-                            ),
-
-                            _buildCard(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  const Text(
-                                    "Informasi Bank Sampah",
-                                    style: TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 16,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 8),
-                                  Text(
-                                    "Nama: $namaBank",
-                                    style: const TextStyle(
-                                      fontWeight: FontWeight.w600,
-                                    ),
-                                  ),
-                                  Text("Deskripsi: $deskripsiBank"),
-                                  Text("Alamat: $alamatBank"),
-                                  const SizedBox(height: 12),
-                                ],
-                              ),
-                            ),
-                            const SizedBox(height: 20),
-                            _buildMapImage(),
-                            const SizedBox(height: 20),
-                            _buildCard(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  const Text(
-                                    "Kontak Admin",
-                                    style: TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 16,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 8),
-                                  Text("Nama: $namaAdmin"),
-                                  Text("Email: $emailAdmin"),
-                                  Text("No HP: $noHpAdmin"),
-                                ],
-                              ),
-                            ),
-
-                            const SizedBox(height: 32),
-
-                            SizedBox(
-                              width: double.infinity,
-                              child: ElevatedButton(
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: Colors.greenAccent.shade400,
-                                  padding: const EdgeInsets.symmetric(
-                                    vertical: 14,
-                                  ),
-                                  textStyle: const TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 16,
                                   ),
                                 ),
-                                onPressed:
-                                    (isLoading || !isTotalValid)
-                                        ? null
-                                        : storePengajuanSetorJemput,
-                                child:
-                                    isLoading
-                                        ? const CircularProgressIndicator()
-                                        : const Text('Konfirmasi Setoran'),
+                              ),
+                            ],
+                          ),
+                        ),
+                        // Estimasi Insentif
+                        Container(
+                          margin: const EdgeInsets.only(bottom: 20),
+                          padding: const EdgeInsets.all(16),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(16),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.green.withOpacity(0.08),
+                                blurRadius: 8,
+                                offset: Offset(0, 2),
+                              ),
+                            ],
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                "Estimasi Insentif",
+                                style: GoogleFonts.poppins(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                  color: Color(0xFF128d54),
+                                ),
+                              ),
+                              const SizedBox(height: 12),
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text(
+                                    "Total Sampah",
+                                    style: GoogleFonts.poppins(),
+                                  ),
+                                  Text(
+                                    'Rp$totalHarga',
+                                    style: GoogleFonts.poppins(),
+                                  ),
+                                ],
+                              ),
+                              const Divider(),
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text("Jarak", style: GoogleFonts.poppins()),
+                                  Text(
+                                    _formatDistance(
+                                      _calculateDistanceInKm(
+                                        latitudeWarga ?? 0,
+                                        longitudeWarga ?? 0,
+                                        latitudeBankSampah ?? 0,
+                                        longitudeBankSampah ?? 0,
+                                      ).toDouble(),
+                                    ),
+                                    style: GoogleFonts.poppins(),
+                                  ),
+                                ],
+                              ),
+                              const Divider(),
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text(
+                                    "Biaya Layanan (Ongkir)",
+                                    style: GoogleFonts.poppins(),
+                                  ),
+                                  Text(
+                                    'Rp $biayaLayanan',
+                                    style: GoogleFonts.poppins(),
+                                  ),
+                                ],
+                              ),
+                              const Divider(),
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text(
+                                    "Total Insentif",
+                                    style: GoogleFonts.poppins(
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                  Column(
+                                    crossAxisAlignment: CrossAxisAlignment.end,
+                                    children: [
+                                      Text(
+                                        'Rp${totalHarga - biayaLayanan}',
+                                        style: GoogleFonts.poppins(
+                                          fontWeight: FontWeight.bold,
+                                          color:
+                                              isTotalValid
+                                                  ? Colors.black
+                                                  : Colors.red,
+                                        ),
+                                      ),
+                                      if (!isTotalValid)
+                                        Text(
+                                          totalError!,
+                                          style: GoogleFonts.poppins(
+                                            color: Colors.red,
+                                            fontSize: 12,
+                                          ),
+                                        ),
+                                    ],
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
+                        // Detail Penyetoran
+                        Container(
+                          margin: const EdgeInsets.only(bottom: 20),
+                          padding: const EdgeInsets.all(16),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(16),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.green.withOpacity(0.08),
+                                blurRadius: 8,
+                                offset: Offset(0, 2),
+                              ),
+                            ],
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                "Detail Penyetoran",
+                                style: GoogleFonts.poppins(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 16,
+                                  color: Color(0xFF128d54),
+                                ),
+                              ),
+                              const SizedBox(height: 8),
+                              Text(
+                                "Tanggal: ${widget.tanggal}",
+                                style: GoogleFonts.poppins(),
+                              ),
+                              Text(
+                                "Catatan: ${widget.catatan ?? "-"}",
+                                style: GoogleFonts.poppins(),
+                              ),
+                            ],
+                          ),
+                        ),
+                        // Informasi Bank Sampah
+                        Container(
+                          margin: const EdgeInsets.only(bottom: 20),
+                          padding: const EdgeInsets.all(16),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(16),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.green.withOpacity(0.08),
+                                blurRadius: 8,
+                                offset: Offset(0, 2),
+                              ),
+                            ],
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                "Informasi Bank Sampah",
+                                style: GoogleFonts.poppins(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 16,
+                                  color: Color(0xFF128d54),
+                                ),
+                              ),
+                              const SizedBox(height: 8),
+                              Text(
+                                "Nama: $namaBank",
+                                style: GoogleFonts.poppins(
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                              Text(
+                                "Deskripsi: $deskripsiBank",
+                                style: GoogleFonts.poppins(),
+                              ),
+                              Text(
+                                "Alamat: $alamatBank",
+                                style: GoogleFonts.poppins(),
+                              ),
+                              const SizedBox(height: 12),
+                            ],
+                          ),
+                        ),
+                        // Map
+                        _buildMapImage(),
+                        const SizedBox(height: 20),
+                        // Kontak Admin
+                        Container(
+                          margin: const EdgeInsets.only(bottom: 20),
+                          padding: const EdgeInsets.all(16),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(16),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.green.withOpacity(0.08),
+                                blurRadius: 8,
+                                offset: Offset(0, 2),
+                              ),
+                            ],
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                "Kontak Admin",
+                                style: GoogleFonts.poppins(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 16,
+                                  color: Color(0xFF128d54),
+                                ),
+                              ),
+                              const SizedBox(height: 8),
+                              Text(
+                                "Nama: $namaAdmin",
+                                style: GoogleFonts.poppins(),
+                              ),
+                              Text(
+                                "Email: $emailAdmin",
+                                style: GoogleFonts.poppins(),
+                              ),
+                              Text(
+                                "No HP: $noHpAdmin",
+                                style: GoogleFonts.poppins(),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: 32),
+                        SizedBox(
+                          width: double.infinity,
+                          child: ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Color(0xFF128d54),
+                              padding: const EdgeInsets.symmetric(vertical: 14),
+                              textStyle: GoogleFonts.poppins(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 16,
+                              ),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(14),
                               ),
                             ),
-                          ],
+                            onPressed:
+                                (isLoading || !isTotalValid)
+                                    ? null
+                                    : storePengajuanSetorJemput,
+                            child:
+                                isLoading
+                                    ? const CircularProgressIndicator()
+                                    : Text(
+                                      'Konfirmasi Setoran',
+                                      style: GoogleFonts.poppins(
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.white,
+                                      ),
+                                    ),
+                          ),
                         ),
-                      ),
+                      ],
                     ),
-                  );
-                },
+                  ),
+                ),
               ),
     );
   }

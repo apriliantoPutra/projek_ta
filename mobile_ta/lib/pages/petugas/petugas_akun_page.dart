@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:ffi';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
@@ -84,7 +85,7 @@ class PetugasAkunPage extends StatelessWidget {
                   //username
                   Text(
                     akunData?['username'] ?? 'Memuat...',
-                    style: TextStyle(
+                    style: GoogleFonts.poppins(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
                       color: Colors.black,
@@ -94,7 +95,11 @@ class PetugasAkunPage extends StatelessWidget {
                   //email
                   Text(
                     akunData?['email'] ?? 'Memuat...',
-                    style: TextStyle(fontSize: 14, color: Colors.black),
+                    style: GoogleFonts.poppins(
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black,
+                    ),
                   ),
 
                   SizedBox(height: 16),

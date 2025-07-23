@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:mobile_ta/pages/warga/setor_jemput/index_page.dart';
 import 'setor_langsung/index_page.dart';
 
@@ -15,9 +16,9 @@ class WargaSetorPage extends StatelessWidget {
         centerTitle: true,
         title: Text(
           'Setor Sampah',
-          style: TextStyle(
-            fontWeight: FontWeight.w500,
-            color: Colors.black,
+          style: GoogleFonts.poppins(
+            fontWeight: FontWeight.bold,
+            color: Color(0xFF128d54),
             fontSize: 24,
           ),
         ),
@@ -30,11 +31,16 @@ class WargaSetorPage extends StatelessWidget {
             SizedBox(height: 24),
             Text(
               'Pilih Layanan Penyetoran Sampah',
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+              style: GoogleFonts.poppins(
+                fontWeight: FontWeight.bold,
+                fontSize: 16,
+                color: Color(0xFF128d54),
+              ),
               textAlign: TextAlign.center,
             ),
             SizedBox(height: 24),
 
+            // Kartu Setor Langsung
             InkWell(
               onTap: () {
                 Navigator.push(
@@ -42,19 +48,23 @@ class WargaSetorPage extends StatelessWidget {
                   MaterialPageRoute(builder: (context) => WargaSetorLangsung()),
                 );
               },
-              borderRadius: BorderRadius.circular(16),
+              borderRadius: BorderRadius.circular(20),
               child: Container(
-                padding: EdgeInsets.all(16),
-                margin: EdgeInsets.only(bottom: 16),
+                padding: EdgeInsets.all(18),
+                margin: EdgeInsets.only(bottom: 18),
                 decoration: BoxDecoration(
-                  color: Color(0xff8fd14f),
-                  borderRadius: BorderRadius.circular(16),
+                  gradient: LinearGradient(
+                    colors: [Color(0xFF6BBE44), Color(0xFF128d54)],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                  borderRadius: BorderRadius.circular(20),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.2),
-                      offset: Offset(0, 1),
-                      spreadRadius: 2,
-                      blurRadius: 3,
+                      color: Colors.green.withOpacity(0.12),
+                      offset: Offset(0, 4),
+                      blurRadius: 12,
+                      spreadRadius: 1,
                     ),
                   ],
                 ),
@@ -62,7 +72,7 @@ class WargaSetorPage extends StatelessWidget {
                   children: [
                     Text(
                       'Setor Langsung',
-                      style: TextStyle(
+                      style: GoogleFonts.poppins(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
                         color: Colors.white,
@@ -71,7 +81,10 @@ class WargaSetorPage extends StatelessWidget {
                     SizedBox(height: 8),
                     Text(
                       'Setor Langsung adalah layanan penyetoran dan penukaran sampah menjadi uang yang dilakukan secara langsung di lokasi Bank Sampah.',
-                      style: TextStyle(color: Colors.white),
+                      style: GoogleFonts.poppins(
+                        color: Colors.white,
+                        fontSize: 14,
+                      ),
                       textAlign: TextAlign.center,
                     ),
                   ],
@@ -79,7 +92,7 @@ class WargaSetorPage extends StatelessWidget {
               ),
             ),
 
-            // Kartu Setor Jemput sebagai tombol
+            // Kartu Setor Jemput
             InkWell(
               onTap: () {
                 Navigator.push(
@@ -90,18 +103,22 @@ class WargaSetorPage extends StatelessWidget {
                   ),
                 );
               },
-              borderRadius: BorderRadius.circular(16),
+              borderRadius: BorderRadius.circular(20),
               child: Container(
-                padding: EdgeInsets.all(16),
+                padding: EdgeInsets.all(18),
                 decoration: BoxDecoration(
-                  color: Color(0xff8fd14f),
-                  borderRadius: BorderRadius.circular(16),
+                  gradient: LinearGradient(
+                    colors: [Color(0xFF6BBE44), Color(0xFF128d54)],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                  borderRadius: BorderRadius.circular(20),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.2),
-                      offset: Offset(0, 1),
-                      spreadRadius: 2,
-                      blurRadius: 3,
+                      color: Colors.green.withOpacity(0.12),
+                      offset: Offset(0, 4),
+                      blurRadius: 12,
+                      spreadRadius: 1,
                     ),
                   ],
                 ),
@@ -109,7 +126,7 @@ class WargaSetorPage extends StatelessWidget {
                   children: [
                     Text(
                       'Setor Jemput',
-                      style: TextStyle(
+                      style: GoogleFonts.poppins(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
                         color: Colors.white,
@@ -118,7 +135,10 @@ class WargaSetorPage extends StatelessWidget {
                     SizedBox(height: 8),
                     Text(
                       'Setor Jemput adalah layanan penjemputan sampah ke rumah pengguna oleh petugas Bank Sampah, dengan tambahan biaya sebesar Rp1.000 per kilometer.',
-                      style: TextStyle(color: Colors.white),
+                      style: GoogleFonts.poppins(
+                        color: Colors.white,
+                        fontSize: 14,
+                      ),
                       textAlign: TextAlign.center,
                     ),
                   ],
@@ -127,10 +147,18 @@ class WargaSetorPage extends StatelessWidget {
             ),
 
             SizedBox(height: 24),
-            Text(
-              'Pelayanan Setor Langsung dan Setor Jemput akan dilayani pada jam kerja Senin sampai Jumat, yaitu pukul 09.00 – 17.00.',
-              style: TextStyle(fontSize: 14, color: Colors.black87),
-              textAlign: TextAlign.center,
+            Container(
+              padding: EdgeInsets.all(14),
+              decoration: BoxDecoration(
+                color: Color(0xFFF1F8E9),
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: Color(0xFF128d54)),
+              ),
+              child: Text(
+                'Pelayanan Setor Langsung dan Setor Jemput akan dilayani pada jam kerja Senin sampai Jumat, yaitu pukul 09.00 – 17.00.',
+                style: GoogleFonts.poppins(fontSize: 14, color: Colors.black87),
+                textAlign: TextAlign.center,
+              ),
             ),
             SizedBox(height: 24),
           ],

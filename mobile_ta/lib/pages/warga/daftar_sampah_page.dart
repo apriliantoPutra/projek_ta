@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class WargaDaftarSampahPage extends StatefulWidget {
   const WargaDaftarSampahPage({super.key});
@@ -59,69 +60,103 @@ class _WargaDaftarSampahPageState extends State<WargaDaftarSampahPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Colors.greenAccent.shade400,
+        backgroundColor: const Color(0xFF128d54),
         elevation: 0,
         centerTitle: true,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.white),
           onPressed: () => Navigator.pop(context),
         ),
-        title: const Text(
+        title: Text(
           'Daftar Sampah',
-          style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
+          style: GoogleFonts.poppins(
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
+            fontSize: 22,
+          ),
         ),
       ),
       body:
           isLoading
               ? const Center(
-                child: CircularProgressIndicator(color: Colors.green),
+                child: CircularProgressIndicator(color: Color(0xFF128d54)),
               )
               : SingleChildScrollView(
                 padding: const EdgeInsets.all(16),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
+                    Text(
                       "Berikut adalah daftar jenis sampah yang diterima oleh sistem, beserta harga jual per kilogramnya:",
-                      style: TextStyle(fontSize: 16, color: Colors.black87),
+                      textAlign: TextAlign.center,
+                      style: GoogleFonts.poppins(
+                        fontSize: 14,
+                        color: Colors.black87,
+                      ),
                     ),
-                    const SizedBox(height: 20),
+                    const SizedBox(height: 16),
                     if (sampahList.isEmpty)
-                      const Center(child: Text("Tidak ada data tersedia."))
+                      Center(
+                        child: Text(
+                          "Tidak ada data tersedia.",
+                          style: GoogleFonts.poppins(fontSize: 15),
+                        ),
+                      )
                     else
-                      Column(
-                        children:
-                            sampahList.map((sampah) {
-                              final nama =
-                                  sampah['nama_sampah'] ?? 'Tidak diketahui';
-                              final harga =
-                                  sampah['harga_per_satuan']?.toString() ?? '-';
+                      ListView.builder(
+                        shrinkWrap: true,
+                        physics: NeverScrollableScrollPhysics(),
+                        itemCount: sampahList.length,
+                        itemBuilder: (context, idx) {
+                          final sampah = sampahList[idx];
+                          final nama =
+                              sampah['nama_sampah'] ?? 'Tidak diketahui';
+                          final harga =
+                              sampah['harga_per_satuan']?.toString() ?? '-';
 
-                              return Card(
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(12),
+                          return Container(
+                            margin: const EdgeInsets.symmetric(vertical: 4),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(16),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.green.withOpacity(0.10),
+                                  blurRadius: 10,
+                                  offset: Offset(0, 2),
                                 ),
-                                elevation: 3,
-                                margin: const EdgeInsets.symmetric(vertical: 8),
-                                child: ListTile(
-                                  contentPadding: const EdgeInsets.symmetric(
-                                    horizontal: 16,
-                                    vertical: 12,
-                                  ),
-                                  title: Text(
-                                    nama,
-                                    style: const TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                  subtitle: Text("Harga: Rp$harga /kg"),
-                                  leading: const Icon(
-                                    Icons.recycling,
-                                    color: Colors.green,
-                                  ),
+                              ],
+                            ),
+                            child: ListTile(
+                              contentPadding: const EdgeInsets.symmetric(
+                                horizontal: 16,
+                                vertical: 12,
+                              ),
+                              leading: CircleAvatar(
+                                backgroundColor: Colors.green.shade100,
+                                child: const Icon(
+                                  Icons.recycling,
+                                  color: Color(0xFF128d54),
                                 ),
-                              );
-                            }).toList(),
+                              ),
+                              title: Text(
+                                nama,
+                                style: GoogleFonts.poppins(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 16,
+                                  color: Color(0xFF128d54),
+                                ),
+                              ),
+                              subtitle: Text(
+                                "Harga: Rp$harga /kg",
+                                style: GoogleFonts.poppins(
+                                  fontSize: 14,
+                                  color: Colors.black87,
+                                ),
+                              ),
+                            ),
+                          );
+                        },
                       ),
                   ],
                 ),

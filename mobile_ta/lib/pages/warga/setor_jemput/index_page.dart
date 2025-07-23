@@ -5,6 +5,7 @@ import 'package:mobile_ta/pages/warga/setor_jemput/konfirmasi_page.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class WargaSetorJemput extends StatefulWidget {
   final Map<String, dynamic>? profilData;
@@ -58,44 +59,59 @@ class _WargaSetorJemputState extends State<WargaSetorJemput> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Color(0xff8fd14f),
+        backgroundColor: const Color(0xFF128d54),
         elevation: 0,
         centerTitle: true,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: Colors.white),
+          icon: const Icon(Icons.arrow_back, color: Colors.white),
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
           'Setor Jemput',
-          style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
+          style: GoogleFonts.poppins(
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
+            fontSize: 22,
+          ),
         ),
       ),
       body: Padding(
-        padding: EdgeInsets.all(16),
+        padding: const EdgeInsets.all(16),
         child: SingleChildScrollView(
           child: Column(
             children: [
               Container(
-                padding: EdgeInsets.all(16),
-                margin: EdgeInsets.only(bottom: 16),
+                padding: const EdgeInsets.all(18),
+                margin: const EdgeInsets.only(bottom: 16),
                 decoration: BoxDecoration(
-                  color: Color(0xff8fd14f),
-                  borderRadius: BorderRadius.circular(16),
+                  gradient: LinearGradient(
+                    colors: [Color(0xFF6BBE44), Color(0xFF128d54)],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                  borderRadius: BorderRadius.circular(18),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.green.withOpacity(0.10),
+                      blurRadius: 10,
+                      offset: Offset(0, 2),
+                    ),
+                  ],
                 ),
                 child: Column(
                   children: [
                     Text(
                       'Setor Jemput',
-                      style: TextStyle(
+                      style: GoogleFonts.poppins(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
                         color: Colors.white,
                       ),
                     ),
-                    SizedBox(height: 8),
+                    const SizedBox(height: 8),
                     Text(
                       'Setor Jemput adalah layanan penjemputan sampah ke rumah pengguna oleh petugas Bank Sampah, dengan tambahan biaya sebesar Rp1.000 per kilometer.',
-                      style: TextStyle(color: Colors.white),
+                      style: GoogleFonts.poppins(color: Colors.white),
                       textAlign: TextAlign.center,
                     ),
                   ],
@@ -105,7 +121,7 @@ class _WargaSetorJemputState extends State<WargaSetorJemput> {
                 alignment: Alignment.centerLeft,
                 child: Text(
                   "Mohon isi perkiraan berat sampah anda, petugas akan mengukur lagi saat penjemputan",
-                  style: TextStyle(
+                  style: GoogleFonts.poppins(
                     color: Colors.black,
                     fontSize: 14,
                     fontWeight: FontWeight.normal,
@@ -113,33 +129,37 @@ class _WargaSetorJemputState extends State<WargaSetorJemput> {
                   ),
                 ),
               ),
-              SizedBox(height: 8),
+              const SizedBox(height: 8),
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: Color(0xff8fd14f).withOpacity(0.5),
-                  borderRadius: BorderRadius.circular(12),
+                  color: Color(0xFF8fd14f).withOpacity(0.15),
+                  borderRadius: BorderRadius.circular(14),
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Row(
-                      children: const [
+                      children: [
                         Expanded(
                           flex: 2,
                           child: Text(
                             'Jenis Sampah',
-                            style: TextStyle(fontWeight: FontWeight.bold),
+                            style: GoogleFonts.poppins(
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                         ),
-                        SizedBox(width: 8),
+                        const SizedBox(width: 8),
                         Expanded(
                           child: Text(
                             'Berat (kg)',
-                            style: TextStyle(fontWeight: FontWeight.bold),
+                            style: GoogleFonts.poppins(
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                         ),
-                        SizedBox(width: 40),
+                        const SizedBox(width: 40),
                       ],
                     ),
                     const SizedBox(height: 8),
@@ -158,12 +178,18 @@ class _WargaSetorJemputState extends State<WargaSetorJemput> {
                                   flex: 2,
                                   child: DropdownButtonFormField<int>(
                                     value: item['jenis_sampah_id'],
-                                    hint: Text('Pilih jenis'),
+                                    hint: Text(
+                                      'Pilih jenis',
+                                      style: GoogleFonts.poppins(),
+                                    ),
                                     items:
                                         _jenisSampahOptions.map((option) {
                                           return DropdownMenuItem<int>(
                                             value: option['id'],
-                                            child: Text(option['nama_sampah']),
+                                            child: Text(
+                                              option['nama_sampah'],
+                                              style: GoogleFonts.poppins(),
+                                            ),
                                           );
                                         }).toList(),
                                     onChanged: (value) {
@@ -172,6 +198,16 @@ class _WargaSetorJemputState extends State<WargaSetorJemput> {
                                             value;
                                       });
                                     },
+                                    decoration: InputDecoration(
+                                      contentPadding:
+                                          const EdgeInsets.symmetric(
+                                            horizontal: 10,
+                                            vertical: 10,
+                                          ),
+                                      border: OutlineInputBorder(
+                                        borderRadius: BorderRadius.circular(10),
+                                      ),
+                                    ),
                                   ),
                                 ),
                                 const SizedBox(width: 8),
@@ -184,7 +220,17 @@ class _WargaSetorJemputState extends State<WargaSetorJemput> {
                                         ),
                                     decoration: InputDecoration(
                                       hintText: 'Berat',
+                                      hintStyle: GoogleFonts.poppins(),
+                                      contentPadding:
+                                          const EdgeInsets.symmetric(
+                                            horizontal: 10,
+                                            vertical: 10,
+                                          ),
+                                      border: OutlineInputBorder(
+                                        borderRadius: BorderRadius.circular(10),
+                                      ),
                                     ),
+                                    style: GoogleFonts.poppins(),
                                     onChanged: (value) {
                                       final parsed = double.tryParse(value);
                                       String? error;
@@ -242,7 +288,7 @@ class _WargaSetorJemputState extends State<WargaSetorJemput> {
                                 ),
                                 child: Text(
                                   item['error'],
-                                  style: TextStyle(
+                                  style: GoogleFonts.poppins(
                                     color: Colors.red.shade700,
                                     fontSize: 13,
                                     fontWeight: FontWeight.w500,
@@ -263,11 +309,11 @@ class _WargaSetorJemputState extends State<WargaSetorJemput> {
                           });
                         });
                       },
-                      icon: Icon(Icons.add, color: Colors.green.shade900),
+                      icon: Icon(Icons.add, color: Color(0xFF128d54)),
                       label: Text(
                         'Tambah Jenis Sampah',
-                        style: TextStyle(
-                          color: Colors.green.shade900,
+                        style: GoogleFonts.poppins(
+                          color: Color(0xFF128d54),
                           fontWeight: FontWeight.bold,
                         ),
                       ),
@@ -275,25 +321,26 @@ class _WargaSetorJemputState extends State<WargaSetorJemput> {
                   ],
                 ),
               ),
-              SizedBox(height: 15),
-              // ... (rest of your existing code for date picker and notes)
-              Text(
-                "Tanggal Penyetoran",
-                style: TextStyle(fontWeight: FontWeight.bold),
+              const SizedBox(height: 15),
+              Align(
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  "Tanggal Penyetoran",
+                  style: GoogleFonts.poppins(fontWeight: FontWeight.bold),
+                ),
               ),
-
               const SizedBox(height: 8),
-
               // Input tanggal
               Container(
                 decoration: BoxDecoration(
-                  color: Colors.greenAccent.shade100,
+                  color: Color(0xFF8fd14f).withOpacity(0.15),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 padding: const EdgeInsets.symmetric(horizontal: 12),
                 child: TextFormField(
                   controller: _tanggalController,
                   readOnly: true,
+                  style: GoogleFonts.poppins(),
                   onTap: () async {
                     final pickedDate = await showDatePicker(
                       context: context,
@@ -313,23 +360,24 @@ class _WargaSetorJemputState extends State<WargaSetorJemput> {
                   decoration: InputDecoration(
                     border: InputBorder.none,
                     hintText: "Tanggal",
+                    hintStyle: GoogleFonts.poppins(),
                   ),
                 ),
               ),
-
               const SizedBox(height: 24),
-              Text(
-                "Catatan Petugas (Opsional)",
-                style: TextStyle(fontWeight: FontWeight.bold),
+              Align(
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  "Catatan Petugas (Opsional)",
+                  style: GoogleFonts.poppins(fontWeight: FontWeight.bold),
+                ),
               ),
-
               const SizedBox(height: 8),
-
               // Input catatan
               Container(
                 height: 120,
                 decoration: BoxDecoration(
-                  color: Colors.greenAccent.shade100,
+                  color: Color(0xFF8fd14f).withOpacity(0.15),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 padding: const EdgeInsets.symmetric(horizontal: 12),
@@ -337,9 +385,11 @@ class _WargaSetorJemputState extends State<WargaSetorJemput> {
                   controller: _catatanController,
                   maxLines: null,
                   keyboardType: TextInputType.multiline,
+                  style: GoogleFonts.poppins(),
                   decoration: InputDecoration(
                     border: InputBorder.none,
                     hintText: "Masukkan catatan untuk petugas...",
+                    hintStyle: GoogleFonts.poppins(),
                   ),
                 ),
               ),
@@ -357,15 +407,15 @@ class _WargaSetorJemputState extends State<WargaSetorJemput> {
                           ),
                         );
                       },
-                      icon: Icon(Icons.list_alt),
+                      icon: const Icon(Icons.list_alt),
                       label: Text(
                         'Daftar Sampah',
-                        style: TextStyle(fontWeight: FontWeight.bold),
+                        style: GoogleFonts.poppins(fontWeight: FontWeight.bold),
                       ),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.white,
-                        foregroundColor: Colors.greenAccent.shade400,
-                        side: BorderSide(color: Colors.greenAccent.shade400),
+                        foregroundColor: Color(0xFF128d54),
+                        side: BorderSide(color: Color(0xFF128d54)),
                         padding: const EdgeInsets.symmetric(vertical: 14),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
@@ -416,7 +466,7 @@ class _WargaSetorJemputState extends State<WargaSetorJemput> {
                         );
                       },
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.greenAccent.shade400,
+                        backgroundColor: Color(0xFF128d54),
                         padding: const EdgeInsets.symmetric(vertical: 14),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
@@ -424,7 +474,10 @@ class _WargaSetorJemputState extends State<WargaSetorJemput> {
                       ),
                       child: Text(
                         'Selanjutnya',
-                        style: TextStyle(fontWeight: FontWeight.bold),
+                        style: GoogleFonts.poppins(
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
                       ),
                     ),
                   ),
