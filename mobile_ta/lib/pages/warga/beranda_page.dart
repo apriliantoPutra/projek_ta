@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:mobile_ta/pages/warga/artikel/detail_page.dart';
 import 'package:mobile_ta/pages/warga/chatbot_page.dart';
 import 'package:mobile_ta/pages/warga/daftar_sampah_page.dart';
@@ -50,19 +51,17 @@ class WargaBerandaPage extends StatelessWidget {
                         : 'https://i.pinimg.com/736x/8a/e9/e9/8ae9e92fa4e69967aa61bf2bda967b7b.jpg',
                   ),
                 ),
-
                 SizedBox(width: 10),
                 Text(
                   akunData?['username'] ?? 'Memuat...',
-                  style: const TextStyle(
+                  style: GoogleFonts.poppins(
                     color: Colors.black,
                     fontSize: 16,
-                    fontWeight: FontWeight.w600,
+                    fontWeight: FontWeight.w700,
                   ),
                 ),
               ],
             ),
-
             Row(
               children: [
                 IconButton(
@@ -70,9 +69,7 @@ class WargaBerandaPage extends StatelessWidget {
                   onPressed: () {
                     Navigator.push(
                       context,
-                      MaterialPageRoute(
-                        builder: (_) => WargaNotifikasiPage(),
-                      ),
+                      MaterialPageRoute(builder: (_) => WargaNotifikasiPage()),
                     );
                   },
                 ),
@@ -85,21 +82,26 @@ class WargaBerandaPage extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // Header Total Sampah & Saldo
             Container(
               width: double.infinity,
-              padding: EdgeInsets.all(16),
+              padding: EdgeInsets.all(20),
               decoration: BoxDecoration(
-                color: Color(0xff8fd14f),
+                gradient: LinearGradient(
+                  colors: [Color(0xFF6BBE44), Color(0xFF128d54)],
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                ),
                 borderRadius: BorderRadius.only(
-                  bottomLeft: Radius.circular(20),
-                  bottomRight: Radius.circular(20),
+                  bottomLeft: Radius.circular(30),
+                  bottomRight: Radius.circular(30),
                 ),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.2),
+                    color: Colors.green.withOpacity(0.18),
+                    blurRadius: 18,
                     spreadRadius: 2,
-                    blurRadius: 8,
-                    offset: Offset(0, 4),
+                    offset: Offset(0, 8),
                   ),
                 ],
               ),
@@ -108,13 +110,17 @@ class WargaBerandaPage extends StatelessWidget {
                 children: [
                   Text(
                     "Total Sampah Terkumpul",
-                    style: TextStyle(fontSize: 16, color: Colors.white),
+                    style: GoogleFonts.poppins(
+                      fontSize: 20,
+                      color: Colors.white,
+                      fontWeight: FontWeight.w700,
+                    ),
                   ),
                   SizedBox(height: 4),
                   Text(
                     totalSampah != null ? '$totalSampah kg' : 'Memuat...',
-                    style: TextStyle(
-                      fontSize: 22,
+                    style: GoogleFonts.poppins(
+                      fontSize: 28,
                       fontWeight: FontWeight.bold,
                       color: Colors.white,
                     ),
@@ -122,14 +128,18 @@ class WargaBerandaPage extends StatelessWidget {
                   SizedBox(height: 12),
                   Text(
                     "Total Saldo",
-                    style: TextStyle(fontSize: 16, color: Colors.white),
+                    style: GoogleFonts.poppins(
+                      fontSize: 20,
+                      color: Colors.white,
+                      fontWeight: FontWeight.w700,
+                    ),
                   ),
                   Text(
                     saldoData != null
                         ? 'Rp ${saldoData!['total_saldo']}'
                         : 'Memuat...',
-                    style: TextStyle(
-                      fontSize: 22,
+                    style: GoogleFonts.poppins(
+                      fontSize: 28,
                       fontWeight: FontWeight.bold,
                       color: Colors.white,
                     ),
@@ -138,22 +148,38 @@ class WargaBerandaPage extends StatelessWidget {
               ),
             ),
 
+            // Fitur Lain
             Container(
-              margin: EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+              margin: EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+              padding: EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(20),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.green.withOpacity(0.10),
+                    blurRadius: 16,
+                    offset: Offset(0, 6),
+                  ),
+                ],
+              ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  Text(
-                    "Fitur Lain",
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black,
+                  Center(
+                    child: Text(
+                      "Fitur Lain",
+                      style: GoogleFonts.poppins(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xFF128d54),
+                      ),
                     ),
                   ),
                   SizedBox(height: 12),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       _menuItem(
                         Icons.calculate,
@@ -196,20 +222,27 @@ class WargaBerandaPage extends StatelessWidget {
                 ],
               ),
             ),
+
+            // Konten Edukasi (Video & Artikel)
             Container(
+              width: double.infinity,
               margin: EdgeInsets.only(top: 8),
-              padding: EdgeInsets.all(16),
+              padding: EdgeInsets.all(20),
               decoration: BoxDecoration(
-                color: Color(0xff8fd14f),
+                gradient: LinearGradient(
+                  colors: [Color(0xFF6BBE44), Color(0xFF128d54)],
+                  begin: Alignment.bottomCenter,
+                  end: Alignment.topCenter,
+                ),
                 borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(20),
-                  topRight: Radius.circular(20),
+                  topLeft: Radius.circular(32),
+                  topRight: Radius.circular(32),
                 ),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black12,
-                    blurRadius: 6,
-                    offset: Offset(0, -4),
+                    color: Colors.green.withOpacity(0.12),
+                    blurRadius: 12,
+                    offset: Offset(0, -8),
                   ),
                 ],
               ),
@@ -221,8 +254,8 @@ class WargaBerandaPage extends StatelessWidget {
                     children: [
                       Text(
                         "Edukasi Terbaru",
-                        style: TextStyle(
-                          fontSize: 18,
+                        style: GoogleFonts.poppins(
+                          fontSize: 24,
                           fontWeight: FontWeight.bold,
                           color: Colors.white,
                         ),
@@ -240,8 +273,8 @@ class WargaBerandaPage extends StatelessWidget {
                         },
                         child: Text(
                           "Lainnya",
-                          style: TextStyle(
-                            fontSize: 14,
+                          style: GoogleFonts.poppins(
+                            fontSize: 16,
                             fontWeight: FontWeight.w500,
                             color: Colors.white,
                           ),
@@ -277,8 +310,6 @@ class WargaBerandaPage extends StatelessWidget {
                     ),
                   ),
                   SizedBox(height: 12),
-
-                  // Artikel dibuat grid 2 kolom
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 0),
                     child: GridView.builder(
@@ -287,7 +318,7 @@ class WargaBerandaPage extends StatelessWidget {
                       itemCount: artikelList.length,
                       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                         crossAxisCount: 2,
-                        // crossAxisSpacing: 16,
+                        crossAxisSpacing: 16,
                         mainAxisSpacing: 16,
                         childAspectRatio: 0.85,
                       ),
@@ -331,12 +362,9 @@ class WargaBerandaPage extends StatelessWidget {
             },
             backgroundColor: Colors.green,
             tooltip: 'Buka Chatbot',
-            child: const Icon(
-              Icons.smart_toy,
-              color: Colors.white,
-            ), // Icon chatbot AI
+            child: const Icon(Icons.smart_toy, color: Colors.white),
           ),
-          const SizedBox(height: 16), // Jarak dari bawah
+          const SizedBox(height: 16),
         ],
       ),
     );
@@ -355,9 +383,9 @@ class WargaBerandaPage extends StatelessWidget {
               borderRadius: BorderRadius.circular(12),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.2), // Warna bayangan
-                  spreadRadius: 1, // Menyebar keluar
-                  blurRadius: 8, // Seberapa kabur/sharp
+                  color: Colors.black.withOpacity(0.2),
+                  spreadRadius: 1,
+                  blurRadius: 8,
                   offset: Offset(0, 2),
                 ),
               ],
@@ -365,7 +393,16 @@ class WargaBerandaPage extends StatelessWidget {
             child: Icon(icon, size: 30, color: Colors.black87),
           ),
           const SizedBox(height: 8),
-          Text(title, textAlign: TextAlign.center),
+          SizedBox(
+            width: 70,
+            child: Text(
+              title,
+              textAlign: TextAlign.center,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              style: GoogleFonts.poppins(fontSize: 13),
+            ),
+          ),
         ],
       ),
     );

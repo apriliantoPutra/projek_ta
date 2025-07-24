@@ -12,6 +12,7 @@ import 'package:mobile_ta/widget/histori/setor_card_langsung_batal.dart';
 import 'package:mobile_ta/widget/histori/setor_card_langsung_selesai.dart';
 import 'package:mobile_ta/widget/warga_main_widget.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class KumpulanHistoriSetorPage extends StatefulWidget {
   const KumpulanHistoriSetorPage({super.key});
@@ -135,7 +136,7 @@ class _KumpulanHistoriSetorPageState extends State<KumpulanHistoriSetorPage>
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Colors.greenAccent.shade400,
+        backgroundColor: const Color(0xFF128d54),
         elevation: 0,
         centerTitle: true,
         leading: IconButton(
@@ -149,64 +150,68 @@ class _KumpulanHistoriSetorPageState extends State<KumpulanHistoriSetorPage>
                 (Route<dynamic> route) => false,
               ),
         ),
-        title: const Text(
+        title: Text(
           'Daftar Setor Sampah',
-          style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
+          style: GoogleFonts.poppins(
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
+            fontSize: 22,
+          ),
         ),
       ),
       body: Column(
         children: [
-          SizedBox(height: 8),
+          const SizedBox(height: 8),
           Padding(
-            padding: EdgeInsets.symmetric(horizontal: 20),
+            padding: const EdgeInsets.symmetric(horizontal: 20),
             child: Container(
               decoration: BoxDecoration(
-                // color: Colors.white,
+                // Tidak perlu warna background, biar tab lebih clean
                 borderRadius: BorderRadius.circular(12),
               ),
               child: TabBar(
                 controller: _tabController,
                 indicator: BoxDecoration(
-                  color: Color(0xff8fd14f),
+                  color: Color(0xFF128d54),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 labelColor: Colors.white,
-                unselectedLabelColor: Colors.black,
-                labelStyle: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w500,
+                unselectedLabelColor: Color(0xFF128d54),
+                labelStyle: GoogleFonts.poppins(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
                 ),
-                unselectedLabelStyle: TextStyle(
-                  fontSize: 16,
+                unselectedLabelStyle: GoogleFonts.poppins(
+                  fontSize: 14,
                   fontWeight: FontWeight.w500,
                 ),
                 tabs: [
                   Tab(
                     child: Container(
-                      height: 30,
+                      height: 40,
                       alignment: Alignment.center,
-                      child: Text("Baru"),
+                      child: Text("Baru", textAlign: TextAlign.center),
                     ),
                   ),
                   Tab(
                     child: Container(
-                      height: 30,
+                      height: 40,
                       alignment: Alignment.center,
-                      child: Text("Proses"),
+                      child: Text("Proses", textAlign: TextAlign.center),
                     ),
                   ),
                   Tab(
                     child: Container(
-                      height: 30,
+                      height: 40,
                       alignment: Alignment.center,
-                      child: Text("Selesai"),
+                      child: Text("Selesai", textAlign: TextAlign.center),
                     ),
                   ),
                   Tab(
                     child: Container(
-                      height: 30,
+                      height: 40,
                       alignment: Alignment.center,
-                      child: Text("Batal"),
+                      child: Text("Batal", textAlign: TextAlign.center),
                     ),
                   ),
                 ],
@@ -394,24 +399,19 @@ class _KumpulanHistoriSetorPageState extends State<KumpulanHistoriSetorPage>
 
   Widget _buildSection(String title, List<Widget> cards) {
     return Container(
-      padding: EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+      padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                title,
-                style: TextStyle(
-                  color: Colors.black,
-                  fontSize: 20,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-            ],
+          Text(
+            title,
+            style: GoogleFonts.poppins(
+              color: Color(0xFF128d54),
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+            ),
           ),
-          SizedBox(height: 8),
+          const SizedBox(height: 8),
           Column(children: cards),
         ],
       ),
@@ -421,21 +421,31 @@ class _KumpulanHistoriSetorPageState extends State<KumpulanHistoriSetorPage>
   Widget _buildEmptyState(String message) {
     return Container(
       width: double.infinity,
-      margin: EdgeInsets.only(top: 12),
-      padding: EdgeInsets.all(20),
+      margin: const EdgeInsets.only(top: 12),
+      padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.grey.shade100,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey.shade300),
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(14),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.green.withOpacity(0.08),
+            blurRadius: 8,
+            offset: Offset(0, 2),
+          ),
+        ],
+        border: Border.all(color: Colors.grey.shade200),
       ),
       child: Row(
         children: [
-          Icon(Icons.inbox, size: 36, color: Colors.grey),
-          SizedBox(width: 12),
+          Icon(Icons.inbox, size: 36, color: Color(0xFF128d54)),
+          const SizedBox(width: 12),
           Expanded(
             child: Text(
               message,
-              style: TextStyle(fontSize: 16, color: Colors.grey.shade700),
+              style: GoogleFonts.poppins(
+                fontSize: 15,
+                color: Colors.grey.shade700,
+              ),
             ),
           ),
         ],

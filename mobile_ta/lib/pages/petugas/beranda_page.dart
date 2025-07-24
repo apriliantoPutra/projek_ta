@@ -15,6 +15,10 @@ class PetugasBerandaPage extends StatelessWidget {
   final List<dynamic> artikelList;
   final List<dynamic> videoList;
   final List<dynamic> setorTerbaruList;
+
+  final String? totalSampah;
+  final String? totalSampahBotol;
+
   const PetugasBerandaPage({
     Key? key,
     required this.artikelList,
@@ -22,6 +26,8 @@ class PetugasBerandaPage extends StatelessWidget {
     required this.setorTerbaruList,
     this.akunData,
     this.profilData,
+    this.totalSampah,
+    this.totalSampahBotol,
   }) : super(key: key);
   @override
   Widget build(BuildContext context) {
@@ -129,7 +135,9 @@ class PetugasBerandaPage extends StatelessWidget {
                             ),
                           ),
                           Text(
-                            "14,144,400+",
+                            totalSampahBotol != null
+                                ? '$totalSampahBotol kg'
+                                : 'Memuat...',
                             style: GoogleFonts.poppins(
                               fontSize: 30,
                               fontWeight: FontWeight.w700,
@@ -153,7 +161,7 @@ class PetugasBerandaPage extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'Berat Sampah',
+                            'Total Berat Sampah',
                             style: GoogleFonts.poppins(
                               color: Colors.white,
                               fontSize: 16,
@@ -162,7 +170,9 @@ class PetugasBerandaPage extends StatelessWidget {
                             ),
                           ),
                           Text(
-                            "400+ ton",
+                            totalSampah != null
+                                ? '$totalSampah kg'
+                                : 'Memuat...',
                             style: GoogleFonts.poppins(
                               fontSize: 30,
                               fontWeight: FontWeight.w700,
@@ -171,7 +181,7 @@ class PetugasBerandaPage extends StatelessWidget {
                             ),
                           ),
                           Text(
-                            "Sampah Lainnya",
+                            "Sampah Terkumpul",
                             style: GoogleFonts.poppins(
                               fontSize: 16,
                               color: Colors.white,
@@ -301,8 +311,7 @@ class PetugasBerandaPage extends StatelessWidget {
                       itemBuilder: (context, index) {
                         final video = videoList[index];
                         return VideoCard(
-                          imageUrl:
-                              video['thumbnail_url'] ?? '',
+                          imageUrl: video['thumbnail_url'] ?? '',
                           title: video['judul_video'] ?? '',
                           date: video['tanggal_format'] ?? '',
                           onTap: () {

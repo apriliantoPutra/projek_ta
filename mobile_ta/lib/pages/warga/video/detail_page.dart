@@ -5,6 +5,7 @@ import 'dart:convert';
 import 'package:intl/intl.dart';
 import 'package:media_kit/media_kit.dart';
 import 'package:media_kit_video/media_kit_video.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class WargaDetailVideoPage extends StatefulWidget {
   final int videoId;
@@ -84,16 +85,20 @@ class _WargaDetailVideoPageState extends State<WargaDetailVideoPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Color(0xFF8fd14f),
+        backgroundColor: Color(0xFF128d54),
         elevation: 0,
         centerTitle: true,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.white),
           onPressed: () => Navigator.pop(context),
         ),
-        title: const Text(
-          'Video Edukasi',
-          style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
+        title: Text(
+          'Edukasi Video',
+          style: GoogleFonts.poppins(
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
+            fontSize: 24,
+          ),
         ),
       ),
       body:
@@ -124,20 +129,16 @@ class _WargaDetailVideoPageState extends State<WargaDetailVideoPage> {
                               ),
                     ),
                     const SizedBox(height: 20),
-
-                    // Judul
                     Text(
                       _judul,
-                      style: const TextStyle(
+                      style: GoogleFonts.poppins(
                         fontSize: 20,
                         fontWeight: FontWeight.bold,
-                        color: Colors.black87,
+                        color: Color(0xFF128d54),
                       ),
                       textAlign: TextAlign.center,
                     ),
                     const SizedBox(height: 12),
-
-                    // Tanggal
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
@@ -149,16 +150,14 @@ class _WargaDetailVideoPageState extends State<WargaDetailVideoPage> {
                         const SizedBox(width: 6),
                         Text(
                           _tanggal,
-                          style: const TextStyle(color: Colors.grey),
+                          style: GoogleFonts.poppins(color: Colors.grey),
                         ),
                       ],
                     ),
                     const SizedBox(height: 20),
-
-                    // Deskripsi
                     Text(
                       _deskripsi,
-                      style: const TextStyle(fontSize: 16, height: 1.6),
+                      style: GoogleFonts.poppins(fontSize: 16, height: 1.6),
                       textAlign: TextAlign.justify,
                     ),
                   ],

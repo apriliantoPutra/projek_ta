@@ -167,6 +167,9 @@ class HistoriController extends Controller
                 'metode' => $item->metode,
                 'nomor_tarik_saldo' => $item->nomor_tarik_saldo,
                 'pesan' => $item->pesan ?? '',
+                'tanggal_format' => \Carbon\Carbon::parse($item->created_at)
+                    ->locale('id')
+                    ->isoFormat('dddd, DD/MM/YYYY'),
 
             ];
         });
@@ -196,6 +199,9 @@ class HistoriController extends Controller
             'metode' => $item->metode,
             'nomor_tarik_saldo' => $item->nomor_tarik_saldo,
             'pesan' => $item->pesan,
+            'tanggal_format' => \Carbon\Carbon::parse($item->created_at)
+                ->locale('id')
+                ->isoFormat('dddd, DD/MM/YYYY'),
 
         ];
 

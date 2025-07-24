@@ -7,6 +7,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:http/http.dart' as http;
 import 'package:mobile_ta/constants/constants.dart';
 import 'package:mobile_ta/pages/warga/detail_map/map_bank_sampah_map_warga_page.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class HistoriSetorSelesaiJemputPage extends StatefulWidget {
@@ -16,6 +17,7 @@ class HistoriSetorSelesaiJemputPage extends StatefulWidget {
     required this.id,
     required this.tanggal,
     super.key,
+    required catatan,
   });
 
   @override
@@ -57,7 +59,6 @@ class HistoriSetorSelesaiJemputPageState
       await fetchPengajuanDetailSetor();
       await fetchJenisSampah();
       await fetchBankSampah();
-      
 
       if (pengajuanDetailSetor != null && bankSampah != null) {
         final profil = pengajuanDetailSetor!['user']?['profil'];
@@ -299,223 +300,328 @@ class HistoriSetorSelesaiJemputPageState
   Widget build(BuildContext context) {
     if (isLoading || pengajuanDetailSetor == null || bankSampah == null) {
       return Scaffold(
-        appBar: AppBar(title: Text("Setor Jemput Sampah")),
-        body: Center(child: CircularProgressIndicator()),
+        appBar: AppBar(
+          backgroundColor: Colors.white,
+          elevation: 0,
+          centerTitle: true,
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back, color: Color(0xFF128d54)),
+            onPressed: () => Navigator.pop(context),
+          ),
+          title: Text(
+            "Histori Setor Jemput",
+            style: GoogleFonts.poppins(
+              fontWeight: FontWeight.bold,
+              color: Color(0xFF128d54),
+              fontSize: 22,
+            ),
+          ),
+        ),
+        body: const Center(child: CircularProgressIndicator()),
       );
     }
 
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Colors.greenAccent.shade400,
+        backgroundColor: Colors.white,
         elevation: 0,
         centerTitle: true,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          icon: const Icon(Icons.arrow_back, color: Color(0xFF128d54)),
           onPressed: () => Navigator.pop(context),
         ),
-        title: const Text(
+        title: Text(
           'Histori Setor Jemput',
-          style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
+          style: GoogleFonts.poppins(
+            fontWeight: FontWeight.bold,
+            color: Color(0xFF128d54),
+            fontSize: 22,
+          ),
         ),
       ),
-      body: ListView(
+      body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
-        children: [
-          const SizedBox(height: 16),
-          // Waste Visualization
-          Container(
-            padding: EdgeInsets.all(16),
-            margin: EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: Colors.greenAccent.shade100,
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Column(
-              children: [
-                Stack(
-                  children: [
-                    Container(
-                      height: 32,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(8),
-                        color: Colors.grey[300],
-                      ),
+        child: Column(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(18),
+              margin: const EdgeInsets.only(bottom: 18),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [Color(0xFF6BBE44), Color(0xFF128d54)],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+                borderRadius: BorderRadius.circular(20),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.green.withOpacity(0.12),
+                    offset: Offset(0, 4),
+                    blurRadius: 12,
+                    spreadRadius: 1,
+                  ),
+                ],
+              ),
+              child: Column(
+                children: [
+                  Text(
+                    'Detail Setor Jemput',
+                    style: GoogleFonts.poppins(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
                     ),
-                    Row(
-                      children:
-                          processedSetoran.map((item) {
-                            final proportion = item['berat'] / totalBerat;
-                            return Expanded(
-                              flex: (proportion * 1000).round(),
-                              child: Container(
-                                height: 32,
-                                decoration: BoxDecoration(
-                                  color: _parseHexColor(item['warna']),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    'Berikut detail penyetoran dan estimasi insentif.',
+                    style: GoogleFonts.poppins(
+                      color: Colors.white,
+                      fontSize: 14,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ],
+              ),
+            ),
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(16),
+              margin: const EdgeInsets.only(bottom: 18),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(20),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.green.withOpacity(0.10),
+                    blurRadius: 16,
+                    offset: Offset(0, 6),
+                  ),
+                ],
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Jenis dan Berat Sampah',
+                    style: GoogleFonts.poppins(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFF128d54),
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  Stack(
+                    children: [
+                      Container(
+                        height: 24,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(12),
+                          color: Colors.grey[300],
+                        ),
+                      ),
+                      Row(
+                        children:
+                            processedSetoran.map((item) {
+                              final double proportion =
+                                  item['berat'] / totalBerat;
+                              return Expanded(
+                                flex: (proportion * 1000).round(),
+                                child: Container(
+                                  height: 24,
+                                  decoration: BoxDecoration(
+                                    color: _parseHexColor(item['warna']),
+                                  ),
                                 ),
-                              ),
-                            );
-                          }).toList(),
-                    ),
-                    Center(
-                      child: Text(
-                        "${totalBerat.toStringAsFixed(1)}kg",
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
+                              );
+                            }).toList(),
+                      ),
+                      Positioned.fill(
+                        child: Center(
+                          child: Text(
+                            '${totalBerat.toStringAsFixed(1)} kg',
+                            style: GoogleFonts.poppins(
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                            ),
+                          ),
                         ),
                       ),
-                    ),
-                  ],
-                ),
-                SizedBox(height: 16),
-                ...processedSetoran.map(
-                  (item) => Padding(
-                    padding: EdgeInsets.only(bottom: 8),
-                    child: Row(
-                      children: [
-                        Icon(
-                          Icons.square,
-                          color: _parseHexColor(item['warna']),
-                        ),
-                        SizedBox(width: 8),
-                        Expanded(child: Text(item['nama'])),
-                        Text("${item['berat']}kg"),
-                        SizedBox(width: 16),
-                        Text("Rp${item['subtotal']}"),
-                      ],
-                    ),
+                    ],
                   ),
-                ),
-                SizedBox(height: 16),
-                const Text(
-                  'Estimasi Insentif',
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 10),
-
-          // Estimasi Insentif
-          Container(
-            padding: const EdgeInsets.all(16),
-            margin: EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: Colors.greenAccent.shade100,
-              borderRadius: BorderRadius.circular(16),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    const Text('Estimasi harga sampah anda'),
-                    Text('Rp $totalHarga'),
-                  ],
-                ),
-                const SizedBox(height: 4),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    const Text("Jarak"),
-                    Text(
-                      _formatDistance(
-                        _calculateDistanceInKm(
-                          latitudeWarga ?? 0,
-                          longitudeWarga ?? 0,
-                          latitudeBankSampah ?? 0,
-                          longitudeBankSampah ?? 0,
-                        ).toDouble(),
+                  const SizedBox(height: 12),
+                  ...processedSetoran.map((item) {
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: 8.0),
+                      child: Row(
+                        children: [
+                          Icon(
+                            Icons.square,
+                            color: _parseHexColor(item['warna']),
+                          ),
+                          const SizedBox(width: 6),
+                          Expanded(
+                            child: Text(
+                              item['nama'],
+                              style: GoogleFonts.poppins(),
+                            ),
+                          ),
+                          Text(
+                            '${item['berat']} kg',
+                            style: GoogleFonts.poppins(),
+                          ),
+                          const SizedBox(width: 16),
+                          Text(
+                            'Rp ${item['subtotal']}',
+                            style: GoogleFonts.poppins(),
+                          ),
+                        ],
                       ),
-                    ),
-                  ],
-                ),
-                const Divider(),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    const Text("Biaya Layanan (Ongkir)"),
-                    Text('Rp $biayaLayanan'),
-                  ],
-                ),
-                const Divider(),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    const Text(
-                      'Perkiraan Insentif',
-                      style: TextStyle(fontWeight: FontWeight.bold),
-                    ),
-                    Text(
-                      'Rp ${totalHarga - biayaLayanan}',
-                      style: const TextStyle(fontWeight: FontWeight.bold),
-                    ),
-                  ],
-                ),
-              ],
+                    );
+                  }).toList(),
+                ],
+              ),
             ),
-          ),
-          const SizedBox(height: 10),
-          _buildMapImage(),
-          const SizedBox(height: 10),
-          SizedBox(
-            width: double.infinity,
-            child: ElevatedButton.icon(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder:
-                        (context) => (WargaMapBankSampahMapWargaPage(
-                          latitudeWarga: latitudeWarga,
-                          longitudeWarga: longitudeWarga,
-                          latitudeBankSampah: latitudeBankSampah,
-                          longitudeBankSampah: longitudeBankSampah,
-                        )),
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(16),
+              margin: const EdgeInsets.only(bottom: 18),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(20),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.green.withOpacity(0.10),
+                    blurRadius: 16,
+                    offset: Offset(0, 6),
                   ),
-                );
-              },
-              icon: const Icon(Icons.map),
-              label: const Text("Detail Map"),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.green,
-                foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(vertical: 14),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
+                ],
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Estimasi Insentif',
+                    style: GoogleFonts.poppins(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFF128d54),
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text('Total harga sampah', style: GoogleFonts.poppins()),
+                      Text('Rp $totalHarga', style: GoogleFonts.poppins()),
+                    ],
+                  ),
+                  const SizedBox(height: 4),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text("Jarak", style: GoogleFonts.poppins()),
+                      Text(
+                        _formatDistance(
+                          _calculateDistanceInKm(
+                            latitudeWarga,
+                            longitudeWarga,
+                            latitudeBankSampah,
+                            longitudeBankSampah,
+                          ).toDouble(),
+                        ),
+                        style: GoogleFonts.poppins(),
+                      ),
+                    ],
+                  ),
+                  const Divider(),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        "Biaya Layanan (Ongkir)",
+                        style: GoogleFonts.poppins(),
+                      ),
+                      Text('Rp $biayaLayanan', style: GoogleFonts.poppins()),
+                    ],
+                  ),
+                  const Divider(),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'Perkiraan Insentif',
+                        style: GoogleFonts.poppins(fontWeight: FontWeight.bold),
+                      ),
+                      Text(
+                        'Rp ${totalHarga - biayaLayanan}',
+                        style: GoogleFonts.poppins(fontWeight: FontWeight.bold),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 10),
+            _buildMapImage(),
+            const SizedBox(height: 10),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton.icon(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder:
+                          (context) => WargaMapBankSampahMapWargaPage(
+                            latitudeWarga: latitudeWarga,
+                            longitudeWarga: longitudeWarga,
+                            latitudeBankSampah: latitudeBankSampah,
+                            longitudeBankSampah: longitudeBankSampah,
+                          ),
+                    ),
+                  );
+                },
+                icon: const Icon(Icons.map),
+                label: Text("Detail Map", style: GoogleFonts.poppins()),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Color(0xFF128d54),
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
                 ),
               ),
             ),
-          ),
-          const SizedBox(height: 10),
-          Padding(
-            padding: EdgeInsets.symmetric(horizontal: 16),
-            child: Row(
-              children: [
-                Text(
-                  "Telah diambil oleh",
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                    color: Colors.black,
+            const SizedBox(height: 10),
+            Padding(
+              padding: EdgeInsets.symmetric(horizontal: 16),
+              child: Row(
+                children: [
+                  Text(
+                    "Telah diambil oleh",
+                    style: GoogleFonts.poppins(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.black,
+                    ),
                   ),
-                ),
-                Spacer(),
-                Text(
-                  "Nama Petugas Jemput",
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.normal,
-                    color: Colors.black,
+                  Spacer(),
+                  Text(
+                    "Nama Petugas Jemput",
+                    style: GoogleFonts.poppins(
+                      fontSize: 14,
+                      fontWeight: FontWeight.normal,
+                      color: Colors.black,
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
-
-          const SizedBox(height: 10),
-        ],
+            const SizedBox(height: 10),
+          ],
+        ),
       ),
     );
   }

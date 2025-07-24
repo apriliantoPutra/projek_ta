@@ -17,7 +17,7 @@ class Akses
     public function handle(Request $request, Closure $next): Response
     {
         if (Auth::user()->role !== 'admin') {
-            return redirect('/')->with('loginError', 'Tidak Ada Akses!!');
+            return redirect()->route('Login')->with('loginError', 'Tidak Ada Akses!!');
         }
 
         return $next($request);

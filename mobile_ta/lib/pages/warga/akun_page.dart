@@ -9,6 +9,7 @@ import 'package:mobile_ta/pages/warga/tarik_saldo_page.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'edit_profil_page.dart';
 import '../auth/login_page.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class WargaAkunPage extends StatefulWidget {
   final Map<String, dynamic>? akunData;
@@ -98,19 +99,23 @@ class _WargaAkunPageState extends State<WargaAkunPage> {
 
     return Scaffold(
       appBar: AppBar(
+        automaticallyImplyLeading: false,
         backgroundColor: Colors.white,
         elevation: 0,
         centerTitle: true,
         title: Text(
-          'Akun Saya',
-          style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black),
+          "Akun Saya",
+          style: GoogleFonts.poppins(
+            fontWeight: FontWeight.bold,
+            color: Color(0xFF128d54),
+            fontSize: 24,
+          ),
         ),
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
-            // Profil
+            Padding(padding: EdgeInsets.all(16)),
             Center(
               child: Column(
                 children: [
@@ -125,69 +130,109 @@ class _WargaAkunPageState extends State<WargaAkunPage> {
                   SizedBox(height: 8),
                   Text(
                     akunData?['username'] ?? 'Memuat...',
-                    style: TextStyle(
+                    style: GoogleFonts.poppins(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
-                      color: Colors.green.shade900,
+                      color: Colors.black,
                     ),
                   ),
+
                   Text(
                     akunData?['email'] ?? 'Memuat...',
-                    style: TextStyle(fontSize: 14, color: Colors.grey.shade700),
+                    style: GoogleFonts.poppins(
+                      fontSize: 14,
+                      color: Colors.black,
+                    ),
                   ),
-                  SizedBox(height: 8),
-                  ElevatedButton(
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder:
-                              (context) =>
-                                  WargaEditProfilPage(profilData: profilData),
+                  SizedBox(height: 16),
+                  SizedBox(
+                    width: 160,
+                    height: 42,
+                    child: ElevatedButton(
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder:
+                                (context) =>
+                                    WargaEditProfilPage(profilData: profilData),
+                          ),
+                        );
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Color(0xFF128d54),
+                        foregroundColor: Colors.white,
+                        elevation: 4,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(20),
                         ),
-                      );
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.grey.shade300,
-                      foregroundColor: Colors.black,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
+                        textStyle: GoogleFonts.poppins(
+                          fontWeight: FontWeight.w600,
+                          fontSize: 16,
+                        ),
+                        shadowColor: Colors.green.withOpacity(0.15),
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(Icons.edit, size: 20, color: Colors.white),
+                          SizedBox(width: 8),
+                          Text(
+                            "Edit Akun",
+                            style: GoogleFonts.poppins(
+                              fontWeight: FontWeight.w600,
+                              fontSize: 16,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
-                    child: Text("Edit Profil"),
                   ),
                 ],
               ),
             ),
-            SizedBox(height: 24),
+            SizedBox(height: 16),
 
             // Saldo Card
             Container(
+              margin: EdgeInsets.symmetric(horizontal: 16),
               padding: EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: Colors.lightGreen,
+                gradient: LinearGradient(
+                  colors: [Color(0xff15a864), Color(0xFF128d54)],
+                  begin: Alignment.bottomCenter,
+                  end: Alignment.topCenter,
+                ),
                 borderRadius: BorderRadius.circular(16),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.green.withOpacity(0.20),
+                    blurRadius: 10,
+                    offset: Offset(0, 2),
+                  ),
+                ],
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: const [
+                    children: [
                       Text(
                         "Saldo Saya",
-                        style: TextStyle(
+                        style: GoogleFonts.poppins(
                           color: Colors.white,
                           fontWeight: FontWeight.bold,
-                          fontSize: 13,
+                          fontSize: 14,
                         ),
                       ),
                       Text(
                         "Permintaan Saldo",
-                        style: TextStyle(
+                        style: GoogleFonts.poppins(
                           color: Colors.white,
                           fontWeight: FontWeight.bold,
-                          fontSize: 13,
+                          fontSize: 14,
                         ),
                       ),
                     ],
@@ -200,7 +245,7 @@ class _WargaAkunPageState extends State<WargaAkunPage> {
                         saldoData != null
                             ? 'Rp ${saldoData['total_saldo']}'
                             : 'Memuat...',
-                        style: const TextStyle(
+                        style: GoogleFonts.poppins(
                           fontSize: 24,
                           fontWeight: FontWeight.bold,
                           color: Colors.white,
@@ -208,7 +253,7 @@ class _WargaAkunPageState extends State<WargaAkunPage> {
                       ),
                       Text(
                         'Rp $jumlahPermintaanTarikSaldo',
-                        style: const TextStyle(
+                        style: GoogleFonts.poppins(
                           fontSize: 24,
                           fontWeight: FontWeight.bold,
                           color: Colors.white,
@@ -220,7 +265,7 @@ class _WargaAkunPageState extends State<WargaAkunPage> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      ElevatedButton(
+                      ElevatedButton.icon(
                         onPressed: () {
                           Navigator.push(
                             context,
@@ -231,14 +276,22 @@ class _WargaAkunPageState extends State<WargaAkunPage> {
                         },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.white,
-                          foregroundColor: Colors.green.shade900,
+                          foregroundColor: Color(0xFF128d54),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12),
                           ),
+                          elevation: 2,
                         ),
-                        child: Text("Histori Saldo"),
+                        icon: Icon(Icons.history, size: 18),
+                        label: Text(
+                          "Histori Saldo",
+                          style: GoogleFonts.poppins(
+                            fontWeight: FontWeight.w600,
+                            fontSize: 15,
+                          ),
+                        ),
                       ),
-                      ElevatedButton(
+                      ElevatedButton.icon(
                         onPressed:
                             isTarikSaldoAktif
                                 ? () {
@@ -264,50 +317,80 @@ class _WargaAkunPageState extends State<WargaAkunPage> {
                                   : Colors.grey.shade400,
                           foregroundColor:
                               isTarikSaldoAktif
-                                  ? Colors.green.shade900
+                                  ? Color(0xFF128d54)
                                   : Colors.grey.shade800,
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12),
                           ),
                           elevation: isTarikSaldoAktif ? 2 : 0,
                         ),
-                        child: Text("Tarik Saldo"),
+                        icon: Icon(Icons.money, size: 18),
+                        label: Text(
+                          "Tarik Saldo",
+                          style: GoogleFonts.poppins(
+                            fontWeight: FontWeight.w600,
+                            fontSize: 15,
+                          ),
+                        ),
                       ),
                     ],
                   ),
                 ],
               ),
             ),
-            SizedBox(height: 24),
+            // SizedBox(height: 16),
 
             // Menu lainnya
-            Column(
-              children: [
-                _buildMenuItem(Icons.info, "Info", iconColor: Colors.deepPurpleAccent, onTap: () {
-                  Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (_) => WargaInfoPage()),
-                    );
-                },),
-                _buildMenuItem(
-                  Icons.mail_outline,
-                  "Notifikasi",
-                  iconColor: Colors.blue,
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (_) => WargaNotifikasiPage()),
-                    );
-                  },
-                ),
-
-                _buildMenuItem(
-                  Icons.logout,
-                  "Logout",
-                  iconColor: Colors.red,
-                  onTap: () => logout(context),
-                ),
-              ],
+            Container(
+              margin: EdgeInsets.all(16),
+              padding: EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(20),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.green.withOpacity(0.20),
+                    blurRadius: 16,
+                    offset: Offset(0, 6),
+                  ),
+                ],
+              ),
+              child: Column(
+                children: [
+                  _buildMenuItem(
+                    Icons.info,
+                    "Info",
+                    iconColor: Colors.white,
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (_) => WargaInfoPage()),
+                      );
+                    },
+                  ),
+                  // SizedBox(height: 4),
+                  _buildMenuItem(
+                    Icons.mail_outline,
+                    "Notifikasi",
+                    iconColor: Colors.white,
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => WargaNotifikasiPage(),
+                        ),
+                      );
+                    },
+                  ),
+                  // SizedBox(height: 4),
+                  _buildMenuItem(
+                    Icons.logout,
+                    "Logout",
+                    iconColor: Colors.white,
+                    onTap: () => logout(context),
+                  ),
+                ],
+              ),
             ),
           ],
         ),
@@ -322,17 +405,25 @@ class _WargaAkunPageState extends State<WargaAkunPage> {
     VoidCallback? onTap,
   }) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 16.0),
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
       child: Container(
         decoration: BoxDecoration(
-          color: Color(0xff8fd14f),
+          gradient: LinearGradient(
+            colors: [Color(0xff15a864), Color(0xFF128d54)],
+            begin: Alignment.bottomCenter,
+            end: Alignment.topCenter,
+          ),
           borderRadius: BorderRadius.circular(16),
         ),
         child: ListTile(
-          leading: Icon(icon, color: iconColor ?? Colors.green.shade900),
+          leading: Icon(icon, color: iconColor ?? Colors.white),
           title: Text(
             title,
-            style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
+            style: GoogleFonts.poppins(
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
+              fontSize: 15,
+            ),
           ),
           trailing: Icon(
             Icons.arrow_forward_ios,

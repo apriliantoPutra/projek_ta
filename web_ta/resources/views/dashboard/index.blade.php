@@ -30,9 +30,7 @@
             </div>
         </div>
 
-        <!-- Grafik & Info Tambahan -->
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <!-- Placeholder Grafik -->
             <div class="bg-white rounded-xl shadow-md p-5">
                 <h3 class="text-lg font-semibold text-gray-700 mb-2">Grafik Penarikan Saldo Diterima</h3>
                 <div>
@@ -41,7 +39,6 @@
             </div>
 
 
-            <!-- Info Ringkasan -->
             <div class="bg-white rounded-xl shadow-md p-5">
                 <h3 class="text-lg font-semibold text-gray-700 mb-2">Grafik Setor Sampah Diterima</h3>
                 <div>
@@ -50,6 +47,8 @@
 
             </div>
         </div>
+
+
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>

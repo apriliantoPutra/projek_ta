@@ -17,7 +17,7 @@ class Authenticate
     public function handle(Request $request, Closure $next): Response
     {
         if (!Auth::check()) {
-            return redirect('/')->with('loginError', 'Silakan login terlebih dahulu.');
+            return redirect()->route('Login')->with('loginError', 'Silakan login terlebih dahulu.');
         }
 
         return $next($request);
@@ -28,6 +28,6 @@ class Authenticate
         if ($request->expectJson()) {
             return null;
         }
-        return route('login');
+        return route('Login');
     }
 }

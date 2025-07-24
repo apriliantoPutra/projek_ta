@@ -1,49 +1,68 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class NotifikasiCard extends StatelessWidget {
-  const NotifikasiCard({super.key});
+  final String title;
+  final String date;
+  final String body;
+
+  const NotifikasiCard({
+    super.key,
+    required this.title,
+    required this.date,
+    required this.body,
+  });
 
   @override
   Widget build(BuildContext context) {
-  final width = MediaQuery.of(context).size.width;
-  
+    final width = MediaQuery.of(context).size.width;
+
     return Container(
       width: width * 0.95,
-      margin: const EdgeInsets.symmetric(vertical: 6, horizontal: 8),
+      margin: const EdgeInsets.symmetric(vertical: 4, horizontal: 2),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: const Color(0xff8fd14f),
-        borderRadius: BorderRadius.circular(16),
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(18),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.green.withOpacity(0.10),
+            blurRadius: 10,
+            offset: Offset(0, 2),
+          ),
+        ],
       ),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          // Informasi utama
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                "Setor Jemput",
-                style: TextStyle(
-                  fontSize: width * 0.045,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: GoogleFonts.poppins(
+                    fontWeight: FontWeight.bold,
+                    color: Color(0xFF128d54),
+                    fontSize: 16,
+                  ),
                 ),
-              ),
-              SizedBox(height: 4),
-              Text(
-                '13/13/2025',
-                style: TextStyle(fontSize: width * 0.035, color: Colors.white),
-              ),
-            ],
+                const SizedBox(height: 6),
+                Text(
+                  date,
+                  style: GoogleFonts.poppins(color: Colors.grey, fontSize: 13),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  body,
+                  style: GoogleFonts.poppins(
+                    color: Colors.black87,
+                    fontSize: 15,
+                  ),
+                ),
+              ],
+            ),
           ),
-          // Icon panah ke kanan
-          IconButton(
-            icon: const Icon(Icons.arrow_forward_ios, color: Colors.white),
-            onPressed: () {
-              
-            },
-          ),
+          Icon(Icons.notifications_active, color: Color(0xFF128d54)),
         ],
       ),
     );

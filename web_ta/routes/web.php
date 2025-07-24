@@ -4,6 +4,7 @@ use App\Http\Controllers\Web\AkunController;
 use App\Http\Controllers\Web\DashboardController;
 use App\Http\Controllers\Web\Edukasi\ArtikelController;
 use App\Http\Controllers\Web\Edukasi\VideoController;
+use App\Http\Controllers\Web\LandingPageController;
 use App\Http\Controllers\Web\LoginController;
 use App\Http\Controllers\Web\Master\BankSampahController;
 use App\Http\Controllers\Web\Master\DataController;
@@ -15,7 +16,8 @@ use App\Http\Controllers\Web\Setoran\SetorLangsungController;
 use App\Http\Controllers\Web\TarikSaldoController;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', [LoginController::class, 'index']);
+Route::get('/', [LandingPageController::class, 'index'])->name('Landing-Page');
+Route::get('/login', [LoginController::class, 'index'])->name('Login');
 Route::post('/login', [LoginController::class, 'authenticate']);
 Route::post('/logout', [LoginController::class, 'logout']);
 

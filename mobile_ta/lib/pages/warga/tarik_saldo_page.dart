@@ -5,6 +5,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:google_fonts/google_fonts.dart';
 import '../../widget/warga_main_widget.dart';
 
 class WargaTarikSaldoPage extends StatefulWidget {
@@ -27,7 +28,9 @@ class _WargaTarikSaldoPageState extends State<WargaTarikSaldoPage> {
   String? metodeTarik;
   final TextEditingController pesanController = TextEditingController();
   final TextEditingController rekeningController = TextEditingController();
+  final TextEditingController jumlahSaldoController = TextEditingController();
   bool isLoading = false;
+  String? errorMessage;
 
   String formatRupiah(int number) {
     return NumberFormat.currency(
@@ -53,6 +56,44 @@ class _WargaTarikSaldoPageState extends State<WargaTarikSaldoPage> {
       return rekeningController.text == widget.no_hp.toString();
     }
     return rekeningController.text.isNotEmpty;
+  }
+
+  void handleJumlahSaldoChange(String value) {
+    setState(() {
+      errorMessage = null;
+      if (value.isEmpty) {
+        selectedSaldo = null;
+        return;
+      }
+
+      final parsedValue = int.tryParse(value);
+      if (parsedValue == null) {
+        errorMessage = 'Masukkan angka yang valid';
+        selectedSaldo = null;
+        return;
+      }
+
+      if (parsedValue < 25000) {
+        errorMessage = 'Minimal penarikan Rp 25.000';
+        selectedSaldo = null;
+        return;
+      }
+
+      if (parsedValue > (widget.saldo?['total_saldo'] ?? 0)) {
+        errorMessage = 'Jumlah melebihi saldo Anda';
+        selectedSaldo = null;
+        return;
+      }
+
+      final totalPermintaan = widget.permintaanSaldo + parsedValue;
+      if (totalPermintaan > (widget.saldo?['total_saldo'] ?? 0)) {
+        errorMessage = 'Total permintaan melebihi saldo Anda';
+        selectedSaldo = null;
+        return;
+      }
+
+      selectedSaldo = parsedValue;
+    });
   }
 
   Future<void> storePengajuanSetorLangsung() async {
@@ -126,206 +167,315 @@ class _WargaTarikSaldoPageState extends State<WargaTarikSaldoPage> {
   @override
   Widget build(BuildContext context) {
     final int totalSaldo = widget.saldo?['total_saldo'] ?? 0;
-    final bool saldoCukup = totalSaldo >= 20000;
+    final bool saldoCukup = totalSaldo >= 25000;
 
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Colors.greenAccent.shade400,
+        backgroundColor: const Color(0xFF128d54),
         elevation: 0,
         centerTitle: true,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.white),
           onPressed: () => Navigator.pop(context),
         ),
-        title: const Text(
+        title: Text(
           'Tarik Saldo',
-          style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
+          style: GoogleFonts.poppins(
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
+            fontSize: 22,
+          ),
         ),
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // 🔹 Info Saldo
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(16),
-              margin: const EdgeInsets.only(bottom: 20),
-              decoration: BoxDecoration(
-                color: Colors.green.shade50,
-                border: Border.all(color: Colors.green.shade200),
-                borderRadius: BorderRadius.circular(12),
+        padding: const EdgeInsets.all(16),
+        child: Container(
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(20),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.green.withOpacity(0.10),
+                blurRadius: 16,
+                offset: Offset(0, 6),
               ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    "Saldo Anda Saat Ini:",
-                    style: TextStyle(
-                      fontSize: 16,
-                      color: Colors.green.shade800,
+            ],
+          ),
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Center(
+                child: Icon(
+                  Icons.account_balance_wallet_rounded,
+                  color: Color(0xFF128d54),
+                  size: 48,
+                ),
+              ),
+              const SizedBox(height: 12),
+              Center(
+                child: Text(
+                  "Saldo Anda Saat Ini",
+                  style: GoogleFonts.poppins(
+                    fontSize: 16,
+                    color: Color(0xFF128d54),
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+              Center(
+                child: Text(
+                  formatRupiah(totalSaldo),
+                  style: GoogleFonts.poppins(
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                    color: Color(0xFF128d54),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 10),
+              Center(
+                child: Text(
+                  "Permintaan ini akan dikirim ke Admin. Mohon tunggu sampai Admin menyetujui dan melakukan proses transfer.",
+                  style: GoogleFonts.poppins(
+                    fontSize: 13,
+                    color: Colors.black54,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ),
+              const SizedBox(height: 20),
+
+              Text(
+                "Metode Tarik Saldo:",
+                style: GoogleFonts.poppins(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 8),
+              DropdownButtonFormField<String>(
+                value: metodeTarik,
+                hint: Text("Pilih Metode", style: GoogleFonts.poppins()),
+                decoration: InputDecoration(
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 14,
+                  ),
+                ),
+                items:
+                    [
+                      {'display': 'Dana', 'value': 'Dana'},
+                      {'display': 'ShopeePay', 'value': 'ShopeePay'},
+                      {
+                        'display': 'Bank Negara Indonesia (BNI)',
+                        'value': 'BNI',
+                      },
+                      {'display': 'Bank Central Asia (BCA)', 'value': 'BCA'},
+                      {
+                        'display': 'Bank Rakyat Indonesia (BRI)',
+                        'value': 'BRI',
+                      },
+                    ].map<DropdownMenuItem<String>>((item) {
+                      return DropdownMenuItem<String>(
+                        value: item['value']!,
+                        child: Text(
+                          item['display']!,
+                          style: GoogleFonts.poppins(),
+                        ),
+                      );
+                    }).toList(),
+                onChanged: handleMetodeChange,
+              ),
+              const SizedBox(height: 16),
+
+              Text(
+                "Nomor Rekening / No HP:",
+                style: GoogleFonts.poppins(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 8),
+              TextField(
+                controller: rekeningController,
+                keyboardType: TextInputType.number,
+                decoration: InputDecoration(
+                  hintText:
+                      metodeTarik == null
+                          ? 'Isi setelah memilih metode'
+                          : metodeTarik == 'Dana' || metodeTarik == 'ShopeePay'
+                          ? 'Gunakan/ubah No HP Anda'
+                          : 'Masukkan No Rekening',
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  hintStyle: GoogleFonts.poppins(),
+                ),
+                style: GoogleFonts.poppins(),
+              ),
+              const SizedBox(height: 16),
+
+              Text(
+                "Jumlah Saldo yang Akan Ditarik:",
+                style: GoogleFonts.poppins(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 8),
+
+              if (!saldoCukup)
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 8),
+                  child: Text(
+                    "Saldo minimal Rp. 25.000",
+                    style: GoogleFonts.poppins(
+                      color: Colors.red,
+                      fontWeight: FontWeight.w500,
                     ),
                   ),
-                  const SizedBox(height: 6),
-                  Text(
-                    formatRupiah(totalSaldo),
-                    style: TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.green.shade900,
-                    ),
-                  ),
-                  const SizedBox(height: 10),
-                  const Text(
-                    "Permintaan ini akan dikirim ke Admin. Mohon tunggu sampai Admin menyetujui dan melakukan proses transfer.",
-                    style: TextStyle(fontSize: 13, color: Colors.black54),
-                  ),
-                ],
-              ),
-            ),
-
-            // 🔹 Metode tarik saldo
-            const Text("Metode Tarik Saldo:", style: TextStyle(fontSize: 16)),
-            const SizedBox(height: 8),
-            DropdownButtonFormField<String>(
-              value: metodeTarik,
-              hint: const Text("Pilih Metode"),
-              decoration: InputDecoration(
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                contentPadding: const EdgeInsets.symmetric(
-                  horizontal: 12,
-                  vertical: 14,
-                ),
-              ),
-              items:
-                  ['Dana', 'ShopeePay', 'BNI', 'BCA'].map((String value) {
-                    return DropdownMenuItem<String>(
-                      value: value,
-                      child: Text(value),
-                    );
-                  }).toList(),
-              onChanged: (newValue) {
-                setState(() {
-                  metodeTarik = newValue;
-                  if (metodeTarik == 'Dana' || metodeTarik == 'ShopeePay') {
-                    rekeningController.text =
-                        widget.no_hp.toString(); // Konversi int ke String
-                  } else {
-                    rekeningController.clear();
-                  }
-                });
-              },
-            ),
-
-            const SizedBox(height: 16),
-
-            // 🔹 Input No Rekening / No HP
-            const Text(
-              "Nomor Rekening / No HP:",
-              style: TextStyle(fontSize: 16),
-            ),
-            const SizedBox(height: 8),
-            TextField(
-              controller: rekeningController,
-              keyboardType: TextInputType.number,
-              decoration: InputDecoration(
-                hintText:
-                    metodeTarik == null
-                        ? 'Isi setelah memilih metode'
-                        : metodeTarik == 'Dana' || metodeTarik == 'ShopeePay'
-                        ? 'Gunakan/ubah No HP Anda'
-                        : 'Masukkan No Rekening',
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(10),
-                ),
-              ),
-            ),
-
-            const SizedBox(height: 16),
-
-            // 🔹 Pilih jumlah saldo
-            const Text("Pilih Jumlah Saldo:", style: TextStyle(fontSize: 16)),
-            const SizedBox(height: 10),
-            if (!saldoCukup)
-              ElevatedButton(
-                onPressed: null,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.grey.shade300,
-                ),
-                child: const Text("Saldo di atas Rp.5000"),
-              )
-            else
-              Wrap(
-                spacing: 10,
-                children: [
-                  for (int value in [totalSaldo ~/ 2, totalSaldo])
-                    ElevatedButton(
-                      onPressed:
-                          (widget.permintaanSaldo + value <= totalSaldo)
-                              ? () => setState(() => selectedSaldo = value)
-                              : null,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor:
-                            selectedSaldo == value
-                                ? Colors.green
-                                : (widget.permintaanSaldo + value <= totalSaldo
-                                    ? Colors.grey.shade300
-                                    : Colors
-                                        .grey
-                                        .shade200), // Lebih pucat kalau disabled
-                        foregroundColor:
-                            (widget.permintaanSaldo + value <= totalSaldo)
-                                ? Colors.black
-                                : Colors.grey,
+                )
+              else
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    TextField(
+                      controller: jumlahSaldoController,
+                      keyboardType: TextInputType.number,
+                      decoration: InputDecoration(
+                        hintText: "Masukkan jumlah saldo",
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        suffixText: "Rp",
+                        hintStyle: GoogleFonts.poppins(),
                       ),
-                      child: Text(formatRupiah(value)),
+                      style: GoogleFonts.poppins(),
+                      onChanged: handleJumlahSaldoChange,
                     ),
-                ],
-              ),
+                    if (errorMessage != null)
+                      Padding(
+                        padding: const EdgeInsets.only(top: 8),
+                        child: Text(
+                          errorMessage!,
+                          style: GoogleFonts.poppins(
+                            color: Colors.red,
+                            fontSize: 13,
+                          ),
+                        ),
+                      ),
+                    const SizedBox(height: 12),
+                    Text(
+                      "Pilihan cepat:",
+                      style: GoogleFonts.poppins(
+                        fontSize: 14,
+                        color: Colors.black54,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Wrap(
+                      spacing: 10,
+                      children: [
+                        for (int value in [totalSaldo ~/ 2, totalSaldo])
+                          ElevatedButton(
+                            onPressed:
+                                (widget.permintaanSaldo + value <= totalSaldo)
+                                    ? () {
+                                      setState(() {
+                                        selectedSaldo = value;
+                                        jumlahSaldoController.text =
+                                            value.toString();
+                                        errorMessage = null;
+                                      });
+                                    }
+                                    : null,
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor:
+                                  selectedSaldo == value
+                                      ? Color(0xFF128d54)
+                                      : (widget.permintaanSaldo + value <=
+                                              totalSaldo
+                                          ? Colors.grey.shade300
+                                          : Colors.grey.shade200),
+                              foregroundColor:
+                                  selectedSaldo == value
+                                      ? Colors.white
+                                      : Colors.black,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              elevation: selectedSaldo == value ? 2 : 0,
+                            ),
+                            child: Text(
+                              formatRupiah(value),
+                              style: GoogleFonts.poppins(),
+                            ),
+                          ),
+                      ],
+                    ),
+                  ],
+                ),
+              const SizedBox(height: 20),
 
-            const SizedBox(height: 20),
-
-            // 🔹 Pesan Opsional
-            const Text("Pesan (Opsional):", style: TextStyle(fontSize: 16)),
-            const SizedBox(height: 10),
-            TextField(
-              controller: pesanController,
-              maxLines: 3,
-              decoration: InputDecoration(
-                hintText: "Tulis pesan tambahan di sini...",
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(10),
+              Text(
+                "Pesan (Opsional):",
+                style: GoogleFonts.poppins(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
                 ),
               ),
-            ),
-
-            const SizedBox(height: 20),
-            // 🔹 Kirim Permintaan
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed:
-                    saldoCukup &&
-                            selectedSaldo != null &&
-                            metodeTarik != null &&
-                            isRekeningValid
-                        ? storePengajuanSetorLangsung
-                        : null,
-
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.green,
-                  padding: const EdgeInsets.symmetric(vertical: 16),
+              const SizedBox(height: 10),
+              TextField(
+                controller: pesanController,
+                maxLines: 3,
+                decoration: InputDecoration(
+                  hintText: "Tulis pesan tambahan di sini...",
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  hintStyle: GoogleFonts.poppins(),
                 ),
-                child: const Text(
-                  "Kirim Permintaan Tarik Saldo",
-                  style: TextStyle(fontWeight: FontWeight.bold),
+                style: GoogleFonts.poppins(),
+              ),
+              const SizedBox(height: 20),
+
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed:
+                      saldoCukup &&
+                              selectedSaldo != null &&
+                              metodeTarik != null &&
+                              isRekeningValid &&
+                              errorMessage == null
+                          ? storePengajuanSetorLangsung
+                          : null,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Color(0xFF128d54),
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                    elevation: 2,
+                  ),
+                  child:
+                      isLoading
+                          ? CircularProgressIndicator(color: Colors.white)
+                          : Text(
+                            "Kirim Permintaan Tarik Saldo",
+                            style: GoogleFonts.poppins(
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                            ),
+                          ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

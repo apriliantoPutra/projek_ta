@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class HasilSetorSampahPage extends StatefulWidget {
   final List<Map<String, dynamic>> dataSetoran;
@@ -90,44 +91,98 @@ class _HasilSetorSampahPageState extends State<HasilSetorSampahPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Colors.greenAccent.shade400,
+        backgroundColor: Colors.white,
         elevation: 0,
         centerTitle: true,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: Colors.white),
+          icon: Icon(Icons.arrow_back, color: Color(0xFF128d54)),
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
           'Kalkulator Setor Sampah',
-          style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
+          style: GoogleFonts.poppins(
+            fontWeight: FontWeight.bold,
+            color: Color(0xFF128d54),
+            fontSize: 22,
+          ),
         ),
       ),
       body:
           isLoading
               ? const Center(child: CircularProgressIndicator())
               : Padding(
-                padding: const EdgeInsets.all(10),
+                padding: const EdgeInsets.all(16),
                 child: SingleChildScrollView(
                   child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text(
-                        'Jenis dan Berat Sampah',
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
+                      Container(
+                        padding: const EdgeInsets.all(18),
+                        margin: const EdgeInsets.only(bottom: 18),
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            colors: [Color(0xFF6BBE44), Color(0xFF128d54)],
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                          ),
+                          borderRadius: BorderRadius.circular(20),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.green.withOpacity(0.12),
+                              offset: Offset(0, 4),
+                              blurRadius: 12,
+                              spreadRadius: 1,
+                            ),
+                          ],
+                        ),
+                        child: Column(
+                          children: [
+                            Text(
+                              'Hasil Kalkulator Setor Sampah',
+                              style: GoogleFonts.poppins(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                              ),
+                            ),
+                            SizedBox(height: 8),
+                            Text(
+                              'Berikut adalah hasil perhitungan berat dan insentif dari sampah yang Anda input.',
+                              style: GoogleFonts.poppins(
+                                color: Colors.white,
+                                fontSize: 14,
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+                          ],
                         ),
                       ),
-                      const SizedBox(height: 10),
                       Container(
+                        width: double.infinity,
                         padding: const EdgeInsets.all(16),
+                        margin: const EdgeInsets.only(bottom: 18),
                         decoration: BoxDecoration(
-                          color: Colors.greenAccent.shade100,
-                          borderRadius: BorderRadius.circular(16),
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(20),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.green.withOpacity(0.10),
+                              blurRadius: 16,
+                              offset: Offset(0, 6),
+                            ),
+                          ],
                         ),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
+                            Text(
+                              'Jenis dan Berat Sampah',
+                              style: GoogleFonts.poppins(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                                color: Color(0xFF128d54),
+                              ),
+                            ),
+                            const SizedBox(height: 10),
                             Stack(
                               children: [
                                 Container(
@@ -162,8 +217,8 @@ class _HasilSetorSampahPageState extends State<HasilSetorSampahPage> {
                                 Positioned.fill(
                                   child: Center(
                                     child: Text(
-                                      '${totalBerat.toStringAsFixed(1)}kg',
-                                      style: const TextStyle(
+                                      '${totalBerat.toStringAsFixed(1)} kg',
+                                      style: GoogleFonts.poppins(
                                         fontWeight: FontWeight.bold,
                                         color: Colors.white,
                                       ),
@@ -188,42 +243,61 @@ class _HasilSetorSampahPageState extends State<HasilSetorSampahPage> {
                                     ),
                                   ),
                                   const SizedBox(width: 6),
-                                  Expanded(child: Text(item['nama'])),
-                                  Text('${item['berat']}kg'),
+                                  Expanded(
+                                    child: Text(
+                                      item['nama'],
+                                      style: GoogleFonts.poppins(),
+                                    ),
+                                  ),
+                                  Text(
+                                    '${item['berat']} kg',
+                                    style: GoogleFonts.poppins(),
+                                  ),
                                 ],
                               );
                             }).toList(),
                           ],
                         ),
                       ),
-                      const SizedBox(height: 20),
-                      const Text(
-                        'Estimasi Insentif',
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const SizedBox(height: 10),
                       Container(
+                        width: double.infinity,
                         padding: const EdgeInsets.all(16),
+                        margin: const EdgeInsets.only(bottom: 18),
                         decoration: BoxDecoration(
-                          color: Colors.greenAccent.shade100,
-                          borderRadius: BorderRadius.circular(16),
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(20),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.green.withOpacity(0.10),
+                              blurRadius: 16,
+                              offset: Offset(0, 6),
+                            ),
+                          ],
                         ),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
+                            Text(
+                              'Estimasi Insentif',
+                              style: GoogleFonts.poppins(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                                color: Color(0xFF128d54),
+                              ),
+                            ),
+                            const SizedBox(height: 10),
                             Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                const Text(
+                                Text(
                                   'Perkiraan Insentif',
-                                  style: TextStyle(fontWeight: FontWeight.bold),
+                                  style: GoogleFonts.poppins(
+                                    fontWeight: FontWeight.bold,
+                                  ),
                                 ),
                                 Text(
                                   'Rp ${totalHarga - biayaLayanan}',
-                                  style: const TextStyle(
+                                  style: GoogleFonts.poppins(
                                     fontWeight: FontWeight.bold,
                                   ),
                                 ),

@@ -55,7 +55,7 @@ class DashboardController extends Controller
             ->orderBy('tanggal')
             ->get();
 
-
+        
 
         return view('dashboard/index', [
             'headerTitle' => 'Dashboard',

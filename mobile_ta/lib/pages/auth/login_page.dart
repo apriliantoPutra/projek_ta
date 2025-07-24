@@ -24,7 +24,7 @@ class _LoginPageState extends State<LoginPage> {
     setState(() {
       _isLoading = true;
     });
-
+    print(dotenv.env['URL']);
     final response = await http.post(
       Uri.parse('${dotenv.env['URL']}/authenticate'),
       body: {

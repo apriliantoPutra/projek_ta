@@ -13,10 +13,13 @@ class NotificationController extends Controller
     {
         $akunId = Auth::id();
 
+        $threeDaysAgo = \Carbon\Carbon::now()->subDays(3);
+
         $notifs = Notification::where(function ($q) use ($akunId) {
             $q->whereNull('akun_id') // notifikasi umum
                 ->orWhere('akun_id', '=', $akunId); // notifikasi khusus user
         })
+            ->where('created_at', '>=', $threeDaysAgo)
             ->orderBy('sent_at', 'desc')
             ->limit(4)
             ->get();

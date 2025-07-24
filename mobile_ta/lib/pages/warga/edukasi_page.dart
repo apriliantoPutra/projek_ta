@@ -22,16 +22,15 @@ class WargaEdukasiPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        automaticallyImplyLeading: false,
         backgroundColor: Colors.white,
         elevation: 0,
         centerTitle: true,
         title: Text(
-          "Konten Edukasi",
-          style: TextStyle(
-            fontWeight: FontWeight.w500,
-            color: Colors.black,
-            fontSize: 24,
+          'Konten Edukasi',
+          style: GoogleFonts.poppins(
+            fontWeight: FontWeight.bold,
+            color: Color(0xFF128d54),
+            fontSize: 22,
           ),
         ),
       ),
@@ -145,8 +144,7 @@ class WargaEdukasiPage extends StatelessWidget {
                       itemBuilder: (context, index) {
                         final video = videoList[index];
                         return VideoCard(
-                          imageUrl:
-                              video['thumbnail_url'] ?? '',
+                          imageUrl: video['thumbnail_url'] ?? '',
                           title: video['judul_video'] ?? '',
                           date: video['tanggal_format'] ?? '',
                           onTap: () {
@@ -182,8 +180,7 @@ class WargaEdukasiPage extends StatelessWidget {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder:
-                                  (context) => WargaKumpulanArtikelPage(),
+                              builder: (context) => WargaKumpulanArtikelPage(),
                             ),
                           );
                         },

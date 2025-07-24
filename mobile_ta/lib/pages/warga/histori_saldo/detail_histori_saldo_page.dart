@@ -4,6 +4,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:intl/intl.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class DetailHistoriSaldoPage extends StatefulWidget {
   final int id;
@@ -100,116 +101,159 @@ class _DetailHistoriSaldoPageState extends State<DetailHistoriSaldoPage> {
     return input[0].toUpperCase() + input.substring(1).toLowerCase();
   }
 
-  Widget _buildRow(String title, String value, {Color? valueColor}) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          title,
-          style: const TextStyle(
-            fontSize: 14,
-            color: Colors.grey,
-            fontWeight: FontWeight.w500,
-          ),
-        ),
-        const SizedBox(height: 4),
-        Text(
-          value,
-          style: TextStyle(
-            fontSize: 16,
-            color: valueColor ?? Colors.black87,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-      ],
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Colors.greenAccent.shade400,
+        backgroundColor: const Color(0xFF128d54),
         elevation: 0,
         centerTitle: true,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.white),
           onPressed: () => Navigator.pop(context),
         ),
-        title: const Text(
+        title: Text(
           'Detail Tarik Saldo',
-          style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
+          style: GoogleFonts.poppins(
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
+            fontSize: 22,
+          ),
         ),
       ),
       body:
           isLoading
               ? const Center(child: CircularProgressIndicator())
               : errorMessage != null
-              ? Center(child: Text(errorMessage!))
+              ? Center(
+                child: Text(
+                  errorMessage!,
+                  style: GoogleFonts.poppins(fontSize: 16, color: Colors.red),
+                ),
+              )
               : SafeArea(
                 child: SingleChildScrollView(
                   padding: const EdgeInsets.all(16.0),
-                  child: Card(
-                    elevation: 4,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(20),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.green.withOpacity(0.10),
+                          blurRadius: 16,
+                          offset: Offset(0, 6),
+                        ),
+                      ],
                     ),
-                    child: Padding(
-                      padding: const EdgeInsets.all(20),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Container(
-                            width: double.infinity,
-                            padding: const EdgeInsets.symmetric(vertical: 12),
-                            child: _buildRow(
-                              'Jumlah Saldo',
-                              formatCurrency(data!['jumlah_saldo']),
+                    padding: const EdgeInsets.all(20),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Center(
+                          child: Icon(
+                            Icons.account_balance_wallet_rounded,
+                            color: Color(0xFF128d54),
+                            size: 48,
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                        Center(
+                          child: Text(
+                            formatCurrency(data!['jumlah_saldo']),
+                            style: GoogleFonts.poppins(
+                              fontSize: 24,
+                              fontWeight: FontWeight.bold,
+                              color: Color(0xFF128d54),
                             ),
                           ),
-                          const Divider(),
-                          Container(
-                            width: double.infinity,
-                            padding: const EdgeInsets.symmetric(vertical: 12),
-                            child: _buildRow(
-                              'Status',
-                              data!['status'] ?? 'Tidak diketahui',
-                              valueColor: getStatusColor(data!['status'] ?? ''),
+                        ),
+                        const SizedBox(height: 18),
+                        Divider(),
+                        _buildRow(
+                          'Status',
+                          data!['status'] ?? 'Tidak diketahui',
+                          valueColor: getStatusColor(data!['status'] ?? ''),
+                        ),
+                        Divider(),
+                        _buildRow(
+                          'Tanggal Penarikan',
+                          data!['tanggal_format'] ?? 'Tidak diketahui',
+                        ),
+                        Divider(),
+                        _buildRow(
+                          'Metode',
+                          formatMetode(data!['metode'] ?? ''),
+                        ),
+                        Divider(),
+                        _buildRow(
+                          'Nomor Tarik Saldo',
+                          data!['nomor_tarik_saldo'] ?? '-',
+                        ),
+                        Divider(),
+                        _buildRow(
+                          'Pesan',
+                          data!['pesan'] ?? 'Tidak ada pesan!',
+                        ),
+                        const SizedBox(height: 18),
+                        Center(
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 18,
+                              vertical: 10,
+                            ),
+                            decoration: BoxDecoration(
+                              color: Color(0xFFF1F8E9),
+                              borderRadius: BorderRadius.circular(14),
+                              border: Border.all(color: Color(0xFFB2DFDB)),
+                            ),
+                            child: Text(
+                              "Jika ada kendala, silakan hubungi admin bank sampah.",
+                              style: GoogleFonts.poppins(
+                                fontSize: 14,
+                                color: Colors.black87,
+                              ),
+                              textAlign: TextAlign.center,
                             ),
                           ),
-                          const Divider(),
-                          Container(
-                            width: double.infinity,
-                            padding: const EdgeInsets.symmetric(vertical: 12),
-                            child: _buildRow(
-                              'Metode',
-                              formatMetode(data!['metode'] ?? ''),
-                            ),
-                          ),
-                          const Divider(),
-                          Container(
-                            width: double.infinity,
-                            padding: const EdgeInsets.symmetric(vertical: 12),
-                            child: _buildRow(
-                              'Nomor Tarik Saldo',
-                              data!['nomor_tarik_saldo'] ?? '-',
-                            ),
-                          ),
-                          const Divider(),
-                          Container(
-                            width: double.infinity,
-                            padding: const EdgeInsets.symmetric(vertical: 12),
-                            child: _buildRow(
-                              'Pesan',
-                              data!['pesan'] ?? 'Tidak ada pesan!',
-                            ),
-                          ),
-                        ],
-                      ),
+                        ),
+                      ],
                     ),
                   ),
                 ),
               ),
+    );
+  }
+
+  Widget _buildRow(String title, String value, {Color? valueColor}) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(
+            width: 140,
+            child: Text(
+              title,
+              style: GoogleFonts.poppins(
+                fontSize: 14,
+                color: Colors.grey[700],
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ),
+          Expanded(
+            child: Text(
+              value,
+              style: GoogleFonts.poppins(
+                fontSize: 16,
+                color: valueColor ?? Colors.black87,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
