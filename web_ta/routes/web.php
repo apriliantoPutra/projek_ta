@@ -50,6 +50,7 @@ Route::middleware(['authorization', 'admin'])->group(function () {
     Route::get('/setoran-langsung', [SetorLangsungController::class, 'index'])->name('Setor-Langsung');
 
     Route::get('/dashboard', [DashboardController::class, 'index',])->name('Dashboard');
+    Route::post('/pdf', [DashboardController::class, 'pdf',])->name('PDF');
 
 
     Route::prefix('chatbot')->group(function () {
