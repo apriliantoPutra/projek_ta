@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Web\AkunController;
+use App\Http\Controllers\Web\ChatBotController;
 use App\Http\Controllers\Web\DashboardController;
 use App\Http\Controllers\Web\Edukasi\ArtikelController;
 use App\Http\Controllers\Web\Edukasi\VideoController;
@@ -44,12 +45,21 @@ Route::middleware(['authorization', 'admin'])->group(function () {
         Route::post('/layanan-jemput-store', [LayananJemputController::class, 'store'])->name('Layanan-Jemput-Store');
         Route::get('/layanan-jemput-edit/{id}', [LayananJemputController::class, 'edit'])->name('Layanan-Jemput-Edit');
         Route::put('/layanan-jemput-update/{id}', [LayananJemputController::class, 'update'])->name('Layanan-Jemput-Update');
-
     });
 
     Route::get('/setoran-langsung', [SetorLangsungController::class, 'index'])->name('Setor-Langsung');
 
     Route::get('/dashboard', [DashboardController::class, 'index',])->name('Dashboard');
+
+
+    Route::prefix('chatbot')->group(function () {
+        Route::get('/', [ChatbotController::class, 'index'])->name('chatbot.index');
+        Route::post('/update-api', [ChatbotController::class, 'updateApiKey'])->name('chatbot.update-api');
+        Route::post('/chat', [ChatbotController::class, 'chat'])->name('chatbot.chat');
+    });
+
+
+
     // Akun
     Route::get('/akun', [AkunController::class, 'index',])->name('Akun');
     Route::get('/akun-tambah', [AkunController::class, 'create',])->name('Akun-Tambah');

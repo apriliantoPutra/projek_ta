@@ -87,8 +87,7 @@ Route::prefix('v1')->group(function () {
 
 
         Route::get('/notifikasi', [NotificationController::class, 'detailNotifikasi']);
-
-
+        Route::get('/api-key', [ChatBotController::class, 'apiKey']);
 
         // Logout
         Route::post('/logout', [ApiLoginController::class, 'logout']);

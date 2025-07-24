@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter_markdown/flutter_markdown.dart';
+import 'package:mobile_ta/services/api_service.dart';
 
 class ChatbotPage extends StatefulWidget {
   const ChatbotPage({super.key});
@@ -18,12 +19,46 @@ class _ChatbotPageState extends State<ChatbotPage> {
   int _sendCount = 0;
   final int _maxSendCount = 3;
   bool _isGenerating = false;
+  String? _apiKey;
+  bool _isLoadingKey = true;
+  String? _errorMessage;
 
-  final String openRouterUrl = "https://openrouter.ai/api/v1/chat/completions";
+  static final String openRouterUrl = dotenv.env['openRouterUrl'] ?? '';
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchApiKey();
+  }
+
+  Future<void> _fetchApiKey() async {
+    setState(() {
+      _isLoadingKey = true;
+      _errorMessage = null;
+    });
+
+    final response = await ApiService.getApiKey();
+
+    if (response.success && response.data != null) {
+      setState(() {
+        _apiKey = response.data;
+        _isLoadingKey = false;
+      });
+    } else {
+      setState(() {
+        _errorMessage = response.message ?? 'Failed to get API key';
+        _isLoadingKey = false;
+      });
+    }
+  }
 
   Future<void> _sendMessage() async {
     final text = _controller.text.trim();
-    if (text.isEmpty || _sendCount >= _maxSendCount || _isGenerating) return;
+    if (text.isEmpty ||
+        _sendCount >= _maxSendCount ||
+        _isGenerating ||
+        _apiKey == null)
+      return;
 
     setState(() {
       _messages.add(ChatMessage(text: text, isUser: true));
@@ -39,7 +74,7 @@ class _ChatbotPageState extends State<ChatbotPage> {
         Uri.parse(openRouterUrl),
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': 'Bearer ${dotenv.env['API_KEY']}',
+          'Authorization': 'Bearer $_apiKey',
         },
         body: jsonEncode({
           "model": "deepseek/deepseek-r1:free",
@@ -99,6 +134,35 @@ class _ChatbotPageState extends State<ChatbotPage> {
     super.dispose();
   }
 
+  Widget _buildMessageBubble(ChatMessage message) {
+    return Align(
+      alignment: message.isUser ? Alignment.centerRight : Alignment.centerLeft,
+      child: Container(
+        margin: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        constraints: const BoxConstraints(maxWidth: 300),
+        decoration: BoxDecoration(
+          color:
+              message.isUser
+                  ? Theme.of(context).colorScheme.primaryContainer
+                  : Theme.of(context).colorScheme.surfaceVariant,
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: MarkdownBody(
+          data: message.text,
+          styleSheet: MarkdownStyleSheet.fromTheme(Theme.of(context)).copyWith(
+            p: TextStyle(
+              color:
+                  message.isUser
+                      ? Theme.of(context).colorScheme.onPrimaryContainer
+                      : Theme.of(context).colorScheme.onSurfaceVariant,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -129,13 +193,33 @@ class _ChatbotPageState extends State<ChatbotPage> {
                     ],
                   ),
             );
-
-            if (shouldExit == true) {
-              Navigator.pop(context);
-            }
+            if (shouldExit == true) Navigator.pop(context);
           },
         ),
         actions: [
+          if (_isLoadingKey)
+            const Padding(
+              padding: EdgeInsets.only(right: 16),
+              child: Center(
+                child: SizedBox(
+                  width: 20,
+                  height: 20,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    color: Colors.white,
+                  ),
+                ),
+              ),
+            )
+          else if (_errorMessage != null)
+            IconButton(
+              icon: const Icon(Icons.error, color: Colors.red),
+              onPressed: () {
+                ScaffoldMessenger.of(
+                  context,
+                ).showSnackBar(SnackBar(content: Text(_errorMessage!)));
+              },
+            ),
           Padding(
             padding: const EdgeInsets.only(right: 16),
             child: Center(
@@ -144,9 +228,7 @@ class _ChatbotPageState extends State<ChatbotPage> {
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
                   color:
-                      _sendCount >= _maxSendCount
-                          ? Colors.red
-                          : Theme.of(context).colorScheme.onPrimary,
+                      _sendCount >= _maxSendCount ? Colors.red : Colors.white,
                 ),
               ),
             ),
@@ -155,16 +237,38 @@ class _ChatbotPageState extends State<ChatbotPage> {
       ),
       body: Column(
         children: [
-          Expanded(
-            child: ListView.builder(
-              controller: _scrollController,
-              padding: const EdgeInsets.all(8),
-              itemCount: _messages.length,
-              itemBuilder: (context, index) {
-                return _buildMessageBubble(_messages[index]);
-              },
+          if (_isLoadingKey)
+            const Expanded(child: Center(child: CircularProgressIndicator()))
+          else if (_errorMessage != null)
+            Expanded(
+              child: Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      'Failed to load API key',
+                      style: Theme.of(context).textTheme.titleMedium,
+                    ),
+                    const SizedBox(height: 8),
+                    ElevatedButton(
+                      onPressed: _fetchApiKey,
+                      child: const Text('Retry'),
+                    ),
+                  ],
+                ),
+              ),
+            )
+          else
+            Expanded(
+              child: ListView.builder(
+                controller: _scrollController,
+                padding: const EdgeInsets.all(8),
+                itemCount: _messages.length,
+                itemBuilder: (context, index) {
+                  return _buildMessageBubble(_messages[index]);
+                },
+              ),
             ),
-          ),
           Padding(
             padding: const EdgeInsets.all(8.0),
             child: Row(
@@ -194,7 +298,10 @@ class _ChatbotPageState extends State<ChatbotPage> {
                               )
                               : null,
                     ),
-                    enabled: _sendCount < _maxSendCount && !_isGenerating,
+                    enabled:
+                        _sendCount < _maxSendCount &&
+                        !_isGenerating &&
+                        _apiKey != null,
                     onSubmitted: (_) => _sendMessage(),
                   ),
                 ),
@@ -202,7 +309,9 @@ class _ChatbotPageState extends State<ChatbotPage> {
                 if (!_isGenerating)
                   FloatingActionButton.small(
                     onPressed:
-                        (_sendCount >= _maxSendCount || _isGenerating)
+                        (_sendCount >= _maxSendCount ||
+                                _isGenerating ||
+                                _apiKey == null)
                             ? null
                             : _sendMessage,
                     child: const Icon(Icons.send),
@@ -211,35 +320,6 @@ class _ChatbotPageState extends State<ChatbotPage> {
             ),
           ),
         ],
-      ),
-    );
-  }
-
-  Widget _buildMessageBubble(ChatMessage message) {
-    return Align(
-      alignment: message.isUser ? Alignment.centerRight : Alignment.centerLeft,
-      child: Container(
-        margin: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-        constraints: const BoxConstraints(maxWidth: 300),
-        decoration: BoxDecoration(
-          color:
-              message.isUser
-                  ? Theme.of(context).colorScheme.primaryContainer
-                  : Theme.of(context).colorScheme.surfaceVariant,
-          borderRadius: BorderRadius.circular(20),
-        ),
-        child: MarkdownBody(
-          data: message.text,
-          styleSheet: MarkdownStyleSheet.fromTheme(Theme.of(context)).copyWith(
-            p: TextStyle(
-              color:
-                  message.isUser
-                      ? Theme.of(context).colorScheme.onPrimaryContainer
-                      : Theme.of(context).colorScheme.onSurfaceVariant,
-            ),
-          ),
-        ),
       ),
     );
   }

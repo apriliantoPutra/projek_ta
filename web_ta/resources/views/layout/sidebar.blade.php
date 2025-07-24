@@ -78,11 +78,10 @@
                     </div>
                 </div>
 
-
-                {{-- <a href="#"
+                <a href="{{ route('chatbot.index') }}"
                     class="flex items-center px-4 py-2 text-lg rounded-lg hover:bg-green-600 hover:text-white transition-colors border-b border-gray-700">
                     <i class="ri-robot-2-line mr-3"></i> Chatbot
-                </a> --}}
+                </a>
             </nav>
         </div>
 

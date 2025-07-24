@@ -56,7 +56,6 @@ class DashboardController extends Controller
             ->get();
 
         
-
         return view('dashboard/index', [
             'headerTitle' => 'Dashboard',
             'total_sampah' => $total_sampah,
