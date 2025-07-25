@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
@@ -28,6 +29,9 @@ class _WargaEditProfilPageState extends State<WargaEditProfilPage> {
   late CameraPosition _initialCameraPosition;
   Set<Marker> _markers = {};
   LatLng? _currentLatLng;
+  File? _profileImage;
+  bool _isLoading = false;
+  bool _isMapLoading = false;
 
   @override
   void initState() {
@@ -99,9 +103,6 @@ class _WargaEditProfilPageState extends State<WargaEditProfilPage> {
     }
   }
 
-  File? _profileImage;
-  bool _isLoading = false;
-
   Future<void> _pickImage(ImageSource source) async {
     final picker = ImagePicker();
     final pickedFile = await picker.pickImage(source: source, imageQuality: 75);
@@ -127,7 +128,10 @@ class _WargaEditProfilPageState extends State<WargaEditProfilPage> {
             children: [
               Text(
                 "Pilih Foto Profil",
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                style: GoogleFonts.poppins(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 16,
+                ),
               ),
               const SizedBox(height: 16),
               ListTile(
@@ -225,6 +229,93 @@ class _WargaEditProfilPageState extends State<WargaEditProfilPage> {
     }
   }
 
+  Future<void> _getCurrentLocation() async {
+    if (!mounted) return;
+
+    setState(() {
+      _isLoading = true;
+      _isMapLoading = true;
+    });
+
+    try {
+      bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+      if (!serviceEnabled) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text(
+                'Lokasi/GPS tidak aktif. Mohon aktifkan terlebih dahulu.',
+              ),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+        return;
+      }
+
+      LocationPermission permission = await Geolocator.checkPermission();
+      if (permission == LocationPermission.denied) {
+        permission = await Geolocator.requestPermission();
+        if (permission == LocationPermission.denied) {
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('Izin lokasi ditolak. Tidak dapat melanjutkan.'),
+                backgroundColor: Colors.red,
+              ),
+            );
+          }
+          return;
+        }
+      }
+
+      if (permission == LocationPermission.deniedForever) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text(
+                'Izin lokasi ditolak permanen. Mohon aktifkan manual di pengaturan aplikasi.',
+              ),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+        return;
+      }
+
+      Position position = await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.high,
+      );
+
+      final newLatLng = LatLng(position.latitude, position.longitude);
+
+      if (mounted) {
+        setState(() {
+          _currentLatLng = newLatLng;
+          _koordinatController.text =
+              '${position.latitude.toStringAsFixed(6)}, ${position.longitude.toStringAsFixed(6)}';
+          _isLoading = false;
+          _isMapLoading = false;
+        });
+      }
+
+      _updateMarkers();
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error: ${e.toString()}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+        setState(() {
+          _isLoading = false;
+          _isMapLoading = false;
+        });
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -251,76 +342,98 @@ class _WargaEditProfilPageState extends State<WargaEditProfilPage> {
           ),
         ],
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          children: [
-            GestureDetector(
-              onTap: _showImagePickerOptions,
-              child: Center(
-                child: Stack(
-                  alignment: Alignment.bottomRight,
-                  children: [
-                    CircleAvatar(
-                      radius: 55,
-                      backgroundColor: Colors.grey.shade300,
-                      backgroundImage:
-                          _profileImage != null
-                              ? FileImage(_profileImage!)
-                              : NetworkImage(
-                                    (widget.profilData?['gambar_pengguna'] ??
-                                                '')
-                                            .isNotEmpty
-                                        ? widget.profilData!['gambar_url']
-                                        : 'https://i.pinimg.com/736x/8a/e9/e9/8ae9e92fa4e69967aa61bf2bda967b7b.jpg',
-                                  )
-                                  as ImageProvider,
+      body: Stack(
+        children: [
+          SingleChildScrollView(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              children: [
+                GestureDetector(
+                  onTap: _showImagePickerOptions,
+                  child: Center(
+                    child: Stack(
+                      alignment: Alignment.bottomRight,
+                      children: [
+                        CircleAvatar(
+                          radius: 55,
+                          backgroundColor: Colors.grey.shade300,
+                          backgroundImage:
+                              _profileImage != null
+                                  ? FileImage(_profileImage!)
+                                  : NetworkImage(
+                                        (widget.profilData?['gambar_pengguna'] ??
+                                                    '')
+                                                .isNotEmpty
+                                            ? widget.profilData!['gambar_url']
+                                            : 'https://i.pinimg.com/736x/8a/e9/e9/8ae9e92fa4e69967aa61bf2bda967b7b.jpg',
+                                      )
+                                      as ImageProvider,
+                        ),
+                        const CircleAvatar(
+                          radius: 16,
+                          backgroundColor: Colors.white,
+                          child: Icon(Icons.edit, color: Colors.green),
+                        ),
+                      ],
                     ),
-                    const CircleAvatar(
-                      radius: 16,
-                      backgroundColor: Colors.white,
-                      child: Icon(Icons.edit, color: Colors.green),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            const SizedBox(height: 20),
-
-            // Form Data
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [Color(0xFF6BBE44), Color(0xFF128d54)],
-                  begin: Alignment.bottomCenter,
-                  end: Alignment.topCenter,
-                ),
-                borderRadius: BorderRadius.circular(20),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.green.withOpacity(0.10),
-                    blurRadius: 16,
-                    offset: Offset(0, 6),
                   ),
-                ],
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _buildTextField("Nama Lengkap", _namaController),
-                  _buildTextField("Telpon", _telponController),
-                  _buildTextField("Alamat", _alamatController),
-                  _buildCoordinateField(),
-                  const SizedBox(height: 12),
-                ],
-              ),
+                ),
+                const SizedBox(height: 20),
+
+                // Form Data
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [Color(0xFF6BBE44), Color(0xFF128d54)],
+                      begin: Alignment.bottomCenter,
+                      end: Alignment.topCenter,
+                    ),
+                    borderRadius: BorderRadius.circular(20),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.green.withOpacity(0.10),
+                        blurRadius: 16,
+                        offset: Offset(0, 6),
+                      ),
+                    ],
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _buildTextField("Nama Lengkap", _namaController),
+                      _buildTextField("Telpon", _telponController),
+                      _buildTextField("Alamat", _alamatController),
+                      _buildCoordinateField(),
+                      const SizedBox(height: 12),
+                      SizedBox(
+                        width: double.infinity,
+                        child: ElevatedButton.icon(
+                          icon: const Icon(Icons.location_on, size: 20),
+                          label: const Text('Lokasi Terkini'),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.white,
+                            foregroundColor: Color(0xFF128d54),
+                            padding: const EdgeInsets.symmetric(vertical: 12),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                          onPressed: _isLoading ? null : _getCurrentLocation,
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 20),
+                _buildMapWidget(),
+                const SizedBox(height: 16),
+              ],
             ),
-            const SizedBox(height: 20),
-            _buildMapWidget(),
-            SizedBox(height: 16),
-          ],
-        ),
+          ),
+          if (_isMapLoading) Center(child: CircularProgressIndicator()),
+        ],
       ),
     );
   }
@@ -384,15 +497,10 @@ class _WargaEditProfilPageState extends State<WargaEditProfilPage> {
             ),
             suffixIcon: IconButton(
               icon: const Icon(Icons.map),
-              onPressed: () {
-                _handleKoordinatChanged();
-              },
+              onPressed: _handleKoordinatChanged,
             ),
           ),
-          onChanged: (value) {},
-          onSubmitted: (value) {
-            _handleKoordinatChanged();
-          },
+          onChanged: (value) => _handleKoordinatChanged(),
         ),
         const SizedBox(height: 12),
       ],
@@ -411,17 +519,16 @@ class _WargaEditProfilPageState extends State<WargaEditProfilPage> {
             _mapController = controller;
           },
           onTap: (LatLng position) {
-            // Optional: Allow user to tap on map to set location
             setState(() {
               _currentLatLng = position;
               _koordinatController.text =
-                  '${position.latitude.toStringAsFixed(6)},${position.longitude.toStringAsFixed(6)}';
+                  '${position.latitude.toStringAsFixed(6)}, ${position.longitude.toStringAsFixed(6)}';
               _updateMarkers();
             });
           },
           mapType: MapType.normal,
           zoomControlsEnabled: false,
-          myLocationEnabled: false,
+          myLocationEnabled: true,
           myLocationButtonEnabled: false,
         ),
       ),

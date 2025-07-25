@@ -39,14 +39,17 @@ class _ChatbotPageState extends State<ChatbotPage> {
 
     final response = await ApiService.getApiKey();
 
-    if (response.success && response.data != null) {
+    if (response.success &&
+        response.apiKey != null &&
+        response.apiKey!.isNotEmpty) {
       setState(() {
-        _apiKey = response.data;
+        _apiKey = response.apiKey; // Gunakan apiKey bukan data
         _isLoadingKey = false;
       });
     } else {
       setState(() {
-        _errorMessage = response.message ?? 'Failed to get API key';
+        _errorMessage =
+            response.message ?? 'Failed to get API key: Empty response';
         _isLoadingKey = false;
       });
     }

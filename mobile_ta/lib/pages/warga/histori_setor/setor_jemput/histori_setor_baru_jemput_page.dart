@@ -29,6 +29,7 @@ class _HistoriSetorBaruJemputPageState
     extends State<HistoriSetorBaruJemputPage> {
   Map<String, dynamic>? bankSampah;
   Map<String, dynamic>? pengajuanDetailSetor;
+  String gambarPengguna = '';
 
   Map<int, Map<String, dynamic>> jenisSampahCache = {};
   bool isLoading = true;
@@ -61,6 +62,7 @@ class _HistoriSetorBaruJemputPageState
 
       if (pengajuanDetailSetor != null && bankSampah != null) {
         final profil = pengajuanDetailSetor!['user']?['profil'];
+        
 
         // Parse coordinates with proper error handling
         latitudeWarga =
@@ -651,6 +653,7 @@ class _HistoriSetorBaruJemputPageState
                                   longitudeWarga: longitudeWarga,
                                   latitudeBankSampah: latitudeBankSampah,
                                   longitudeBankSampah: longitudeBankSampah,
+                                  
                                 ),
                           ),
                         );

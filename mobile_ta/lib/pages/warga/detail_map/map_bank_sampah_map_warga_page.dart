@@ -1,6 +1,7 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'dart:math';
 import 'package:google_fonts/google_fonts.dart';
 
 class WargaMapBankSampahMapWargaPage extends StatefulWidget {
@@ -26,28 +27,35 @@ class _WargaMapBankSampahMapWargaPageState
     extends State<WargaMapBankSampahMapWargaPage> {
   late GoogleMapController _mapController;
   Set<Marker> _markers = {};
+  bool _isLoading = true;
 
   @override
   void initState() {
     super.initState();
-    _setMarkers();
+    _initializeMarkers();
   }
 
-  void _setMarkers() {
-    _markers = {
-      Marker(
-        markerId: const MarkerId('warga'),
-        position: LatLng(widget.latitudeWarga, widget.longitudeWarga),
-        infoWindow: const InfoWindow(title: "Lokasi Warga"),
-        icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueRed),
-      ),
-      Marker(
-        markerId: const MarkerId('bank_sampah'),
-        position: LatLng(widget.latitudeBankSampah, widget.longitudeBankSampah),
-        infoWindow: const InfoWindow(title: "Lokasi Bank Sampah"),
-        icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueBlue),
-      ),
-    };
+  Future<void> _initializeMarkers() async {
+    setState(() {
+      _markers = {
+        Marker(
+          markerId: const MarkerId('warga'),
+          position: LatLng(widget.latitudeWarga, widget.longitudeWarga),
+          infoWindow: const InfoWindow(title: "Lokasi Warga"),
+          icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueRed),
+        ),
+        Marker(
+          markerId: const MarkerId('bank_sampah'),
+          position: LatLng(
+            widget.latitudeBankSampah,
+            widget.longitudeBankSampah,
+          ),
+          infoWindow: const InfoWindow(title: "Lokasi Bank Sampah"),
+          icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueBlue),
+        ),
+      };
+      _isLoading = false;
+    });
   }
 
   LatLngBounds _getBounds() {
@@ -55,7 +63,6 @@ class _WargaMapBankSampahMapWargaPageState
     final longitudes = [widget.longitudeWarga, widget.longitudeBankSampah];
 
     final northeast = LatLng(latitudes.reduce(max), longitudes.reduce(max));
-
     final southwest = LatLng(latitudes.reduce(min), longitudes.reduce(min));
 
     return LatLngBounds(northeast: northeast, southwest: southwest);
@@ -79,29 +86,32 @@ class _WargaMapBankSampahMapWargaPageState
           'Detail Map',
           style: GoogleFonts.poppins(
             fontWeight: FontWeight.bold,
-            color: Color(0xFF128d54),
+            color: const Color(0xFF128d54),
             fontSize: 22,
           ),
         ),
       ),
-      body: GoogleMap(
-        initialCameraPosition: CameraPosition(
-          target: LatLng(midLat, midLng),
-          zoom: 12,
-        ),
-        markers: _markers,
-        onMapCreated: (controller) {
-          _mapController = controller;
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            _mapController.animateCamera(
-              CameraUpdate.newLatLngBounds(_getBounds(), 50),
-            );
-          });
-        },
-        myLocationEnabled: false,
-        zoomControlsEnabled: false,
-        myLocationButtonEnabled: false,
-      ),
+      body:
+          _isLoading
+              ? const Center(child: CircularProgressIndicator())
+              : GoogleMap(
+                initialCameraPosition: CameraPosition(
+                  target: LatLng(midLat, midLng),
+                  zoom: 12,
+                ),
+                markers: _markers,
+                onMapCreated: (controller) {
+                  _mapController = controller;
+                  WidgetsBinding.instance.addPostFrameCallback((_) {
+                    _mapController.animateCamera(
+                      CameraUpdate.newLatLngBounds(_getBounds(), 100),
+                    );
+                  });
+                },
+                myLocationEnabled: false,
+                zoomControlsEnabled: false,
+                myLocationButtonEnabled: false,
+              ),
     );
   }
 }

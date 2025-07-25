@@ -69,15 +69,38 @@ class DashboardController extends Controller
 
         ]);
     }
-    
-    public function pdf()
+
+    public function pdf(Request $request)
     {
-        $startOfMonth = Carbon::now()->startOfMonth();
-        $endOfMonth = Carbon::now()->endOfMonth();
+        $reportType = $request->input('report_type', 'bulanan');
+
+        // Determine date range based on report type
+        switch ($reportType) {
+            case 'harian':
+                $startDate = Carbon::today()->startOfDay();
+                $endDate = Carbon::today()->endOfDay();
+                $periodText = 'Hari Ini - ' . Carbon::today()->isoFormat('dddd, D MMMM YYYY');
+                break;
+
+            case 'mingguan':
+                $startDate = Carbon::now()->startOfWeek();
+                $endDate = Carbon::now()->endOfWeek();
+                $periodText = 'Minggu Ini - ' .
+                    $startDate->isoFormat('D MMMM') . ' s/d ' .
+                    $endDate->isoFormat('D MMMM YYYY');
+                break;
+
+            case 'bulanan':
+            default:
+                $startDate = Carbon::now()->startOfMonth();
+                $endDate = Carbon::now()->endOfMonth();
+                $periodText = 'Bulan Ini - ' . Carbon::now()->isoFormat('MMMM YYYY');
+                break;
+        }
 
         // Get setor sampah data
         $query1 = PengajuanSetor::where('status_pengajuan', 'diterima')
-            ->whereBetween('waktu_pengajuan', [$startOfMonth, $endOfMonth])
+            ->whereBetween('waktu_pengajuan', [$startDate, $endDate])
             ->with(['user.profil', 'inputdetail' => function ($query) {
                 $query->where('status_setor', 'selesai');
             }])
@@ -86,7 +109,7 @@ class DashboardController extends Controller
         // Get tarik saldo data
         $query2 = TarikSaldo::with('user.profil')
             ->where('status', 'terima')
-            ->whereBetween('created_at', [$startOfMonth, $endOfMonth])
+            ->whereBetween('created_at', [$startDate, $endDate])
             ->get();
 
         // Process setor sampah data and calculate totals
@@ -167,12 +190,11 @@ class DashboardController extends Controller
             ];
         });
 
-        $currentMonth = Carbon::now()->isoFormat('MMMM YYYY');
-
         $pdf = Pdf::loadView('dashboard.pdf', [
             'setor_sampah' => $setorSampah,
             'tarik_saldo' => $tarikSaldo,
-            'monthYear' => $currentMonth,
+            'periodText' => $periodText,
+            'reportType' => $reportType,
             'logoPath' => public_path('img/green.png'),
             'total_berat' => $totalBerat,
             'total_harga' => $totalHarga,
@@ -183,7 +205,6 @@ class DashboardController extends Controller
 
         // Set paper to landscape
         return $pdf->setPaper('a4', 'landscape')
-            ->download('laporan-bank-sampah-' . Carbon::now()->format('Y-m-d') . '.pdf');
-
-        }
+            ->download('laporan-bank-sampah-' . $reportType . '-' . Carbon::now()->format('Y-m-d') . '.pdf');
+    }
 }

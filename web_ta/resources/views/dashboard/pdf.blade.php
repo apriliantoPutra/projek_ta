@@ -105,8 +105,8 @@
 <body>
     <div class="header">
         <img src="{{ $logoPath }}" alt="Bank Sampah Logo" class="logo">
-        <div class="title">Laporan Bank Sampah</div>
-        <div class="subtitle">Periode: {{ $monthYear }}</div>
+        <div class="title">Laporan {{ ucfirst($reportType) }} Bank Sampah</div>
+        <div class="subtitle">Periode: {{ $periodText }}</div>
     </div>
 
     <div class="section-title">Data Setor Sampah</div>

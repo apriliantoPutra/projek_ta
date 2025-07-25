@@ -201,17 +201,10 @@ class _PetugasSetorLangsungBaruState extends State<PetugasSetorLangsungBaru> {
             ),
             SizedBox(height: 8),
             Container(
-              padding: const EdgeInsets.all(12),
+              padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(20),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.green.withOpacity(0.10),
-                    blurRadius: 16,
-                    offset: Offset(0, 6),
-                  ),
-                ],
+                color: Color(0xFF8fd14f).withOpacity(0.15),
+                borderRadius: BorderRadius.circular(14),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -227,7 +220,7 @@ class _PetugasSetorLangsungBaruState extends State<PetugasSetorLangsungBaru> {
                           ),
                         ),
                       ),
-                      SizedBox(width: 8),
+                      const SizedBox(width: 8),
                       Expanded(
                         child: Text(
                           'Berat (kg)',
@@ -236,109 +229,164 @@ class _PetugasSetorLangsungBaruState extends State<PetugasSetorLangsungBaru> {
                           ),
                         ),
                       ),
-                      SizedBox(width: 8),
-                      SizedBox(width: 40), // Space for delete button
+                      const SizedBox(width: 40),
                     ],
                   ),
-                  SizedBox(height: 8),
+                  const SizedBox(height: 8),
                   ..._jenisSampahList.asMap().entries.map((entry) {
                     final index = entry.key;
                     final item = entry.value;
+
                     return Padding(
                       padding: const EdgeInsets.only(bottom: 8.0),
-                      child: Row(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Expanded(
-                            flex: 2,
-                            child: DropdownButtonFormField<int>(
-                              value: item['jenis_sampah_id'],
-                              hint: Text(
-                                'Pilih jenis',
-                                style: GoogleFonts.poppins(fontSize: 16),
+                          Row(
+                            children: [
+                              Expanded(
+                                flex: 2,
+                                child: DropdownButtonFormField<int>(
+                                  value: item['jenis_sampah_id'],
+                                  hint: Text(
+                                    'Pilih jenis',
+                                    style: GoogleFonts.poppins(),
+                                  ),
+                                  items:
+                                      _jenisSampahOptions.map((option) {
+                                        return DropdownMenuItem<int>(
+                                          value: option['id'],
+                                          child: Text(
+                                            option['nama_sampah'],
+                                            style: GoogleFonts.poppins(),
+                                          ),
+                                        );
+                                      }).toList(),
+                                  onChanged: (value) {
+                                    setState(() {
+                                      _jenisSampahList[index]['jenis_sampah_id'] =
+                                          value;
+                                    });
+                                  },
+                                  decoration: InputDecoration(
+                                    contentPadding: const EdgeInsets.symmetric(
+                                      horizontal: 10,
+                                      vertical: 10,
+                                    ),
+                                    border: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(10),
+                                    ),
+                                  ),
+                                ),
                               ),
-                              items:
-                                  _jenisSampahOptions.map((option) {
-                                    return DropdownMenuItem<int>(
-                                      value: option['id'],
-                                      child: Text(option['nama_sampah']),
-                                    );
-                                  }).toList(),
-                              onChanged: (value) {
-                                setState(() {
-                                  _jenisSampahList[index]['jenis_sampah_id'] =
-                                      value;
-                                });
-                              },
-                            ),
-                          ),
-                          SizedBox(width: 8),
-                          Expanded(
-                            child: TextFormField(
-                              keyboardType: TextInputType.numberWithOptions(
-                                decimal: true,
-                              ),
-                              decoration: InputDecoration(
-                                hintText: 'Berat',
-                                hintStyle: GoogleFonts.poppins(fontSize: 16),
-                                errorText:
-                                    _jenisSampahList[index]['error'] ?? null,
-                              ),
-                              onChanged: (value) {
-                                final parsed = double.tryParse(value);
-                                String? error;
+                              const SizedBox(width: 8),
+                              Expanded(
+                                child: TextFormField(
+                                  initialValue: item['berat']?.toString(),
+                                  keyboardType: TextInputType.numberWithOptions(
+                                    decimal: true,
+                                  ),
+                                  decoration: InputDecoration(
+                                    hintText: 'Berat',
+                                    hintStyle: GoogleFonts.poppins(),
+                                    contentPadding: const EdgeInsets.symmetric(
+                                      horizontal: 10,
+                                      vertical: 10,
+                                    ),
+                                    border: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(10),
+                                    ),
+                                  ),
+                                  style: GoogleFonts.poppins(),
+                                  onChanged: (value) {
+                                    final parsed = double.tryParse(value);
+                                    String? error;
 
-                                if (parsed == null) {
-                                  error = 'Harus berupa angka';
-                                } else if (parsed < 0.5) {
-                                  error = 'Minimum 0.5 kg';
-                                } else if (parsed > 50) {
-                                  error = 'Maksimum 50 kg';
-                                } else if (!RegExp(
-                                  r'^\d+(\.\d)?$',
-                                ).hasMatch(value)) {
-                                  error = 'Maksimal 1 angka desimal';
-                                }
+                                    if (value.isEmpty) {
+                                      error = null;
+                                    } else if (parsed == null) {
+                                      error = 'Harus berupa angka';
+                                    } else if (parsed < 0.5) {
+                                      error = 'Minimum 0.5 kg';
+                                    } else if (parsed > 50) {
+                                      error = 'Maksimum 50 kg';
+                                    } else if (!RegExp(
+                                      r'^\d+(\.\d{1,2})?$',
+                                    ).hasMatch(value)) {
+                                      error = 'Maksimal 2 angka desimal';
+                                    }
 
-                                setState(() {
-                                  if (error != null) {
-                                    _jenisSampahList[index]['berat'] = null;
-                                    _jenisSampahList[index]['error'] = error;
-                                  } else {
-                                    _jenisSampahList[index]['berat'] = parsed;
-                                    _jenisSampahList[index]['error'] = null;
-                                  }
-                                });
-                              },
+                                    setState(() {
+                                      if (error != null) {
+                                        _jenisSampahList[index]['berat'] = null;
+                                        _jenisSampahList[index]['error'] =
+                                            error;
+                                      } else {
+                                        _jenisSampahList[index]['berat'] =
+                                            parsed;
+                                        _jenisSampahList[index]['error'] = null;
+                                      }
+                                    });
+                                  },
+                                ),
+                              ),
+                              IconButton(
+                                icon: const Icon(
+                                  Icons.delete,
+                                  color: Colors.red,
+                                ),
+                                onPressed: () => _removeJenisSampah(index),
+                              ),
+                            ],
+                          ),
+                          if (item['error'] != null)
+                            Container(
+                              margin: const EdgeInsets.only(top: 4),
+                              width: double.infinity,
+                              padding: const EdgeInsets.symmetric(
+                                vertical: 6,
+                                horizontal: 10,
+                              ),
+                              decoration: BoxDecoration(
+                                color: Colors.red.withOpacity(0.08),
+                                borderRadius: BorderRadius.circular(6),
+                              ),
+                              child: Text(
+                                item['error'],
+                                style: GoogleFonts.poppins(
+                                  color: Colors.red.shade700,
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
                             ),
-                          ),
-                          SizedBox(width: 8),
-                          IconButton(
-                            icon: Icon(Icons.delete, color: Colors.red),
-                            onPressed: () => _removeJenisSampah(index),
-                          ),
                         ],
                       ),
                     );
                   }).toList(),
-                  SizedBox(height: 8),
                   TextButton.icon(
                     onPressed: () {
                       setState(() {
                         _jenisSampahList.add({
                           'jenis_sampah_id': null,
                           'berat': null,
+                          'error': null,
                         });
                       });
                     },
                     icon: Icon(Icons.add, color: Color(0xFF128d54)),
                     label: Text(
                       'Tambah Jenis Sampah',
-                      style: GoogleFonts.poppins(color: Color(0xFF128d54)),
+                      style: GoogleFonts.poppins(
+                        color: Color(0xFF128d54),
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ),
                 ],
               ),
             ),
+
             SizedBox(height: 20),
             Center(
               child: ElevatedButton(

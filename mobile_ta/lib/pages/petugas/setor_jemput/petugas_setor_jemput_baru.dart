@@ -519,13 +519,7 @@ class _PetugasSetorJemputBaruState extends State<PetugasSetorJemputBaru> {
                 children: [
                   Stack(
                     children: [
-                      // Container(
-                      //   height: 32,
-                      //   decoration: BoxDecoration(
-                      //     borderRadius: BorderRadius.circular(8),
-                      //     color: Colors.grey[300],
-                      //   ),
-                      // ),
+                      
                       Row(
                         children:
                             processedSetoran.map((item) {
@@ -693,6 +687,7 @@ class _PetugasSetorJemputBaruState extends State<PetugasSetorJemputBaru> {
                               longitudeWarga: longitudeWarga,
                               latitudeBankSampah: latitudeBankSampah,
                               longitudeBankSampah: longitudeBankSampah,
+                              namaPengguna: namaPengguna,
                             ),
                       ),
                     );

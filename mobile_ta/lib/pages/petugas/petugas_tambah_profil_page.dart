@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
 import 'package:mobile_ta/constants/constants.dart';
@@ -151,6 +152,73 @@ class _PetugasTambahProfilPageState extends State<PetugasTambahProfilPage> {
     }
   }
 
+  Future<void> _getCurrentLocation() async {
+    setState(() => _isLoading = true);
+
+    try {
+      bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+      if (!serviceEnabled) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Lokasi tidak aktif. Mohon aktifkan lokasi.'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+        return;
+      }
+
+      LocationPermission permission = await Geolocator.checkPermission();
+      if (permission == LocationPermission.denied) {
+        permission = await Geolocator.requestPermission();
+        if (permission == LocationPermission.denied) {
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('Izin lokasi ditolak'),
+                backgroundColor: Colors.red,
+              ),
+            );
+          }
+          return;
+        }
+      }
+      if (permission == LocationPermission.deniedForever) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text(
+                'Izin lokasi ditolak permanen. Mohon aktifkan manual di pengaturan aplikasi.',
+              ),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+        return;
+      }
+
+      Position position = await Geolocator.getCurrentPosition();
+      setState(() {
+        _koordinatpenggunaController.text =
+            '${position.latitude}, ${position.longitude}';
+      });
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Gagal mendapatkan lokasi: ${e.toString()}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -216,15 +284,30 @@ class _PetugasTambahProfilPageState extends State<PetugasTambahProfilPage> {
                     _koordinatpenggunaController,
                   ),
                   const SizedBox(height: 12),
-                  // ClipRRect(
-                  //   borderRadius: BorderRadius.circular(12),
-                  //   child: Image.network(
-                  //     "https://i.pinimg.com/736x/b0/79/09/b079096855c0edbaba47d93c67f18853.jpg",
-                  //     height: 150,
-                  //     width: double.infinity,
-                  //     fit: BoxFit.cover,
-                  //   ),
-                  // ),
+                  SizedBox(
+                    width: double.infinity, // Agar tombol memenuhi lebar
+                    child: ElevatedButton.icon(
+                      icon: const Icon(Icons.location_on, size: 20),
+                      label: const Text('Lokasi Terkini'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.white,
+                        foregroundColor: Colors.greenAccent.shade400,
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                      onPressed:
+                          _isLoading
+                              ? null
+                              : () async {
+                                setState(() => _isLoading = true);
+                                await _getCurrentLocation();
+                                setState(() => _isLoading = false);
+                              },
+                    ),
+                  ),
+                  const SizedBox(height: 12),
                 ],
               ),
             ),

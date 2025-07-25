@@ -633,6 +633,7 @@ class _PetugasSetorJemputProsesState extends State<PetugasSetorJemputProses> {
                                   longitudeWarga: longitudeWarga,
                                   latitudeBankSampah: latitudeBankSampah,
                                   longitudeBankSampah: longitudeBankSampah,
+                                  namaPengguna: namaPengguna,
                                 )),
                           ),
                         );
