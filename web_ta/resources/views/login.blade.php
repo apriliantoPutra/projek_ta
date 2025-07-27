@@ -16,7 +16,8 @@
 <body>
     <section class="bg-gray-100 h-screen ">
         <div class="grid lg:grid-cols-2 h-full">
-            <div class="bg-cover bg-center" style="background-image: url('img/wallpaper.jpg')">
+            <div class="bg-cover bg-center"
+                style="background-image: url('https://i.pinimg.com/736x/03/70/58/03705861eaba977a7c83b8732a54e72d.jpg')">
                 <div class="flex items-end justify-center h-full p-2">
                     <p class="text-white text-lg">Copyright © All rights reserved.</p>
                 </div>

@@ -20,7 +20,7 @@
                     <select name="bank_sampah_id" id="bank_sampah_id"
                         class="w-full border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                         required>
-                        <option value="" disabled selected>Pilih Satuan</option>
+                        <option value="" disabled selected>Pilih Bank Sampah</option>
                         @foreach ($bankSampah as $data)
                             <option value="{{ $data->id }}">{{ $data->nama_bank_sampah }}</option>
                         @endforeach

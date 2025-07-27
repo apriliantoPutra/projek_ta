@@ -5,8 +5,8 @@
 
             <!-- Header -->
             <div class="text-center mb-10">
-                <h2 class="text-2xl font-bold text-gray-800">Detail Bank Data</h2>
-                <p class="text-gray-500">Informasi Seputar Bank Data</p>
+                <h2 class="text-2xl font-bold text-gray-800">Detail Data Bank Sampah</h2>
+                <p class="text-gray-500">Informasi Seputar Detail Bank Sampah</p>
             </div>
 
             <!-- Isi Profil -->
@@ -65,7 +65,7 @@
                     <iframe src="https://www.google.com/maps?q={{ $bank_sampah->koordinat_bank_sampah }}&output=embed"
                         allowfullscreen loading="lazy" class="w-full h-96 border-0"
                         referrerpolicy="no-referrer-when-downgrade"></iframe>
-                    
+
                 </div>
             </div>
 
