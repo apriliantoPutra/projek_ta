@@ -3,8 +3,8 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:mobile_ta/pages/warga/daftar_sampah_page.dart';
 import 'package:mobile_ta/pages/warga/setor_jemput/konfirmasi_page.dart';
 import 'package:http/http.dart' as http;
+import 'package:mobile_ta/services/auth_service.dart';
 import 'dart:convert';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class WargaSetorJemput extends StatefulWidget {
@@ -24,20 +24,40 @@ class _WargaSetorJemputState extends State<WargaSetorJemput> {
   List<Map<String, dynamic>> _jenisSampahOptions = [];
 
   Future<void> fetchJenisSampah() async {
-    final prefs = await SharedPreferences.getInstance();
-    final token = prefs.getString('token');
-    if (token == null) return;
+    final authService = AuthService();
+    final token = await authService.getToken();
 
-    final response = await http.get(
-      Uri.parse('${dotenv.env['URL']}/jenis-sampah'),
-      headers: {'Authorization': 'Bearer $token', 'Accept': 'application/json'},
-    );
+    if (token == null) {
+      debugPrint('Token tidak ditemukan');
+      return;
+    }
 
-    if (response.statusCode == 200) {
-      final json = jsonDecode(response.body);
-      setState(() {
-        _jenisSampahOptions = List<Map<String, dynamic>>.from(json['data']);
-      });
+    try {
+      final response = await http.get(
+        Uri.parse('${dotenv.env['URL']}/jenis-sampah'),
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Accept': 'application/json',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final json = jsonDecode(response.body);
+        if (mounted) {
+          setState(() {
+            _jenisSampahOptions = List<Map<String, dynamic>>.from(json['data']);
+          });
+        }
+      } else if (response.statusCode == 401) {
+        final refreshed = await authService.refreshToken();
+        if (refreshed) {
+          await fetchJenisSampah(); // Retry after token refresh
+        }
+      } else {
+        debugPrint('Gagal ambil data jenis sampah: ${response.statusCode}');
+      }
+    } catch (e) {
+      debugPrint('Error in fetchJenisSampah: $e');
     }
   }
 

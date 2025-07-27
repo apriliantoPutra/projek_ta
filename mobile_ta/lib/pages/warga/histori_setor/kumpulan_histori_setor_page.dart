@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
+import 'package:mobile_ta/services/auth_service.dart';
 import 'package:mobile_ta/widget/histori/setor_card_jemput_baru.dart';
 import 'package:mobile_ta/widget/histori/setor_card_jemput_batal.dart';
 import 'package:mobile_ta/widget/histori/setor_card_jemput_proses.dart';
@@ -11,7 +12,6 @@ import 'package:mobile_ta/widget/histori/setor_card_langsung_baru.dart';
 import 'package:mobile_ta/widget/histori/setor_card_langsung_batal.dart';
 import 'package:mobile_ta/widget/histori/setor_card_langsung_selesai.dart';
 import 'package:mobile_ta/widget/warga_main_widget.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class KumpulanHistoriSetorPage extends StatefulWidget {
@@ -33,86 +33,146 @@ class _KumpulanHistoriSetorPageState extends State<KumpulanHistoriSetorPage>
   late Future<List<dynamic>> _setorBatalList;
 
   Future<List<dynamic>> fetchSetorBaru() async {
-    final prefs = await SharedPreferences.getInstance();
-    final token = prefs.getString('token');
+    final authService = AuthService();
+    final token = await authService.getToken();
 
     if (token == null) {
       debugPrint('Token tidak ditemukan');
       return [];
     }
-    final response = await http.get(
-      Uri.parse('${dotenv.env['URL']}/histori-setor-baru'),
-      headers: {'Authorization': 'Bearer $token', 'Accept': 'application/json'},
-    );
 
-    if (response.statusCode == 200) {
-      final jsonData = json.decode(response.body);
-      return jsonData['data'];
-    } else {
-      throw Exception('Gagal memuat data setor baru');
+    try {
+      final response = await http.get(
+        Uri.parse('${dotenv.env['URL']}/histori-setor-baru'),
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Accept': 'application/json',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final jsonData = json.decode(response.body);
+        return jsonData['data'];
+      } else if (response.statusCode == 401) {
+        final refreshed = await authService.refreshToken();
+        if (refreshed) {
+          return await fetchSetorBaru();
+        }
+        return [];
+      } else {
+        throw Exception('Gagal memuat data setor baru');
+      }
+    } catch (e) {
+      debugPrint('Error fetch setor baru: $e');
+      return [];
     }
   }
 
   Future<List<dynamic>> fetchSetorProses() async {
-    final prefs = await SharedPreferences.getInstance();
-    final token = prefs.getString('token');
+    final authService = AuthService();
+    final token = await authService.getToken();
 
     if (token == null) {
       debugPrint('Token tidak ditemukan');
       return [];
     }
-    final response = await http.get(
-      Uri.parse('${dotenv.env['URL']}/histori-setor-proses'),
-      headers: {'Authorization': 'Bearer $token', 'Accept': 'application/json'},
-    );
 
-    if (response.statusCode == 200) {
-      final jsonData = json.decode(response.body);
-      return jsonData['data'];
-    } else {
-      throw Exception('Gagal memuat data setor proses');
+    try {
+      final response = await http.get(
+        Uri.parse('${dotenv.env['URL']}/histori-setor-proses'),
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Accept': 'application/json',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final jsonData = json.decode(response.body);
+        return jsonData['data'];
+      } else if (response.statusCode == 401) {
+        final refreshed = await authService.refreshToken();
+        if (refreshed) {
+          return await fetchSetorProses();
+        }
+        return [];
+      } else {
+        throw Exception('Gagal memuat data setor proses');
+      }
+    } catch (e) {
+      debugPrint('Error fetch setor proses: $e');
+      return [];
     }
   }
 
   Future<List<dynamic>> fetchSetorSelesai() async {
-    final prefs = await SharedPreferences.getInstance();
-    final token = prefs.getString('token');
+    final authService = AuthService();
+    final token = await authService.getToken();
 
     if (token == null) {
       debugPrint('Token tidak ditemukan');
       return [];
     }
-    final response = await http.get(
-      Uri.parse('${dotenv.env['URL']}/histori-setor-selesai'),
-      headers: {'Authorization': 'Bearer $token', 'Accept': 'application/json'},
-    );
 
-    if (response.statusCode == 200) {
-      final jsonData = json.decode(response.body);
-      return jsonData['data'];
-    } else {
-      throw Exception('Gagal memuat data setor selesai');
+    try {
+      final response = await http.get(
+        Uri.parse('${dotenv.env['URL']}/histori-setor-selesai'),
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Accept': 'application/json',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final jsonData = json.decode(response.body);
+        return jsonData['data'];
+      } else if (response.statusCode == 401) {
+        final refreshed = await authService.refreshToken();
+        if (refreshed) {
+          return await fetchSetorSelesai();
+        }
+        return [];
+      } else {
+        throw Exception('Gagal memuat data setor selesai');
+      }
+    } catch (e) {
+      debugPrint('Error fetch setor selesai: $e');
+      return [];
     }
   }
 
   Future<List<dynamic>> fetchSetorBatal() async {
-    final prefs = await SharedPreferences.getInstance();
-    final token = prefs.getString('token');
+    final authService = AuthService();
+    final token = await authService.getToken();
 
     if (token == null) {
       debugPrint('Token tidak ditemukan');
       return [];
     }
-    final response = await http.get(
-      Uri.parse('${dotenv.env['URL']}/histori-setor-batal'),
-      headers: {'Authorization': 'Bearer $token', 'Accept': 'application/json'},
-    );
 
-    if (response.statusCode == 200) {
-      final jsonData = json.decode(response.body);
-      return jsonData['data'];
-    } else {
-      throw Exception('Gagal memuat data setor selesai');
+    try {
+      final response = await http.get(
+        Uri.parse('${dotenv.env['URL']}/histori-setor-batal'),
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Accept': 'application/json',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final jsonData = json.decode(response.body);
+        return jsonData['data'];
+      } else if (response.statusCode == 401) {
+        final refreshed = await authService.refreshToken();
+        if (refreshed) {
+          return await fetchSetorBatal();
+        }
+        return [];
+      } else {
+        throw Exception('Gagal memuat data setor batal');
+      }
+    } catch (e) {
+      debugPrint('Error fetch setor batal: $e');
+      return [];
     }
   }
 

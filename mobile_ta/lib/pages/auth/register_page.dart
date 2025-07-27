@@ -2,8 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import 'package:mobile_ta/widget/warga_main_widget.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:mobile_ta/pages/auth/login_page.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class RegisterPage extends StatefulWidget {
@@ -23,47 +22,67 @@ class _RegisterPageState extends State<RegisterPage> {
   bool _isLoading = false;
 
   Future<void> registerUser() async {
-    final url = Uri.parse('${dotenv.env['URL']}/register');
-
     setState(() {
       _isLoading = true;
     });
 
-    final response = await http.post(
-      url,
-      headers: {'Content-Type': 'application/json'},
-      body: jsonEncode({
-        'username': _usernameController.text,
-        'email': _emailController.text,
-        'password': _passwordController.text,
-        'konfirmasiPassword': _konfirmasiPasswordController.text,
-      }),
-    );
-
-    setState(() {
-      _isLoading = false;
-    });
-
-    final json = jsonDecode(response.body);
-    if (response.statusCode == 200 && json['success'] == true) {
-      final token = json['token'];
-
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setString('token', token);
-
-      // Sukses register, arahkan ke WargaMainWrapper
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (_) => const WargaMainWrapper()),
+    try {
+      final response = await http.post(
+        Uri.parse('${dotenv.env['URL']}/register'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({
+          'username': _usernameController.text,
+          'email': _emailController.text,
+          'password': _passwordController.text,
+          'konfirmasiPassword': _konfirmasiPasswordController.text,
+        }),
       );
-    } else {
-      // Gagal register, tampilkan pesan
+
+      final responseData = jsonDecode(response.body);
+
+      if (response.statusCode == 200 && responseData['success'] == true) {
+        // Tampilkan pesan sukses dan redirect ke login
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(
+              'Register Berhasil, Silahkan Isi Username & Password',
+            ),
+            backgroundColor: Colors.green,
+          ),
+        );
+
+        // Redirect ke login setelah 2 detik
+        await Future.delayed(const Duration(seconds: 2));
+        if (mounted) {
+          Navigator.pushAndRemoveUntil(
+            context,
+            MaterialPageRoute(builder: (_) => const LoginPage()),
+            (route) => false,
+          );
+        }
+      } else {
+        // Tampilkan error dari backend
+        String errorMessage = responseData['message'] ?? 'Registrasi gagal';
+        if (responseData['errors'] != null) {
+          errorMessage = responseData['errors'].values.first[0];
+        }
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(errorMessage), backgroundColor: Colors.red),
+        );
+      }
+    } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(json['message'] ?? 'Registrasi gagal'),
+          content: Text('Terjadi kesalahan: ${e.toString()}'),
           backgroundColor: Colors.red,
         ),
       );
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
     }
   }
 

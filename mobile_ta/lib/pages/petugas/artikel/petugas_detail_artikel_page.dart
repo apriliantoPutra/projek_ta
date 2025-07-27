@@ -5,7 +5,6 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:intl/intl.dart';
 import 'package:flutter_html/flutter_html.dart';
-import 'package:mobile_ta/constants/constants.dart';
 
 class PetugasDetailArtikelPage extends StatefulWidget {
   final int id;

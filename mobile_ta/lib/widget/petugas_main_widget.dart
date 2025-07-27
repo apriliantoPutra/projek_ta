@@ -6,7 +6,7 @@ import 'package:http/http.dart' as http;
 import 'package:mobile_ta/pages/petugas/petugas_akun_page.dart';
 import 'package:mobile_ta/pages/petugas/petugas_konten_page.dart';
 import 'package:mobile_ta/pages/petugas/petugas_setor_page.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:mobile_ta/services/auth_service.dart';
 import '../pages/petugas/beranda_page.dart';
 import '../pages/petugas/petugas_tambah_profil_page.dart';
 
@@ -130,13 +130,14 @@ class _WargaMainWrapperState extends State<PetugasMainWrapper> {
   }
 
   Future<void> loadSetorTerbaru() async {
-    final prefs = await SharedPreferences.getInstance();
-    final token = prefs.getString('token');
+    final authService = AuthService();
+    final token = await authService.getToken();
 
     if (token == null) {
       debugPrint('Token tidak ditemukan');
       return;
     }
+
     try {
       final response = await http.get(
         Uri.parse('${dotenv.env['URL']}/setor-baru'),
@@ -145,11 +146,17 @@ class _WargaMainWrapperState extends State<PetugasMainWrapper> {
           'Accept': 'application/json',
         },
       );
+
       if (response.statusCode == 200) {
         final jsonData = json.decode(response.body);
         setState(() {
           setorTerbaruList = jsonData['data'];
         });
+      } else if (response.statusCode == 401) {
+        final refreshed = await authService.refreshToken();
+        if (refreshed) {
+          await loadSetorTerbaru();
+        }
       }
     } catch (e) {
       debugPrint('Gagal load setor terbaru: $e');
@@ -157,33 +164,54 @@ class _WargaMainWrapperState extends State<PetugasMainWrapper> {
   }
 
   Future<void> cekProfil() async {
-    final prefs = await SharedPreferences.getInstance();
-    final token = prefs.getString('token');
+    final authService = AuthService();
+    final token = await authService.getToken();
 
     if (token == null) {
       debugPrint('Token tidak ditemukan saat cek profil');
       return;
     }
 
-    final response = await http.get(
-      Uri.parse('${dotenv.env['URL']}/profil'),
-      headers: {'Authorization': 'Bearer $token', 'Accept': 'application/json'},
-    );
+    try {
+      final response = await http.get(
+        Uri.parse('${dotenv.env['URL']}/profil'),
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Accept': 'application/json',
+        },
+      );
 
-    if (response.statusCode == 200) {
-      final json = jsonDecode(response.body);
-      profilDitemukan = true;
-      profilData = json['data'];
-    } else if (response.statusCode == 404) {
-      profilDitemukan = false;
-    } else {
-      debugPrint('Gagal cek profil: ${response.body}');
+      if (response.statusCode == 200) {
+        final json = jsonDecode(response.body);
+        setState(() {
+          profilDitemukan = true;
+          profilData = json['data'];
+        });
+      } else if (response.statusCode == 401) {
+        // Token expired, try refresh
+        final refreshed = await authService.refreshToken();
+        if (refreshed) {
+          await cekProfil(); // Retry
+        } else {
+          setState(() {
+            profilDitemukan = false;
+          });
+        }
+      } else if (response.statusCode == 404) {
+        setState(() {
+          profilDitemukan = false;
+        });
+      } else {
+        debugPrint('Gagal cek profil: ${response.body}');
+      }
+    } catch (e) {
+      debugPrint('Error cek profil: $e');
     }
   }
 
   Future<Map<String, dynamic>?> fetchAkunData() async {
-    final prefs = await SharedPreferences.getInstance();
-    final token = prefs.getString('token');
+    final authService = AuthService();
+    final token = await authService.getToken();
 
     if (token == null) {
       debugPrint('Token tidak ditemukan');
@@ -196,8 +224,14 @@ class _WargaMainWrapperState extends State<PetugasMainWrapper> {
     );
 
     if (response.statusCode == 200) {
-      final json = jsonDecode(response.body);
-      return json['data'];
+      return jsonDecode(response.body)['data'];
+    } else if (response.statusCode == 401) {
+      // Token expired, try refresh
+      final refreshed = await authService.refreshToken();
+      if (refreshed) {
+        return fetchAkunData(); // Retry
+      }
+      return null;
     } else {
       debugPrint('Gagal ambil data akun: ${response.body}');
       return null;

@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:mobile_ta/services/auth_service.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class WargaDaftarSampahPage extends StatefulWidget {
@@ -17,12 +17,12 @@ class _WargaDaftarSampahPageState extends State<WargaDaftarSampahPage> {
   bool isLoading = true; // Tambahkan ini
 
   Future<void> loadSampah() async {
-    final prefs = await SharedPreferences.getInstance();
-    final token = prefs.getString('token');
+    final authService = AuthService();
+    final token = await authService.getToken();
 
     if (token == null) {
       debugPrint('Token tidak ditemukan');
-      setState(() => isLoading = false); // Tetap set false agar UI muncul
+      if (mounted) setState(() => isLoading = false);
       return;
     }
 
@@ -37,16 +37,23 @@ class _WargaDaftarSampahPageState extends State<WargaDaftarSampahPage> {
 
       if (response.statusCode == 200) {
         final jsonData = json.decode(response.body);
-        setState(() {
-          sampahList = jsonData['data'];
-        });
+        if (mounted) {
+          setState(() {
+            sampahList = jsonData['data'];
+          });
+        }
+      } else if (response.statusCode == 401) {
+        final refreshed = await authService.refreshToken();
+        if (refreshed) {
+          await loadSampah();
+        }
       } else {
         debugPrint('Gagal fetch: ${response.statusCode}');
       }
     } catch (e) {
       debugPrint('Gagal load data: $e');
     } finally {
-      setState(() => isLoading = false); // Tutup loading
+      if (mounted) setState(() => isLoading = false);
     }
   }
 

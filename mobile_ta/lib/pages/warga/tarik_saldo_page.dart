@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:mobile_ta/services/auth_service.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../widget/warga_main_widget.dart';
 
@@ -97,17 +97,20 @@ class _WargaTarikSaldoPageState extends State<WargaTarikSaldoPage> {
   }
 
   Future<void> storePengajuanSetorLangsung() async {
-    setState(() {
-      isLoading = true;
-    });
+    if (mounted) setState(() => isLoading = true);
 
-    final prefs = await SharedPreferences.getInstance();
-    final String? token = prefs.getString('token');
+    final authService = AuthService();
+    final token = await authService.getToken();
 
     if (token == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Token tidak ditemukan. Silakan login ulang.')),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Token tidak ditemukan. Silakan login ulang.'),
+          ),
+        );
+        setState(() => isLoading = false);
+      }
       return;
     }
 
@@ -128,39 +131,49 @@ class _WargaTarikSaldoPageState extends State<WargaTarikSaldoPage> {
         }),
       );
 
-      final responseData = jsonDecode(response.body);
-
       if (response.statusCode == 200 || response.statusCode == 201) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              responseData['message'] ??
-                  'Berhasil mengirim Permintaan Tarik Saldo',
+        final responseData = jsonDecode(response.body);
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                responseData['message'] ??
+                    'Berhasil mengirim Permintaan Tarik Saldo',
+              ),
             ),
-          ),
-        );
-
-        Navigator.pushAndRemoveUntil(
-          context,
-          MaterialPageRoute(
-            builder: (context) => const WargaMainWrapper(initialMenu: 3),
-          ),
-          (Route<dynamic> route) => false,
-        );
+          );
+          Navigator.pushAndRemoveUntil(
+            context,
+            MaterialPageRoute(
+              builder: (context) => const WargaMainWrapper(initialMenu: 3),
+            ),
+            (Route<dynamic> route) => false,
+          );
+        }
+      } else if (response.statusCode == 401) {
+        final refreshed = await authService.refreshToken();
+        if (refreshed) {
+          await storePengajuanSetorLangsung();
+        }
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(responseData['message'] ?? 'Gagal mengirim')),
-        );
+        final responseData = jsonDecode(response.body);
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(responseData['message'] ?? 'Gagal mengirim'),
+            ),
+          );
+        }
       }
     } catch (e) {
-      print("Error: $e");
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Terjadi kesalahan, coba lagi.')));
+      debugPrint("Error: $e");
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Terjadi kesalahan, coba lagi.')),
+        );
+      }
     } finally {
-      setState(() {
-        isLoading = false;
-      });
+      if (mounted) setState(() => isLoading = false);
     }
   }
 

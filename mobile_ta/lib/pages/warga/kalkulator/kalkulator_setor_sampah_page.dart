@@ -6,7 +6,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
 import 'package:mobile_ta/pages/warga/daftar_sampah_page.dart';
 import 'package:mobile_ta/pages/warga/kalkulator/hasil_setor_sampah_page.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:mobile_ta/services/auth_service.dart';
 
 class KalkulatorSetorSampahPage extends StatefulWidget {
   const KalkulatorSetorSampahPage({super.key});
@@ -24,26 +24,40 @@ class _KalkulatorSetorSampahPageState extends State<KalkulatorSetorSampahPage> {
   List<Map<String, dynamic>> _jenisSampahOptions = [];
 
   Future<void> fetchJenisSampah() async {
-    final prefs = await SharedPreferences.getInstance();
-    final token = prefs.getString('token');
+    final authService = AuthService();
+    final token = await authService.getToken();
 
     if (token == null) {
       debugPrint('Token tidak ditemukan');
       return;
     }
 
-    final response = await http.get(
-      Uri.parse('${dotenv.env['URL']}/jenis-sampah'),
-      headers: {'Authorization': 'Bearer $token', 'Accept': 'application/json'},
-    );
+    try {
+      final response = await http.get(
+        Uri.parse('${dotenv.env['URL']}/jenis-sampah'),
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Accept': 'application/json',
+        },
+      );
 
-    if (response.statusCode == 200) {
-      final json = jsonDecode(response.body);
-      setState(() {
-        _jenisSampahOptions = List<Map<String, dynamic>>.from(json['data']);
-      });
-    } else {
-      debugPrint('Gagal ambil data jenis sampah: ${response.body}');
+      if (response.statusCode == 200) {
+        final json = jsonDecode(response.body);
+        if (mounted) {
+          setState(() {
+            _jenisSampahOptions = List<Map<String, dynamic>>.from(json['data']);
+          });
+        }
+      } else if (response.statusCode == 401) {
+        final refreshed = await authService.refreshToken();
+        if (refreshed) {
+          await fetchJenisSampah(); // Retry after token refresh
+        }
+      } else {
+        debugPrint('Gagal ambil data jenis sampah: ${response.statusCode}');
+      }
+    } catch (e) {
+      debugPrint('Error in fetchJenisSampah: $e');
     }
   }
 

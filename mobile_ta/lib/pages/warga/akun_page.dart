@@ -6,7 +6,9 @@ import 'package:mobile_ta/pages/warga/histori_saldo/kumpulan_histori_saldo_page.
 import 'package:mobile_ta/pages/warga/info_page.dart';
 import 'package:mobile_ta/pages/warga/notifikasi_page.dart';
 import 'package:mobile_ta/pages/warga/tarik_saldo_page.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:mobile_ta/providers/auth_provider.dart';
+import 'package:mobile_ta/services/auth_service.dart';
+import 'package:provider/provider.dart';
 import 'edit_profil_page.dart';
 import '../auth/login_page.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -31,50 +33,49 @@ class _WargaAkunPageState extends State<WargaAkunPage> {
   int jumlahPermintaanTarikSaldo = 0;
 
   Future<void> logout(BuildContext context) async {
-    final prefs = await SharedPreferences.getInstance();
-    final token = prefs.getString('token');
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    await authProvider.logout();
 
-    if (token == null) return;
-
-    final response = await http.post(
-      Uri.parse('${dotenv.env['URL']}/logout'),
-      headers: {'Authorization': 'Bearer $token', 'Accept': 'application/json'},
+    Navigator.pushAndRemoveUntil(
+      context,
+      MaterialPageRoute(builder: (_) => const LoginPage()),
+      (route) => false,
     );
-
-    if (response.statusCode == 200) {
-      await prefs.remove('token');
-      Navigator.pushAndRemoveUntil(
-        context,
-        MaterialPageRoute(builder: (_) => LoginPage()),
-        (route) => false,
-      );
-    } else {
-      final message = jsonDecode(response.body)['message'] ?? 'Gagal logout';
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(message)));
-    }
   }
 
   Future<int> fetchPermintaanTarikSaldo() async {
-    final prefs = await SharedPreferences.getInstance();
-    final token = prefs.getString('token');
+    final authService = AuthService();
+    final token = await authService.getToken();
 
     if (token == null) {
       debugPrint('Token tidak ditemukan');
       return 0;
     }
 
-    final response = await http.get(
-      Uri.parse('${dotenv.env['URL']}/permintaan-tarik-saldo'),
-      headers: {'Authorization': 'Bearer $token', 'Accept': 'application/json'},
-    );
+    try {
+      final response = await http.get(
+        Uri.parse('${dotenv.env['URL']}/permintaan-tarik-saldo'),
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Accept': 'application/json',
+        },
+      );
 
-    if (response.statusCode == 200) {
-      final jsonData = json.decode(response.body);
-      return jsonData['data'] is int ? jsonData['data'] : 0;
-    } else {
-      throw Exception('Gagal memuat data permintaan tarik saldo');
+      if (response.statusCode == 200) {
+        final jsonData = json.decode(response.body);
+        return jsonData['data'] is int ? jsonData['data'] : 0;
+      } else if (response.statusCode == 401) {
+        final refreshed = await authService.refreshToken();
+        if (refreshed) {
+          return await fetchPermintaanTarikSaldo();
+        }
+        return 0;
+      } else {
+        throw Exception('Gagal memuat data permintaan tarik saldo');
+      }
+    } catch (e) {
+      debugPrint('Error fetch permintaan tarik saldo: $e');
+      return 0;
     }
   }
 

@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:intl/intl.dart';
 import 'package:http/http.dart' as http;
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:mobile_ta/services/auth_service.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class DetailHistoriSaldoPage extends StatefulWidget {
@@ -26,15 +26,17 @@ class _DetailHistoriSaldoPageState extends State<DetailHistoriSaldoPage> {
   }
 
   Future<void> fetchDetailHistoriTarikSaldo() async {
-    try {
-      final prefs = await SharedPreferences.getInstance();
-      final token = prefs.getString('token');
+    final authService = AuthService();
+    final token = await authService.getToken();
 
+    try {
       if (token == null) {
-        setState(() {
-          errorMessage = 'Token tidak ditemukan';
-          isLoading = false;
-        });
+        if (mounted) {
+          setState(() {
+            errorMessage = 'Token tidak ditemukan';
+            isLoading = false;
+          });
+        }
         return;
       }
 
@@ -48,21 +50,37 @@ class _DetailHistoriSaldoPageState extends State<DetailHistoriSaldoPage> {
 
       if (response.statusCode == 200) {
         final jsonData = json.decode(response.body);
-        setState(() {
-          data = jsonData['data'];
-          isLoading = false;
-        });
+        if (mounted) {
+          setState(() {
+            data = jsonData['data'];
+            isLoading = false;
+          });
+        }
+      } else if (response.statusCode == 401) {
+        final refreshed = await authService.refreshToken();
+        if (refreshed) {
+          await fetchDetailHistoriTarikSaldo();
+        } else if (mounted) {
+          setState(() {
+            errorMessage = 'Session expired. Please login again';
+            isLoading = false;
+          });
+        }
       } else {
+        if (mounted) {
+          setState(() {
+            errorMessage = 'Gagal memuat data histori tarik saldo';
+            isLoading = false;
+          });
+        }
+      }
+    } catch (e) {
+      if (mounted) {
         setState(() {
-          errorMessage = 'Gagal memuat data histori tarik saldo';
+          errorMessage = 'Terjadi kesalahan: $e';
           isLoading = false;
         });
       }
-    } catch (e) {
-      setState(() {
-        errorMessage = 'Terjadi kesalahan: $e';
-        isLoading = false;
-      });
     }
   }
 

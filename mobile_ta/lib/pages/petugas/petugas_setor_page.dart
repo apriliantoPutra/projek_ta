@@ -3,11 +3,11 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
+import 'package:mobile_ta/services/auth_service.dart';
 import 'package:mobile_ta/widget/setor_card/setor_card_jemput_baru.dart';
 import 'package:mobile_ta/widget/setor_card/setor_card_jemput_proses.dart';
 import 'package:mobile_ta/widget/setor_card/setor_card_jemput_selesai.dart';
 import 'package:mobile_ta/widget/setor_card/setor_card_langsung_selesai.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../widget/setor_card/setor_card_langsung_baru.dart';
 
@@ -26,65 +26,116 @@ class _PetugasSetorPageState extends State<PetugasSetorPage>
   late Future<List<dynamic>> _setorSelesaiList;
 
   Future<List<dynamic>> fetchSetorBaru() async {
-    final prefs = await SharedPreferences.getInstance();
-    final token = prefs.getString('token');
+    final authService = AuthService();
+    final token = await authService.getToken();
 
     if (token == null) {
       debugPrint('Token tidak ditemukan');
       return [];
     }
-    final response = await http.get(
-      Uri.parse('${dotenv.env['URL']}/setor-baru'),
-      headers: {'Authorization': 'Bearer $token', 'Accept': 'application/json'},
-    );
 
-    if (response.statusCode == 200) {
-      final jsonData = json.decode(response.body);
-      return jsonData['data'];
-    } else {
-      throw Exception('Gagal memuat data setor baru');
+    try {
+      final response = await http.get(
+        Uri.parse('${dotenv.env['URL']}/setor-baru'),
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Accept': 'application/json',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final jsonData = json.decode(response.body);
+        return jsonData['data'];
+      } else if (response.statusCode == 401) {
+        final refreshed = await authService.refreshToken();
+        if (refreshed) {
+          return await fetchSetorBaru(); // Retry after token refresh
+        }
+        return [];
+      } else {
+        throw Exception(
+          'Gagal memuat data setor baru. Status: ${response.statusCode}',
+        );
+      }
+    } catch (e) {
+      debugPrint('Error in fetchSetorBaru: $e');
+      return [];
     }
   }
 
   Future<List<dynamic>> fetchSetorProses() async {
-    final prefs = await SharedPreferences.getInstance();
-    final token = prefs.getString('token');
+    final authService = AuthService();
+    final token = await authService.getToken();
 
     if (token == null) {
       debugPrint('Token tidak ditemukan');
       return [];
     }
-    final response = await http.get(
-      Uri.parse('${dotenv.env['URL']}/setor-proses'),
-      headers: {'Authorization': 'Bearer $token', 'Accept': 'application/json'},
-    );
 
-    if (response.statusCode == 200) {
-      final jsonData = json.decode(response.body);
-      return jsonData['data'];
-    } else {
-      throw Exception('Gagal memuat data setor proses');
+    try {
+      final response = await http.get(
+        Uri.parse('${dotenv.env['URL']}/setor-proses'),
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Accept': 'application/json',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final jsonData = json.decode(response.body);
+        return jsonData['data'];
+      } else if (response.statusCode == 401) {
+        final refreshed = await authService.refreshToken();
+        if (refreshed) {
+          return await fetchSetorProses(); // Retry after token refresh
+        }
+        return [];
+      } else {
+        throw Exception(
+          'Gagal memuat data setor proses. Status: ${response.statusCode}',
+        );
+      }
+    } catch (e) {
+      debugPrint('Error in fetchSetorProses: $e');
+      return [];
     }
   }
 
   Future<List<dynamic>> fetchSetorSelesai() async {
-    final prefs = await SharedPreferences.getInstance();
-    final token = prefs.getString('token');
+    final authService = AuthService();
+    final token = await authService.getToken();
 
     if (token == null) {
       debugPrint('Token tidak ditemukan');
       return [];
     }
-    final response = await http.get(
-      Uri.parse('${dotenv.env['URL']}/setor-selesai'),
-      headers: {'Authorization': 'Bearer $token', 'Accept': 'application/json'},
-    );
 
-    if (response.statusCode == 200) {
-      final jsonData = json.decode(response.body);
-      return jsonData['data'];
-    } else {
-      throw Exception('Gagal memuat data setor selesai');
+    try {
+      final response = await http.get(
+        Uri.parse('${dotenv.env['URL']}/setor-selesai'),
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Accept': 'application/json',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final jsonData = json.decode(response.body);
+        return jsonData['data'];
+      } else if (response.statusCode == 401) {
+        final refreshed = await authService.refreshToken();
+        if (refreshed) {
+          return await fetchSetorSelesai(); // Retry after token refresh
+        }
+        return [];
+      } else {
+        throw Exception(
+          'Gagal memuat data setor selesai. Status: ${response.statusCode}',
+        );
+      }
+    } catch (e) {
+      debugPrint('Error in fetchSetorSelesai: $e');
+      return [];
     }
   }
 

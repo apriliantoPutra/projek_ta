@@ -2,16 +2,19 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Enums\TokenAbility;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\LoginRequest;
 use App\Models\User;
+use Carbon\Carbon;
 use GrahamCampbell\ResultType\Success;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
-
+use PHPOpenSourceSaver\JWTAuth\Exceptions\JWTException;
+use PHPOpenSourceSaver\JWTAuth\Facades\JWTAuth;
 
 class LoginController extends Controller
 {
@@ -41,11 +44,11 @@ class LoginController extends Controller
                 'password' => Hash::make($request->get('password')),
                 'role' => 'warga'
             ]);
-            $token = $akun->createToken('auth_token')->plainTextToken;
+
             DB::commit();
             return response()->json([
                 'success' => true,
-                'token' => $token,
+                'message' => 'Registrasi Berhasil',
                 'data' => $akun
             ]);
         } catch (\Exception $e) {
@@ -59,37 +62,68 @@ class LoginController extends Controller
             );
         }
     }
-
-    /**
-     * @group Auth
-     * Authenticate user menggunakan username & password
-     */
-    public function authenticate(LoginRequest $request) // pakai LoginRequest
+    public function authenticate(LoginRequest $request)
     {
         if (!Auth::attempt($request->only('username', 'password'))) {
             return response()->json([
                 'success' => false,
-                'message' => 'Invalid Credentials'
+                'message' => 'Periksa kembali username atau password Anda',
             ], 400);
         }
 
         $akun = User::where('username', $request['username'])->firstOrFail();
-        $token = $akun->createToken('auth_token')->plainTextToken;
+        // Pengecekan untuk menghapus token yang sudah ada
+        $akun->tokens()->where('name', 'access-token')->delete();
+        $akun->tokens()->where('name', 'refresh-token')->delete();
+
+
+        $access_token = $akun->createToken('access-token', [TokenAbility::ACCESS_API->value], Carbon::now()->addMinutes(config('sanctum.access_token_expiration')))->plainTextToken;
+        $refresh_token = $akun->createToken('refresh-token', [TokenAbility::ISSUE_ACCESS_TOKEN->value], Carbon::now()->addDays(config('sanctum.refresh_token_expiration')))->plainTextToken;
 
         return response()->json([
             'success' => true,
-            'token' => $token,
+            'message' => 'Login Berhasil',
+            'access_token' => $access_token,
+            'refresh_token' => $refresh_token,
             'data' => $akun
+        ]);
+    }
+    public function refresh(Request $request)
+    {
+        $user = $request->user();
+        $currentToken = $user->currentAccessToken();
+
+        if (!$currentToken || $currentToken->name !== 'refresh-token' || $currentToken->expires_at->isPast()) {
+            return response()->json(['success' => false, 'message' => 'Invalid or expired refresh token'], 401);
+        }
+
+        // Hapus semua access-token sebelumnya
+        $user->tokens()->where('name', 'access-token')->delete();
+
+        // Buat access-token baru
+        $newAccessToken = $user->createToken(
+            'access-token',
+            [TokenAbility::ACCESS_API->value],
+            now()->addMinutes(config('sanctum.access_token_expiration'))
+        )->plainTextToken;
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Token berhasil diperbarui',
+            'access_token' => $newAccessToken,
+            'token_type' => 'Bearer',
+            'data' => $user
         ]);
     }
 
 
     public function logout(Request $request)
     {
-        $request->user()->currentAccessToken()->delete();
+        $request->user()->tokens()->delete();
+
         return response()->json([
             'success' => true,
-            'message' => 'Logged Out'
+            'message' => 'Berhasil Logout'
         ]);
     }
 }

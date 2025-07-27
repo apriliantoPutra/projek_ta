@@ -4,10 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:http/http.dart' as http;
-import 'package:mobile_ta/constants/constants.dart';
 import 'package:mobile_ta/pages/petugas/setor_langsung/petugas_setor_langsung_konfirmasi.dart';
+import 'package:mobile_ta/services/auth_service.dart';
 import 'package:mobile_ta/widget/petugas_main_widget.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 class PetugasSetorLangsungBaru extends StatefulWidget {
   final int id;
@@ -46,38 +45,79 @@ class _PetugasSetorLangsungBaruState extends State<PetugasSetorLangsungBaru> {
   }
 
   Future<void> fetchJenisSampah() async {
-    final prefs = await SharedPreferences.getInstance();
-    final token = prefs.getString('token');
+    final authService = AuthService();
+    final token = await authService.getToken();
+
     if (token == null) {
       debugPrint('Token tidak ditemukan');
       return;
     }
-    final response = await http.get(
-      Uri.parse('${dotenv.env['URL']}/jenis-sampah'),
-      headers: {'Authorization': 'Bearer $token', 'Accept': 'application/json'},
-    );
-    if (response.statusCode == 200) {
-      final json = jsonDecode(response.body);
-      setState(() {
-        _jenisSampahOptions = List<Map<String, dynamic>>.from(json['data']);
-      });
-    } else {
-      debugPrint('Gagal ambil data jenis sampah: ${response.body}');
+
+    try {
+      final response = await http.get(
+        Uri.parse('${dotenv.env['URL']}/jenis-sampah'),
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Accept': 'application/json',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final json = jsonDecode(response.body);
+        if (mounted) {
+          setState(() {
+            _jenisSampahOptions = List<Map<String, dynamic>>.from(json['data']);
+          });
+        }
+      } else if (response.statusCode == 401) {
+        final refreshed = await authService.refreshToken();
+        if (refreshed) {
+          await fetchJenisSampah();
+        }
+      } else {
+        debugPrint('Gagal ambil data jenis sampah: ${response.body}');
+      }
+    } catch (e) {
+      debugPrint('Error in fetchJenisSampah: $e');
     }
   }
 
   Future<void> fetchPengajuanSetor() async {
-    final prefs = await SharedPreferences.getInstance();
-    final token = prefs.getString('token') ?? '';
-    final resp = await http.get(
-      Uri.parse('${dotenv.env['URL']}/setor-langsung/${widget.id}'),
-      headers: {'Authorization': 'Bearer $token', 'Accept': 'application/json'},
-    );
-    if (resp.statusCode == 200) {
-      final data = jsonDecode(resp.body)['data'];
-      setState(() => pengajuanSetor = data);
-    } else {
-      throw Exception('fetchPengajuanSetor failed');
+    final authService = AuthService();
+    final token = await authService.getToken();
+
+    if (token == null) {
+      debugPrint('Token tidak ditemukan');
+      return;
+    }
+
+    try {
+      final resp = await http.get(
+        Uri.parse('${dotenv.env['URL']}/setor-langsung/${widget.id}'),
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Accept': 'application/json',
+        },
+      );
+
+      if (resp.statusCode == 200) {
+        final data = jsonDecode(resp.body)['data'];
+        if (mounted) {
+          setState(() => pengajuanSetor = data);
+        }
+      } else if (resp.statusCode == 401) {
+        final refreshed = await authService.refreshToken();
+        if (refreshed) {
+          await fetchPengajuanSetor();
+        } else {
+          throw Exception('fetchPengajuanSetor failed: Session expired');
+        }
+      } else {
+        throw Exception('fetchPengajuanSetor failed');
+      }
+    } catch (e) {
+      debugPrint('Error in fetchPengajuanSetor: $e');
+      rethrow;
     }
   }
 

@@ -1,12 +1,9 @@
-import 'dart:convert';
-import 'dart:ffi';
 import 'package:flutter/material.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:http/http.dart' as http;
 import 'package:mobile_ta/pages/petugas/info_page.dart';
 import 'package:mobile_ta/pages/petugas/notifikasi_page.dart';
 import 'package:mobile_ta/pages/petugas/petugas_edit_profil_page.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:mobile_ta/providers/auth_provider.dart';
+import 'package:provider/provider.dart';
 import '../auth/login_page.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -17,33 +14,14 @@ class PetugasAkunPage extends StatelessWidget {
     : super(key: key);
 
   Future<void> logout(BuildContext context) async {
-    final prefs = await SharedPreferences.getInstance();
-    final token = prefs.getString('token');
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    await authProvider.logout();
 
-    if (token == null) {
-      return;
-    }
-
-    final response = await http.post(
-      Uri.parse('${dotenv.env['URL']}/logout'),
-      headers: {'Authorization': 'Bearer $token', 'Accept': 'application/json'},
+    Navigator.pushAndRemoveUntil(
+      context,
+      MaterialPageRoute(builder: (_) => const LoginPage()),
+      (route) => false,
     );
-
-    if (response.statusCode == 200) {
-      await prefs.remove('token');
-      Navigator.pushAndRemoveUntil(
-        context,
-        MaterialPageRoute(
-          builder: (_) => LoginPage(),
-        ), // Ganti dengan halaman login
-        (route) => false,
-      );
-    } else {
-      final message = jsonDecode(response.body)['message'] ?? 'Gagal logout';
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(message)));
-    }
   }
 
   @override

@@ -6,7 +6,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 import 'package:mobile_ta/pages/warga/setor_langsung/status_page.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:mobile_ta/services/auth_service.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class WargaDetailSetorLangsung extends StatefulWidget {
@@ -134,16 +134,16 @@ class _WargaDetailSetorLangsungState extends State<WargaDetailSetorLangsung> {
     });
   }
 
-  Future<void> fetchBankSampah() async {
+  Future<Map<String, dynamic>?> fetchBankSampah() async {
+    final authService = AuthService();
+    final token = await authService.getToken();
+
+    if (token == null) {
+      debugPrint('Token tidak ditemukan');
+      return null;
+    }
+
     try {
-      final prefs = await SharedPreferences.getInstance();
-      final token = prefs.getString('token');
-
-      if (token == null) {
-        debugPrint('Token tidak ditemukan');
-        return;
-      }
-
       final response = await http.get(
         Uri.parse('${dotenv.env['URL']}/bank-sampah'),
         headers: {
@@ -155,20 +155,32 @@ class _WargaDetailSetorLangsungState extends State<WargaDetailSetorLangsung> {
       if (response.statusCode == 200) {
         final responseData = jsonDecode(response.body);
         if (responseData['data'] != null) {
-          setState(() {
-            bankSampah = responseData['data'];
-          });
+          if (mounted) {
+            setState(() {
+              bankSampah = responseData['data'];
+            });
+          }
+          return responseData['data'];
+        }
+      } else if (response.statusCode == 401) {
+        final refreshed = await authService.refreshToken();
+        if (refreshed) {
+          return await fetchBankSampah();
         }
       } else {
-        debugPrint('Failed to fetch bank sampah: ${response.statusCode}');
+        debugPrint('Gagal ambil data bank sampah: ${response.body}');
       }
     } catch (e) {
-      debugPrint('Error in fetchBankSampah: $e');
-      rethrow;
+      debugPrint('Error fetch bank sampah: $e');
     }
+    return null;
   }
 
   Future<void> storePengajuanSetorLangsung() async {
+    final authService = AuthService();
+    final token = await authService.getToken();
+
+    // Validasi awal
     if (formattedDate == null) {
       if (mounted) {
         ScaffoldMessenger.of(
@@ -177,9 +189,6 @@ class _WargaDetailSetorLangsungState extends State<WargaDetailSetorLangsung> {
       }
       return;
     }
-
-    final prefs = await SharedPreferences.getInstance();
-    final String? token = prefs.getString('token');
 
     if (token == null) {
       if (mounted) {
@@ -192,14 +201,11 @@ class _WargaDetailSetorLangsungState extends State<WargaDetailSetorLangsung> {
       return;
     }
 
-    final url = Uri.parse("${dotenv.env['URL']}/setor-langsung");
     try {
-      setState(() {
-        isLoading = true;
-      });
+      if (mounted) setState(() => isLoading = true);
 
       final response = await http.post(
-        url,
+        Uri.parse("${dotenv.env['URL']}/setor-langsung"),
         headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json',
@@ -210,6 +216,14 @@ class _WargaDetailSetorLangsungState extends State<WargaDetailSetorLangsung> {
           'catatan_petugas': widget.catatan ?? '',
         }),
       );
+
+      if (response.statusCode == 401) {
+        final refreshed = await authService.refreshToken();
+        if (refreshed) {
+          await storePengajuanSetorLangsung();
+          return;
+        }
+      }
 
       final responseData = jsonDecode(response.body);
 
@@ -226,7 +240,7 @@ class _WargaDetailSetorLangsungState extends State<WargaDetailSetorLangsung> {
             MaterialPageRoute(
               builder: (context) => const WargaStatusTungguSetorLangsung(),
             ),
-            (Route<dynamic> route) => false,
+            (route) => false,
           );
         }
       } else {
@@ -239,18 +253,14 @@ class _WargaDetailSetorLangsungState extends State<WargaDetailSetorLangsung> {
         }
       }
     } catch (e) {
-      debugPrint("Error: $e");
+      debugPrint("Error in storePengajuanSetorLangsung: $e");
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Terjadi kesalahan, coba lagi.')),
         );
       }
     } finally {
-      if (mounted) {
-        setState(() {
-          isLoading = false;
-        });
-      }
+      if (mounted) setState(() => isLoading = false);
     }
   }
 

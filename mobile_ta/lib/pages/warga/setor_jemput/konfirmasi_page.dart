@@ -6,7 +6,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:mobile_ta/services/auth_service.dart';
 import 'package:mobile_ta/pages/warga/setor_jemput/status_page.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -176,15 +176,15 @@ class _WargaKonfirmasiSetorJemputPageState
   }
 
   Future<Map<String, dynamic>?> fetchBankSampah() async {
+    final authService = AuthService();
+    final token = await authService.getToken();
+
+    if (token == null) {
+      debugPrint('Token tidak ditemukan');
+      return null;
+    }
+
     try {
-      final prefs = await SharedPreferences.getInstance();
-      final token = prefs.getString('token');
-
-      if (token == null) {
-        debugPrint('Token tidak ditemukan');
-        return null;
-      }
-
       final response = await http.get(
         Uri.parse('${dotenv.env['URL']}/bank-sampah'),
         headers: {
@@ -195,50 +195,80 @@ class _WargaKonfirmasiSetorJemputPageState
 
       if (response.statusCode == 200) {
         final responseData = jsonDecode(response.body);
-        setState(() {
-          bankSampah = responseData['data'];
-        });
+        if (responseData['data'] != null) {
+          if (mounted) {
+            setState(() {
+              bankSampah = responseData['data'];
+            });
+          }
+          return responseData['data'];
+        }
+      } else if (response.statusCode == 401) {
+        final refreshed = await authService.refreshToken();
+        if (refreshed) {
+          return await fetchBankSampah();
+        }
       } else {
-        debugPrint(
-          'Gagal ambil data bank sampah: ${response.statusCode} - ${response.body}',
-        );
+        debugPrint('Gagal ambil data bank sampah: ${response.body}');
       }
     } catch (e) {
-      debugPrint('Error in fetchBankSampah: $e');
+      debugPrint('Error fetch bank sampah: $e');
     }
     return null;
   }
 
   Future<void> processSetoran() async {
-    final prefs = await SharedPreferences.getInstance();
-    final token = prefs.getString('token');
-    if (token == null) return;
+    final authService = AuthService();
+    final token = await authService.getToken();
 
-    for (var item in widget.dataSetoran) {
-      final int jenisId = item['jenis_sampah_id'];
-      final double berat = item['berat'];
+    if (token == null) {
+      debugPrint('Token tidak ditemukan');
+      if (mounted) setState(() => isLoading = false);
+      return;
+    }
 
-      if (!jenisSampahCache.containsKey(jenisId)) {
-        final response = await http.get(
-          Uri.parse('${dotenv.env['URL']}/jenis-sampah/$jenisId'),
-          headers: {
-            'Authorization': 'Bearer $token',
-            'Accept': 'application/json',
-          },
-        );
+    // Reset values
+    processedSetoran.clear();
+    totalBerat = 0;
+    totalHarga = 0;
 
-        if (response.statusCode == 200) {
-          final data = json.decode(response.body)['data'];
-          jenisSampahCache[jenisId] = {
-            'nama': data['nama_sampah'],
-            'harga': data['harga_per_satuan'],
-            'warna': data['warna_indikasi'],
-          };
+    try {
+      for (var item in widget.dataSetoran) {
+        final int jenisId = item['jenis_sampah_id'];
+        final double berat = item['berat'] * 1.0;
+
+        Map<String, dynamic> jenisData;
+        if (jenisSampahCache.containsKey(jenisId)) {
+          jenisData = jenisSampahCache[jenisId]!;
+        } else {
+          final response = await http.get(
+            Uri.parse('${dotenv.env['URL']}/jenis-sampah/$jenisId'),
+            headers: {
+              'Authorization': 'Bearer $token',
+              'Accept': 'application/json',
+            },
+          );
+
+          if (response.statusCode == 200) {
+            final data = json.decode(response.body)['data'];
+            jenisData = {
+              'nama': data['nama_sampah'],
+              'harga': data['harga_per_satuan'],
+              'warna': data['warna_indikasi'],
+            };
+            jenisSampahCache[jenisId] = jenisData;
+          } else if (response.statusCode == 401) {
+            final refreshed = await authService.refreshToken();
+            if (refreshed) {
+              return await processSetoran(); // Retry entire process
+            }
+            break; // Skip if refresh fails
+          } else {
+            debugPrint('Gagal ambil data jenis sampah id: $jenisId');
+            continue;
+          }
         }
-      }
 
-      final jenisData = jenisSampahCache[jenisId];
-      if (jenisData != null) {
         final int harga = jenisData['harga'];
         final int subtotal = (berat * harga).round();
 
@@ -253,22 +283,33 @@ class _WargaKonfirmasiSetorJemputPageState
         totalBerat += berat;
         totalHarga += subtotal;
       }
+    } catch (e) {
+      debugPrint('Error in processSetoran: $e');
+    } finally {
+      if (mounted) {
+        setState(() => isLoading = false);
+      }
     }
   }
 
   Future<void> storePengajuanSetorJemput() async {
+    final authService = AuthService();
+    final token = await authService.getToken();
+
+    // Validasi awal
     calculateServiceFee();
     final totalAkhir = totalHarga - biayaLayanan;
 
-    // Validasi total akhir tidak boleh negatif
     if (totalAkhir < 0) {
-      setState(() {
-        isTotalValid = false;
-        totalError = "Total insentif tidak boleh negatif";
-      });
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(totalError!)));
+      if (mounted) {
+        setState(() {
+          isTotalValid = false;
+          totalError = "Total insentif tidak boleh negatif";
+        });
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(totalError!)));
+      }
       return;
     }
 
@@ -281,9 +322,6 @@ class _WargaKonfirmasiSetorJemputPageState
       return;
     }
 
-    final prefs = await SharedPreferences.getInstance();
-    final String? token = prefs.getString('token');
-
     if (token == null) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -295,22 +333,19 @@ class _WargaKonfirmasiSetorJemputPageState
       return;
     }
 
-    final List<Map<String, dynamic>> setoranSampah =
-        widget.dataSetoran.map((item) {
-          return {
-            "jenis_sampah_id": item['jenis_sampah_id'],
-            "berat": item['berat'],
-          };
-        }).toList();
-
-    final url = Uri.parse("${dotenv.env['URL']}/setor-jemput");
     try {
-      setState(() {
-        isLoading = true;
-      });
+      if (mounted) setState(() => isLoading = true);
+
+      final setoranSampah =
+          widget.dataSetoran.map((item) {
+            return {
+              "jenis_sampah_id": item['jenis_sampah_id'],
+              "berat": item['berat'],
+            };
+          }).toList();
 
       final response = await http.post(
-        url,
+        Uri.parse("${dotenv.env['URL']}/setor-jemput"),
         headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json',
@@ -324,6 +359,14 @@ class _WargaKonfirmasiSetorJemputPageState
           'total_harga': totalAkhir,
         }),
       );
+
+      if (response.statusCode == 401) {
+        final refreshed = await authService.refreshToken();
+        if (refreshed) {
+          await storePengajuanSetorJemput();
+          return;
+        }
+      }
 
       final responseData = jsonDecode(response.body);
 
@@ -340,7 +383,7 @@ class _WargaKonfirmasiSetorJemputPageState
             MaterialPageRoute(
               builder: (context) => const WargaStatusTungguSetorJemput(),
             ),
-            (Route<dynamic> route) => false,
+            (route) => false,
           );
         }
       } else {
@@ -353,18 +396,14 @@ class _WargaKonfirmasiSetorJemputPageState
         }
       }
     } catch (e) {
-      debugPrint("Error: $e");
+      debugPrint("Error in storePengajuanSetorJemput: $e");
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Terjadi kesalahan, coba lagi.')),
         );
       }
     } finally {
-      if (mounted) {
-        setState(() {
-          isLoading = false;
-        });
-      }
+      if (mounted) setState(() => isLoading = false);
     }
   }
 

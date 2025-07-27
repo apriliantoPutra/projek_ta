@@ -7,9 +7,9 @@ import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
+import 'package:mobile_ta/services/auth_service.dart';
 import 'package:mobile_ta/widget/petugas_main_widget.dart';
 import 'package:path/path.dart' as Path;
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class PetugasEditProfilPage extends StatefulWidget {
@@ -286,29 +286,37 @@ class _PetugasEditProfilPageState extends State<PetugasEditProfilPage> {
   }
 
   Future<void> _submitForm() async {
-    if (!mounted) return;
+    if (mounted) setState(() => _isLoading = true);
 
-    setState(() => _isLoading = true);
+    final authService = AuthService();
+    final token = await authService.getToken();
+
+    if (token == null) {
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('Token tidak ditemukan')));
+        setState(() => _isLoading = false);
+      }
+      return;
+    }
 
     try {
-      final prefs = await SharedPreferences.getInstance();
-      final token = prefs.getString('token');
-      if (token == null) throw Exception('Token tidak tersedia');
+      var uri = Uri.parse('${dotenv.env['URL']}/profil');
+      var request = http.MultipartRequest('POST', uri);
+      request.headers['Authorization'] = 'Bearer $token';
+      request.headers['Accept'] = 'application/json';
 
-      final uri = Uri.parse('${dotenv.env['URL']}/profil');
-      final request =
-          http.MultipartRequest('POST', uri)
-            ..headers['Authorization'] = 'Bearer $token'
-            ..fields['nama_pengguna'] = _namaController.text
-            ..fields['alamat_pengguna'] = _alamatController.text
-            ..fields['no_hp_pengguna'] = _telponController.text
-            ..fields['koordinat_pengguna'] = _koordinatController.text
-            ..fields['_method'] = 'PUT';
+      request.fields['nama_pengguna'] = _namaController.text;
+      request.fields['alamat_pengguna'] = _alamatController.text;
+      request.fields['no_hp_pengguna'] = _telponController.text;
+      request.fields['koordinat_pengguna'] = _koordinatController.text;
+      request.fields['_method'] = 'PUT';
 
       if (_profileImage != null) {
-        final stream = http.ByteStream(_profileImage!.openRead());
-        final length = await _profileImage!.length();
-        final multipartFile = http.MultipartFile(
+        var stream = http.ByteStream(_profileImage!.openRead());
+        var length = await _profileImage!.length();
+        var multipartFile = http.MultipartFile(
           'gambar_pengguna',
           stream,
           length,
@@ -317,12 +325,10 @@ class _PetugasEditProfilPageState extends State<PetugasEditProfilPage> {
         request.files.add(multipartFile);
       }
 
-      final response = await request.send();
-      final resData = await response.stream.bytesToString();
-      final json = jsonDecode(resData);
+      var response = await request.send();
 
-      if (mounted) {
-        if (response.statusCode == 200 || response.statusCode == 201) {
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
               content: Text('Profil berhasil diedit'),
@@ -333,7 +339,16 @@ class _PetugasEditProfilPageState extends State<PetugasEditProfilPage> {
             MaterialPageRoute(builder: (context) => PetugasMainWrapper()),
             (Route<dynamic> route) => false,
           );
-        } else {
+        }
+      } else if (response.statusCode == 401) {
+        final refreshed = await authService.refreshToken();
+        if (refreshed) {
+          await _submitForm();
+        }
+      } else {
+        final resData = await response.stream.bytesToString();
+        final json = jsonDecode(resData);
+        if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(json['message'] ?? 'Gagal edit profil'),
@@ -352,9 +367,7 @@ class _PetugasEditProfilPageState extends State<PetugasEditProfilPage> {
         );
       }
     } finally {
-      if (mounted) {
-        setState(() => _isLoading = false);
-      }
+      if (mounted) setState(() => _isLoading = false);
     }
   }
 

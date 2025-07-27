@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:http/http.dart' as http;
-import 'dart:convert';
 import 'package:mobile_ta/pages/auth/register_page.dart';
+import 'package:mobile_ta/providers/auth_provider.dart';
 import 'package:mobile_ta/widget/petugas_main_widget.dart';
 import 'package:mobile_ta/widget/warga_main_widget.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:provider/provider.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class LoginPage extends StatefulWidget {
@@ -19,48 +17,56 @@ class _LoginPageState extends State<LoginPage> {
   final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   bool _isLoading = false;
+  bool _isInitializing = true;
 
-  Future<void> login() async {
-    setState(() {
-      _isLoading = true;
-    });
-    print(dotenv.env['URL']);
-    final response = await http.post(
-      Uri.parse('${dotenv.env['URL']}/authenticate'),
-      body: {
-        'username': _usernameController.text,
-        'password': _passwordController.text,
-      },
-    );
+  @override
+  void initState() {
+    super.initState();
+    _initialize();
+  }
 
-    setState(() {
-      _isLoading = false;
-    });
+  Future<void> _initialize() async {
+    await Future.delayed(const Duration(milliseconds: 500));
+    if (mounted) {
+      setState(() => _isInitializing = false);
+    }
+  }
 
-    if (response.statusCode == 200) {
-      final responseData = json.decode(response.body);
-      final role = responseData['data']['role'];
-      final token = responseData['token'];
+  Future<void> _login() async {
+    if (_isLoading) return;
 
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setString('token', token);
+    setState(() => _isLoading = true);
 
-      if (role == 'warga') {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (_) => WargaMainWrapper()),
-        );
-      } else if (role == 'petugas') {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (_) => PetugasMainWrapper()),
-        );
+    try {
+      final authProvider = Provider.of<AuthProvider>(context, listen: false);
+      final success = await authProvider.login(
+        _usernameController.text,
+        _passwordController.text,
+      );
+
+      if (!success) {
+        _showError('Login gagal. Periksa username dan password Anda.');
       } else {
-        _showError('Role tidak dikenali.');
+        // Redirect berdasarkan role setelah login berhasil
+        final user = authProvider.userData;
+        if (user?['role'] == 'warga') {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (_) => const WargaMainWrapper()),
+          );
+        } else if (user?['role'] == 'petugas') {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (_) => const PetugasMainWrapper()),
+          );
+        }
       }
-    } else {
-      final responseData = json.decode(response.body);
-      _showError(responseData['message'] ?? 'Gagal login');
+    } catch (e) {
+      _showError('Terjadi kesalahan: ${e.toString()}');
+    } finally {
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
     }
   }
 
@@ -69,12 +75,12 @@ class _LoginPageState extends State<LoginPage> {
       context: context,
       builder:
           (_) => AlertDialog(
-            title: Text('Login Gagal'),
+            title: const Text('Login Gagal'),
             content: Text(message),
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(context),
-                child: Text('OK'),
+                child: const Text('OK'),
               ),
             ],
           ),
@@ -83,6 +89,9 @@ class _LoginPageState extends State<LoginPage> {
 
   @override
   Widget build(BuildContext context) {
+    if (_isInitializing) {
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+    }
     return Scaffold(
       backgroundColor: Colors.white,
       body: SingleChildScrollView(
@@ -180,7 +189,7 @@ class _LoginPageState extends State<LoginPage> {
                       ),
                       SizedBox(height: 22),
                       ElevatedButton(
-                        onPressed: _isLoading ? null : login,
+                        onPressed: _isLoading ? null : _login,
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Color(0xFF128d54),
                           shape: RoundedRectangleBorder(

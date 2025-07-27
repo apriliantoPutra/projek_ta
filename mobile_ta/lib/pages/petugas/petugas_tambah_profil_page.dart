@@ -6,10 +6,9 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
-import 'package:mobile_ta/constants/constants.dart';
+import 'package:mobile_ta/services/auth_service.dart';
 import 'package:mobile_ta/widget/petugas_main_widget.dart';
 import 'package:path/path.dart' as Path;
-import 'package:shared_preferences/shared_preferences.dart';
 
 class PetugasTambahProfilPage extends StatefulWidget {
   const PetugasTambahProfilPage({super.key});
@@ -82,15 +81,26 @@ class _PetugasTambahProfilPageState extends State<PetugasTambahProfilPage> {
   }
 
   Future<void> _submitForm() async {
-    setState(() => _isLoading = true);
+    if (mounted) setState(() => _isLoading = true);
+
+    final authService = AuthService();
+    final token = await authService.getToken();
+
+    if (token == null) {
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('Token tidak ditemukan')));
+        setState(() => _isLoading = false);
+      }
+      return;
+    }
 
     try {
-      SharedPreferences prefs = await SharedPreferences.getInstance();
-      String? token = prefs.getString('token');
-
       var uri = Uri.parse('${dotenv.env['URL']}/profil');
       var request = http.MultipartRequest('POST', uri);
       request.headers['Authorization'] = 'Bearer $token';
+      request.headers['Accept'] = 'application/json';
 
       request.fields['nama_pengguna'] = _namapenggunaController.text;
       request.fields['alamat_pengguna'] = _alamatpenggunaController.text;
@@ -124,6 +134,11 @@ class _PetugasTambahProfilPageState extends State<PetugasTambahProfilPage> {
             (Route<dynamic> route) => false,
           );
         }
+      } else if (response.statusCode == 401) {
+        final refreshed = await authService.refreshToken();
+        if (refreshed) {
+          await _submitForm();
+        }
       } else {
         final resData = await response.stream.bytesToString();
         final json = jsonDecode(resData);
@@ -146,9 +161,7 @@ class _PetugasTambahProfilPageState extends State<PetugasTambahProfilPage> {
         );
       }
     } finally {
-      if (mounted) {
-        setState(() => _isLoading = false);
-      }
+      if (mounted) setState(() => _isLoading = false);
     }
   }
 

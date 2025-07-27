@@ -3,9 +3,8 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
-import 'package:mobile_ta/constants/constants.dart';
 import 'package:mobile_ta/pages/petugas/setor_langsung/petugas_setor_langsung_selesai.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:mobile_ta/services/auth_service.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class PetugasSetorLangsungKonfirmasi extends StatefulWidget {
@@ -45,70 +44,99 @@ class _PetugasSetorLangsungKonfirmasiState
   }
 
   Future<void> processSetoran() async {
-    final prefs = await SharedPreferences.getInstance();
-    final token = prefs.getString('token');
+    final authService = AuthService();
+    final token = await authService.getToken();
 
     if (token == null) {
       debugPrint('Token tidak ditemukan');
+      if (mounted) setState(() => isLoading = false);
       return;
     }
 
-    for (var item in widget.dataSetoran) {
-      final int jenisId = item['jenis_sampah_id'];
-      final double berat = item['berat'] * 1.0;
-      Map<String, dynamic> jenisData;
+    // Reset values
+    processedSetoran.clear();
+    totalBerat = 0;
+    totalHarga = 0;
 
-      if (jenisSampahCache.containsKey(jenisId)) {
-        jenisData = jenisSampahCache[jenisId]!;
-      } else {
-        final response = await http.get(
-          Uri.parse('${dotenv.env['URL']}/jenis-sampah/$jenisId'),
-          headers: {
-            'Authorization': 'Bearer $token',
-            'Accept': 'application/json',
-          },
-        );
-        if (response.statusCode == 200) {
-          final data = json.decode(response.body)['data'];
-          jenisData = {
-            'nama': data['nama_sampah'],
-            'harga': data['harga_per_satuan'],
-            'warna': data['warna_indikasi'],
-          };
-          jenisSampahCache[jenisId] = jenisData;
+    try {
+      for (var item in widget.dataSetoran) {
+        final int jenisId = item['jenis_sampah_id'];
+        final double berat = item['berat'] * 1.0;
+        Map<String, dynamic> jenisData;
+
+        if (jenisSampahCache.containsKey(jenisId)) {
+          jenisData = jenisSampahCache[jenisId]!;
         } else {
-          debugPrint('Gagal ambil data jenis sampah id: $jenisId');
-          continue;
+          final response = await http.get(
+            Uri.parse('${dotenv.env['URL']}/jenis-sampah/$jenisId'),
+            headers: {
+              'Authorization': 'Bearer $token',
+              'Accept': 'application/json',
+            },
+          );
+
+          if (response.statusCode == 200) {
+            final data = json.decode(response.body)['data'];
+            jenisData = {
+              'nama': data['nama_sampah'],
+              'harga': data['harga_per_satuan'],
+              'warna': data['warna_indikasi'],
+            };
+            jenisSampahCache[jenisId] = jenisData;
+          } else if (response.statusCode == 401) {
+            final refreshed = await authService.refreshToken();
+            if (refreshed) {
+              return await processSetoran(); // Retry entire process
+            }
+            break;
+          } else {
+            debugPrint('Gagal ambil data jenis sampah id: $jenisId');
+            continue;
+          }
         }
+
+        final int harga = jenisData['harga'];
+        final int subtotal = (berat * harga).round();
+        processedSetoran.add({
+          'nama': jenisData['nama'],
+          'berat': berat,
+          'harga': harga,
+          'subtotal': subtotal,
+          'warna': jenisData['warna'],
+        });
+        totalBerat += berat;
+        totalHarga += subtotal;
       }
-
-      final int harga = jenisData['harga'];
-      final int subtotal = (berat * harga).round();
-      processedSetoran.add({
-        'nama': jenisData['nama'],
-        'berat': berat,
-        'harga': harga,
-        'subtotal': subtotal,
-        'warna': jenisData['warna'],
-      });
-      totalBerat += berat;
-      totalHarga += subtotal;
+    } catch (e) {
+      debugPrint('Error in processSetoran: $e');
+    } finally {
+      if (mounted) {
+        setState(() => isLoading = false);
+      }
     }
-
-    setState(() {
-      isLoading = false;
-    });
   }
 
   Future<void> _confirmSetoran() async {
-    setState(() => isLoading = true);
+    final authService = AuthService();
+    final token = await authService.getToken();
 
-    final prefs = await SharedPreferences.getInstance();
-    final token = prefs.getString('token') ?? '';
+    if (token == null) {
+      if (mounted) {
+        setState(() => isLoading = false);
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text("Token tidak ditemukan")));
+      }
+      return;
+    }
+
+    if (mounted) setState(() => isLoading = true);
 
     try {
       final resp = await http.post(
-        Uri.parse('${dotenv.env['URL']}/setor-langsung/detail-sampah/${widget.id}'),
+        Uri.parse(
+          '${dotenv.env['URL']}/setor-langsung/detail-sampah/${widget.id}',
+        ),
         headers: {
           'Authorization': 'Bearer $token',
           'Content-Type': 'application/json',
@@ -121,20 +149,30 @@ class _PetugasSetorLangsungKonfirmasiState
         }),
       );
 
+      if (resp.statusCode == 401) {
+        final refreshed = await authService.refreshToken();
+        if (refreshed) {
+          await _confirmSetoran();
+          return;
+        }
+      }
+
       final response = jsonDecode(resp.body);
 
       if (resp.statusCode == 200) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("Pengajuan berhasil dikonfirmasi.")),
-        );
-        Navigator.pushAndRemoveUntil(
-          context,
-          MaterialPageRoute(
-            builder: (context) => PetugasSetorLangsungSelesai(id: widget.id),
-          ),
-          (Route<dynamic> route) => false,
-        );
-      } else {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text("Pengajuan berhasil dikonfirmasi.")),
+          );
+          Navigator.pushAndRemoveUntil(
+            context,
+            MaterialPageRoute(
+              builder: (context) => PetugasSetorLangsungSelesai(id: widget.id),
+            ),
+            (Route<dynamic> route) => false,
+          );
+        }
+      } else if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
@@ -144,11 +182,16 @@ class _PetugasSetorLangsungKonfirmasiState
         );
       }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Terjadi kesalahan: ${e.toString()}")),
-      );
+      debugPrint('Error in _confirmSetoran: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("Terjadi kesalahan: ${e.toString()}")),
+        );
+      }
     } finally {
-      setState(() => isLoading = false);
+      if (mounted) {
+        setState(() => isLoading = false);
+      }
     }
   }
 

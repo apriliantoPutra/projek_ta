@@ -3,6 +3,7 @@
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
+use Laravel\Sanctum\Http\Middleware\CheckForAnyAbility;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -15,6 +16,8 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'authorization'=> \App\Http\Middleware\Authenticate::class,
             'admin'=> \App\Http\Middleware\Akses::class,
+            'ability'=> CheckForAnyAbility::class,
+            'ability_with_message' => \App\Http\Middleware\CheckAbilityWithMessage::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {

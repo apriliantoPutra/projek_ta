@@ -5,11 +5,10 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:http/http.dart' as http;
-import 'package:mobile_ta/constants/constants.dart';
 import 'package:mobile_ta/pages/petugas/detail_map/map_bank_sampah_map_warga_page.dart';
 import 'package:mobile_ta/pages/petugas/setor_jemput/petugas_setor_jemput_selesai.dart';
+import 'package:mobile_ta/services/auth_service.dart';
 import 'package:mobile_ta/widget/petugas_main_widget.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 class PetugasSetorJemputProses extends StatefulWidget {
   final int id;
@@ -118,8 +117,8 @@ class _PetugasSetorJemputProsesState extends State<PetugasSetorJemputProses> {
         if (!jenisSampahCache.containsKey(jenisId)) {
           try {
             // 2. Jika tidak ada di cache, ambil dari API detail
-            final prefs = await SharedPreferences.getInstance();
-            final token = prefs.getString('token');
+            final authService = AuthService();
+            final token = await authService.getToken();
 
             if (token != null) {
               final response = await http.get(
@@ -137,6 +136,29 @@ class _PetugasSetorJemputProsesState extends State<PetugasSetorJemputProses> {
                   'harga': data['harga_per_satuan'] as int,
                   'warna': data['warna_indikasi'] as String,
                 };
+              } else if (response.statusCode == 401) {
+                final refreshed = await authService.refreshToken();
+                if (refreshed) {
+                  // Retry the current item
+                  if (!jenisSampahCache.containsKey(jenisId)) {
+                    final retryResponse = await http.get(
+                      Uri.parse('${dotenv.env['URL']}/jenis-sampah/$jenisId'),
+                      headers: {
+                        'Authorization':
+                            'Bearer ${await authService.getToken()}',
+                        'Accept': 'application/json',
+                      },
+                    );
+                    if (retryResponse.statusCode == 200) {
+                      final retryData = json.decode(retryResponse.body)['data'];
+                      jenisSampahCache[jenisId] = {
+                        'nama': retryData['nama_sampah'] as String,
+                        'harga': retryData['harga_per_satuan'] as int,
+                        'warna': retryData['warna_indikasi'] as String,
+                      };
+                    }
+                  }
+                }
               }
             }
           } catch (e) {
@@ -176,7 +198,9 @@ class _PetugasSetorJemputProsesState extends State<PetugasSetorJemputProses> {
     }
 
     calculateServiceFee();
-    setState(() {});
+    if (mounted) {
+      setState(() {});
+    }
   }
 
   void _updateMarkers() {
@@ -225,72 +249,121 @@ class _PetugasSetorJemputProsesState extends State<PetugasSetorJemputProses> {
   }
 
   Future<Map<String, dynamic>?> fetchBankSampah() async {
-    final prefs = await SharedPreferences.getInstance();
-    final token = prefs.getString('token');
+    final authService = AuthService();
+    final token = await authService.getToken();
 
     if (token == null) {
       debugPrint('Token tidak ditemukan');
       return null;
     }
 
-    final response = await http.get(
-      Uri.parse('${dotenv.env['URL']}/bank-sampah'),
-      headers: {'Authorization': 'Bearer $token', 'Accept': 'application/json'},
-    );
+    try {
+      final response = await http.get(
+        Uri.parse('${dotenv.env['URL']}/bank-sampah'),
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Accept': 'application/json',
+        },
+      );
 
-    if (response.statusCode == 200) {
-      final responseData = jsonDecode(response.body);
-      if (responseData['data'] != null) {
-        setState(() {
-          bankSampah = responseData['data'];
-        });
-        return responseData['data'];
+      if (response.statusCode == 200) {
+        final responseData = jsonDecode(response.body);
+        if (responseData['data'] != null) {
+          if (mounted) {
+            setState(() {
+              bankSampah = responseData['data'];
+            });
+          }
+          return responseData['data'];
+        }
+      } else if (response.statusCode == 401) {
+        final refreshed = await authService.refreshToken();
+        if (refreshed) {
+          return await fetchBankSampah();
+        }
+      } else {
+        debugPrint('Gagal ambil data bank sampah: ${response.body}');
       }
-    } else {
-      debugPrint('Gagal ambil data bank sampah: ${response.body}');
+    } catch (e) {
+      debugPrint('Error fetch bank sampah: $e');
     }
     return null;
   }
 
   Future<void> fetchPengajuanDetailSetor() async {
-    final prefs = await SharedPreferences.getInstance();
-    final token = prefs.getString('token') ?? '';
-    final resp = await http.get(
-      Uri.parse('${dotenv.env['URL']}/setor-jemput/${widget.id}'),
-      headers: {'Authorization': 'Bearer $token', 'Accept': 'application/json'},
-    );
+    final authService = AuthService();
+    final token = await authService.getToken();
 
-    if (resp.statusCode == 200) {
-      final responseData = jsonDecode(resp.body);
-      if (responseData['data'] != null) {
-        setState(() {
-          pengajuanDetailSetor = responseData['data'];
-        });
+    if (token == null) {
+      debugPrint('Token tidak ditemukan');
+      return;
+    }
+
+    try {
+      final response = await http.get(
+        Uri.parse('${dotenv.env['URL']}/setor-jemput/${widget.id}'),
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Accept': 'application/json',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final responseData = json.decode(response.body);
+        if (responseData['data'] != null && mounted) {
+          setState(() {
+            pengajuanDetailSetor = responseData['data'];
+          });
+        }
+      } else if (response.statusCode == 401) {
+        final refreshed = await authService.refreshToken();
+        if (refreshed) {
+          await fetchPengajuanDetailSetor();
+        }
+      } else {
+        throw Exception('Gagal memuat data pengajuan');
       }
-    } else {
-      throw Exception('Gagal memuat data pengajuan');
+    } catch (e) {
+      debugPrint('Error in fetchPengajuanDetailSetor: $e');
+      rethrow;
     }
   }
 
   Future<void> fetchJenisSampahOptions() async {
-    final prefs = await SharedPreferences.getInstance();
-    final token = prefs.getString('token');
-    if (token == null) return;
+    final authService = AuthService();
+    final token = await authService.getToken();
 
-    final response = await http.get(
-      Uri.parse('${dotenv.env['URL']}/jenis-sampah'),
-      headers: {'Authorization': 'Bearer $token', 'Accept': 'application/json'},
-    );
+    if (token == null) {
+      debugPrint('Token tidak ditemukan');
+      return;
+    }
 
-    if (response.statusCode == 200) {
-      final responseData = jsonDecode(response.body);
-      if (responseData['data'] != null) {
-        setState(() {
-          _jenisSampahOptions = List<Map<String, dynamic>>.from(
-            responseData['data'],
-          );
-        });
+    try {
+      final response = await http.get(
+        Uri.parse('${dotenv.env['URL']}/jenis-sampah'),
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Accept': 'application/json',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final responseData = json.decode(response.body);
+        if (responseData['data'] != null && mounted) {
+          setState(() {
+            _jenisSampahOptions = List<Map<String, dynamic>>.from(
+              responseData['data'],
+            );
+          });
+        }
+      } else if (response.statusCode == 401) {
+        final refreshed = await authService.refreshToken();
+        if (refreshed) {
+          await fetchJenisSampahOptions();
+        }
       }
+    } catch (e) {
+      debugPrint('Error in fetchJenisSampahOptions: $e');
     }
   }
 
@@ -310,9 +383,8 @@ class _PetugasSetorJemputProsesState extends State<PetugasSetorJemputProses> {
           };
         }).toList();
 
-    // Gunakan endpoint detail untuk data awal
-    final prefs = await SharedPreferences.getInstance();
-    final token = prefs.getString('token');
+    final authService = AuthService();
+    final token = await authService.getToken();
 
     if (token != null) {
       for (var item in setoranSampah) {
@@ -334,6 +406,26 @@ class _PetugasSetorJemputProsesState extends State<PetugasSetorJemputProses> {
                 'harga': data['harga_per_satuan'] as int,
                 'warna': data['warna_indikasi'] as String,
               };
+            } else if (response.statusCode == 401) {
+              final refreshed = await authService.refreshToken();
+              if (refreshed) {
+                // Retry for this item
+                final retryResponse = await http.get(
+                  Uri.parse('${dotenv.env['URL']}/jenis-sampah/$jenisId'),
+                  headers: {
+                    'Authorization': 'Bearer ${await authService.getToken()}',
+                    'Accept': 'application/json',
+                  },
+                );
+                if (retryResponse.statusCode == 200) {
+                  final retryData = json.decode(retryResponse.body)['data'];
+                  jenisSampahCache[jenisId] = {
+                    'nama': retryData['nama_sampah'] as String,
+                    'harga': retryData['harga_per_satuan'] as int,
+                    'warna': retryData['warna_indikasi'] as String,
+                  };
+                }
+              }
             }
           } catch (e) {
             debugPrint('Gagal mengambil detail jenis sampah: $e');
@@ -377,30 +469,44 @@ class _PetugasSetorJemputProsesState extends State<PetugasSetorJemputProses> {
     for (var i = 0; i < _jenisSampahList.length; i++) {
       final item = _jenisSampahList[i];
       if (item['jenis_sampah_id'] == null) {
-        setState(() {
-          _jenisSampahList[i]['error'] = 'Pilih jenis sampah';
-        });
+        if (mounted) {
+          setState(() {
+            _jenisSampahList[i]['error'] = 'Pilih jenis sampah';
+          });
+        }
         hasError = true;
       }
       if (item['berat'] == null || item['berat'] <= 0) {
-        setState(() {
-          _jenisSampahList[i]['error'] = 'Berat harus lebih dari 0';
-        });
+        if (mounted) {
+          setState(() {
+            _jenisSampahList[i]['error'] = 'Berat harus lebih dari 0';
+          });
+        }
         hasError = true;
       }
     }
 
     if (hasError) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Harap periksa input Anda')));
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Harap periksa input Anda')));
+      }
       return;
     }
 
-    setState(() => isLoading = true);
-    final prefs = await SharedPreferences.getInstance();
-    final token = prefs.getString('token');
-    if (token == null) return;
+    if (mounted) {
+      setState(() => isLoading = true);
+    }
+
+    final authService = AuthService();
+    final token = await authService.getToken();
+    if (token == null) {
+      if (mounted) {
+        setState(() => isLoading = false);
+      }
+      return;
+    }
 
     try {
       // Pastikan perhitungan terbaru
@@ -417,11 +523,16 @@ class _PetugasSetorJemputProsesState extends State<PetugasSetorJemputProses> {
       final totalAkhir = totalHarga - biayaLayanan;
 
       if (totalAkhir <= 0) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Total harga tidak boleh kurang dari biaya layanan'),
-          ),
-        );
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                'Total harga tidak boleh kurang dari biaya layanan',
+              ),
+            ),
+          );
+          setState(() => isLoading = false);
+        }
         return;
       }
 
@@ -440,20 +551,31 @@ class _PetugasSetorJemputProsesState extends State<PetugasSetorJemputProses> {
       );
 
       if (response.statusCode == 200) {
-        Navigator.pushAndRemoveUntil(
-          context,
-          MaterialPageRoute(
-            builder: (context) => PetugasSetorJemputSelesai(id: widget.id),
-          ),
-          (Route<dynamic> route) => false,
-        );
+        if (mounted) {
+          Navigator.pushAndRemoveUntil(
+            context,
+            MaterialPageRoute(
+              builder: (context) => PetugasSetorJemputSelesai(id: widget.id),
+            ),
+            (Route<dynamic> route) => false,
+          );
+        }
+      } else if (response.statusCode == 401) {
+        final refreshed = await authService.refreshToken();
+        if (refreshed) {
+          await konfirmasiSetoran(); // Retry after refresh
+        } else {
+          throw Exception('Gagal mengkonfirmasi setoran: Session expired');
+        }
       } else {
         throw Exception('Gagal mengkonfirmasi setoran: ${response.body}');
       }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Terjadi kesalahan: ${e.toString()}')),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Terjadi kesalahan: ${e.toString()}')),
+        );
+      }
     } finally {
       if (mounted) {
         setState(() => isLoading = false);

@@ -3,7 +3,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:mobile_ta/services/auth_service.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class HasilSetorSampahPage extends StatefulWidget {
@@ -29,62 +29,78 @@ class _HasilSetorSampahPageState extends State<HasilSetorSampahPage> {
   }
 
   Future<void> processSetoran() async {
-    final prefs = await SharedPreferences.getInstance();
-    final token = prefs.getString('token');
+    final authService = AuthService();
+    final token = await authService.getToken();
 
     if (token == null) {
       debugPrint('Token tidak ditemukan');
+      if (mounted) setState(() => isLoading = false);
       return;
     }
 
-    for (var item in widget.dataSetoran) {
-      final int jenisId = item['jenis_sampah_id'];
-      final double berat = item['berat'] * 1.0;
+    // Reset values
+    processedSetoran.clear();
+    totalBerat = 0;
+    totalHarga = 0;
 
-      Map<String, dynamic> jenisData;
-      if (jenisSampahCache.containsKey(jenisId)) {
-        jenisData = jenisSampahCache[jenisId]!;
-      } else {
-        final response = await http.get(
-          Uri.parse('${dotenv.env['URL']}/jenis-sampah/$jenisId'),
-          headers: {
-            'Authorization': 'Bearer $token',
-            'Accept': 'application/json',
-          },
-        );
+    try {
+      for (var item in widget.dataSetoran) {
+        final int jenisId = item['jenis_sampah_id'];
+        final double berat = item['berat'] * 1.0;
 
-        if (response.statusCode == 200) {
-          final data = json.decode(response.body)['data'];
-          jenisData = {
-            'nama': data['nama_sampah'],
-            'harga': data['harga_per_satuan'],
-            'warna': data['warna_indikasi'],
-          };
-          jenisSampahCache[jenisId] = jenisData;
+        Map<String, dynamic> jenisData;
+        if (jenisSampahCache.containsKey(jenisId)) {
+          jenisData = jenisSampahCache[jenisId]!;
         } else {
-          debugPrint('Gagal ambil data jenis sampah id: $jenisId');
-          continue;
+          final response = await http.get(
+            Uri.parse('${dotenv.env['URL']}/jenis-sampah/$jenisId'),
+            headers: {
+              'Authorization': 'Bearer $token',
+              'Accept': 'application/json',
+            },
+          );
+
+          if (response.statusCode == 200) {
+            final data = json.decode(response.body)['data'];
+            jenisData = {
+              'nama': data['nama_sampah'],
+              'harga': data['harga_per_satuan'],
+              'warna': data['warna_indikasi'],
+            };
+            jenisSampahCache[jenisId] = jenisData;
+          } else if (response.statusCode == 401) {
+            final refreshed = await authService.refreshToken();
+            if (refreshed) {
+              return await processSetoran(); // Retry entire process
+            }
+            break; // Skip if refresh fails
+          } else {
+            debugPrint('Gagal ambil data jenis sampah id: $jenisId');
+            continue;
+          }
         }
+
+        final int harga = jenisData['harga'];
+        final int subtotal = (berat * harga).round();
+
+        processedSetoran.add({
+          'nama': jenisData['nama'],
+          'berat': berat,
+          'harga': harga,
+          'subtotal': subtotal,
+          'warna': jenisData['warna'],
+        });
+
+        totalBerat += berat;
+        totalHarga += subtotal;
       }
-
-      final int harga = jenisData['harga'];
-      final int subtotal = (berat * harga).round();
-
-      processedSetoran.add({
-        'nama': jenisData['nama'],
-        'berat': berat,
-        'harga': harga,
-        'subtotal': subtotal,
-        'warna': jenisData['warna'],
-      });
-
-      totalBerat += berat;
-      totalHarga += subtotal;
+    } catch (e) {
+      debugPrint('Error in processSetoran: $e');
+    } finally {
+      if (mounted) {
+        setState(() => isLoading = false);
+      }
     }
-
-    setState(() {
-      isLoading = false;
-    });
   }
 
   @override

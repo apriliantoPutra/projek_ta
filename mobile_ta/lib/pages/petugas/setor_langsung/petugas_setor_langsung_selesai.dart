@@ -2,10 +2,8 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
-import 'package:mobile_ta/constants/constants.dart';
+import 'package:mobile_ta/services/auth_service.dart';
 import 'package:mobile_ta/widget/petugas_main_widget.dart';
-import 'package:path/path.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class PetugasSetorLangsungSelesai extends StatefulWidget {
@@ -42,68 +40,121 @@ class _PetugasSetorLangsungSelesaiState
   }
 
   Future<void> fetchPengajuanDetailSetor() async {
-    final prefs = await SharedPreferences.getInstance();
-    final token = prefs.getString('token') ?? '';
-    final resp = await http.get(
-      Uri.parse('${dotenv.env['URL']}/setor-langsung/selesai/${widget.id}'),
-      headers: {'Authorization': 'Bearer $token', 'Accept': 'application/json'},
-    );
-    if (resp.statusCode == 200) {
-      final data = jsonDecode(resp.body)['data'];
-      setState(() {
-        pengajuanDetailSetor = data;
-      });
-    } else {
-      throw Exception('fetchPengajuanSetor failed');
+    final authService = AuthService();
+    final token = await authService.getToken();
+
+    if (token == null) {
+      debugPrint('Token tidak ditemukan');
+      throw Exception('Authentication required');
+    }
+
+    try {
+      final response = await http.get(
+        Uri.parse('${dotenv.env['URL']}/setor-langsung/selesai/${widget.id}'),
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Accept': 'application/json',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body)['data'];
+        if (mounted) {
+          setState(() {
+            pengajuanDetailSetor = data;
+          });
+        }
+      } else if (response.statusCode == 401) {
+        final refreshed = await authService.refreshToken();
+        if (refreshed) {
+          await fetchPengajuanDetailSetor(); // Retry after refresh
+        } else {
+          throw Exception('Session expired');
+        }
+      } else {
+        throw Exception(
+          'fetchPengajuanSetor failed with status: ${response.statusCode}',
+        );
+      }
+    } catch (e) {
+      debugPrint('Error in fetchPengajuanDetailSetor: $e');
+      rethrow;
     }
   }
 
   Future<void> processSetoranData() async {
     if (pengajuanDetailSetor == null) return;
 
-    final prefs = await SharedPreferences.getInstance();
-    final token = prefs.getString('token') ?? '';
-    final detailSetoran = pengajuanDetailSetor!['input_detail'];
-    final setoranSampah = detailSetoran['setoran_sampah'] as List;
+    final authService = AuthService();
+    final token = await authService.getToken();
 
-    totalBerat = (detailSetoran['total_berat'] as num).toDouble();
-    totalHarga = detailSetoran['total_harga'] as int;
+    if (token == null) {
+      debugPrint('Token tidak ditemukan');
+      return;
+    }
 
-    for (var item in setoranSampah) {
-      final int jenisId = item['jenis_sampah_id'];
-      final double berat = (item['berat'] as num).toDouble();
+    try {
+      final detailSetoran = pengajuanDetailSetor!['input_detail'];
+      final setoranSampah = detailSetoran['setoran_sampah'] as List;
 
-      if (!jenisSampahCache.containsKey(jenisId)) {
-        final response = await http.get(
-          Uri.parse('${dotenv.env['URL']}/jenis-sampah/$jenisId'),
-          headers: {
-            'Authorization': 'Bearer $token',
-            'Accept': 'application/json',
-          },
-        );
+      // Reset processed data
+      processedSetoran.clear();
+      totalBerat = (detailSetoran['total_berat'] as num).toDouble();
+      totalHarga = detailSetoran['total_harga'] as int;
 
-        if (response.statusCode == 200) {
-          final data = json.decode(response.body)['data'];
-          jenisSampahCache[jenisId] = {
-            'nama': data['nama_sampah'],
-            'harga': data['harga_per_satuan'],
-            'warna': data['warna_indikasi'],
-          };
+      for (var item in setoranSampah) {
+        final int jenisId = item['jenis_sampah_id'];
+        final double berat = (item['berat'] as num).toDouble();
+
+        if (!jenisSampahCache.containsKey(jenisId)) {
+          final response = await http.get(
+            Uri.parse('${dotenv.env['URL']}/jenis-sampah/$jenisId'),
+            headers: {
+              'Authorization': 'Bearer $token',
+              'Accept': 'application/json',
+            },
+          );
+
+          if (response.statusCode == 200) {
+            final data = json.decode(response.body)['data'];
+            jenisSampahCache[jenisId] = {
+              'nama': data['nama_sampah'],
+              'harga': data['harga_per_satuan'],
+              'warna': data['warna_indikasi'],
+            };
+          } else if (response.statusCode == 401) {
+            final refreshed = await authService.refreshToken();
+            if (refreshed) {
+              return await processSetoranData(); // Retry entire process
+            }
+            return; // Skip if refresh fails
+          }
+        }
+
+        final jenisData = jenisSampahCache[jenisId];
+        if (jenisData != null) {
+          final int harga = jenisData['harga'];
+          final int subtotal = (berat * harga).round();
+
+          processedSetoran.add({
+            'nama': jenisData['nama'],
+            'berat': berat,
+            'harga': harga,
+            'subtotal': subtotal,
+            'warna': jenisData['warna'],
+          });
         }
       }
 
-      final jenisData = jenisSampahCache[jenisId];
-      if (jenisData != null) {
-        final int harga = jenisData['harga'];
-        final int subtotal = (berat * harga).round();
-
-        processedSetoran.add({
-          'nama': jenisData['nama'],
-          'berat': berat,
-          'harga': harga,
-          'subtotal': subtotal,
-          'warna': jenisData['warna'],
-        });
+      if (mounted) {
+        setState(() {}); // Trigger UI update
+      }
+    } catch (e) {
+      debugPrint('Error in processSetoranData: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error processing data: ${e.toString()}')),
+        );
       }
     }
   }
