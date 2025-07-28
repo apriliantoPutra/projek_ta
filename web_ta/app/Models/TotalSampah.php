@@ -12,5 +12,7 @@ class TotalSampah extends Model
         'sampah_id',
         'total_berat',
     ];
-    
+    protected $casts = [
+        'total_berat' => 'float',
+    ];
 }

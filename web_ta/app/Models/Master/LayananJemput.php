@@ -12,6 +12,9 @@ class LayananJemput extends Model
         'bank_sampah_id',
         'ongkir_per_jarak',
     ];
+    protected $casts = [
+        'ongkir_per_jarak' => 'integer',
+    ];
 
     /**
      * Get the bankSampah that owns the LayananJemput

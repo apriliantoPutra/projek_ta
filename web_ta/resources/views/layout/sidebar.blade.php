@@ -4,7 +4,7 @@
         <!-- Bagian Atas (Logo + Navigasi) -->
         <div>
             <div class="px-5 py-2 text-center bg-green-300 text-white">
-                <img src="/img/logo.png" alt="Logo" class="w-17 mx-auto">
+                <img src="{{ asset('img/White.png') }}" alt="Logo" class="w-17 mx-auto">
             </div>
             <nav class="px-4 py-4 space-y-2 overflow-auto">
                 <a href="/dashboard"

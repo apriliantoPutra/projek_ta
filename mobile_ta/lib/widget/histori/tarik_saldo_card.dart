@@ -44,7 +44,7 @@ class TarikSaldoCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final jumlah = data['jumlah_saldo'] ?? 0;
+    final int jumlah = data['jumlah_saldo'];
     final status = data['status'] ?? '';
     final metode = data['metode'] ?? '';
     final tanggal = data['tanggal_format'] ?? '';

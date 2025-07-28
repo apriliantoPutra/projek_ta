@@ -20,7 +20,7 @@ class AuthService {
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
         await _saveAuthData(data);
-        _startTokenRefreshTimer(); // <-- Tambahkan ini
+        _startTokenRefreshTimer();
         return {'success': true, 'data': data['data']};
       } else {
         return {
@@ -83,7 +83,7 @@ class AuthService {
 
   void _startTokenRefreshTimer() {
     _tokenRefreshTimer?.cancel();
-    _tokenRefreshTimer = Timer.periodic(const Duration(minutes: 14), (
+    _tokenRefreshTimer = Timer.periodic(const Duration(minutes: 15), (
       timer,
     ) async {
       await refreshToken();

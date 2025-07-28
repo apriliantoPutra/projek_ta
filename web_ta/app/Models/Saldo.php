@@ -11,4 +11,7 @@ class Saldo extends Model
         'warga_id',
         'total_saldo',
     ];
+    protected $casts = [
+        'total_saldo' => 'integer',
+    ];
 }

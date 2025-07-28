@@ -14,4 +14,7 @@ class PenarikanSaldo extends Model
         'status_penarikan',
         'catatan_penarikan',
     ];
+    protected $casts = [
+        'jumlah_penarikan' => 'integer',
+    ];
 }

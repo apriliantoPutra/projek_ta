@@ -15,6 +15,9 @@ class TarikSaldo extends Model
         'nomor_tarik_saldo',
         'pesan'
     ];
+    protected $casts = [
+        'jumlah_saldo' => 'integer',
+    ];
 
     public function user(): BelongsTo
     {

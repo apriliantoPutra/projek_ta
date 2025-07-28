@@ -15,6 +15,9 @@ class JenisSampah extends Model
         'harga_per_satuan',
         'warna_indikasi',
     ];
+      protected $casts = [
+        'harga_per_satuan' => 'integer',
+    ];
 
     /**
      * Get the user associated with the JenisSampah

@@ -15,6 +15,10 @@ class InputDetailSetor extends Model
         'total_harga',
         'status_setor',
     ];
+    protected $casts = [
+        'total_berat' => 'float',
+        'total_harga' => 'integer',
+    ];
 
     public function user(): BelongsTo
     {
