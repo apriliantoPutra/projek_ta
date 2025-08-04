@@ -16,12 +16,18 @@ class CheckAbilityWithMessage
     public function handle(Request $request, Closure $next, $ability)
     {
         $token = $request->user()->currentAccessToken();
-
-        if (!$token || !$token->can($ability)) {
+        if (!$token) {
             return response()->json([
                 'success' => false,
-                'message' => 'Token yang Anda masukan salah.'
-            ], Response::HTTP_FORBIDDEN);
+                'message' => 'Token tidak ditemukan atau tidak valid'
+            ], 401);
+        }
+
+        if (!$token->can($ability)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Akses ditolak, tidak memiliki izin'
+            ], 403);
         }
 
         return $next($request);

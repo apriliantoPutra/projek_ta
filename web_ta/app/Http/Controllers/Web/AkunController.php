@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Web;
 
 use App\Http\Controllers\Controller;
-
+use App\Models\Notification;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -75,22 +75,32 @@ class AkunController extends Controller
         DB::beginTransaction();
 
         try {
-            $user = User::with('profil', 'saldo', 'pengajuansetor', 'inputdetailsetor')->findOrFail($id);
+            $user = User::with('profil', 'saldo', 'pengajuansetor.inputdetail', 'inputdetailsetor', 'tariksaldo')->findOrFail($id);
 
+            // Hapus profil (One-to-One)
             $user->profil()?->delete();
-            $user->saldo?->each(function ($item) {
-                $item->delete();
-            });
-            $user->pengajuansetor?->each(function ($item) {
-                $item->delete();
-            });
 
-            $user->inputdetailsetor?->each(function ($item) {
-                $item->delete();
-            });
+            // Hapus saldo
+            $user->saldo()?->delete();
+
+            // Hapus tarik saldo
+            $user->tariksaldo()->delete();
 
 
-            // Terakhir hapus user
+            // Hapus InputDetailSetor yang dimiliki user sebagai petugas_id
+            $user->inputdetailsetor()->delete();
+
+            // Hapus InputDetailSetor yang terkait dengan pengajuansetor (via pengajuan_id)
+            $user->pengajuansetor->each(function ($pengajuan) {
+                $pengajuan->inputdetail()?->delete(); // Perbaiki disini
+            });
+
+            // Hapus Pengajuan Setor (setelah inputdetailsetor-nya dihapus)
+            $user->pengajuansetor()->delete();
+
+            Notification::where('akun_id', $user->id)->delete();
+
+            // Hapus User terakhir
             $user->delete();
 
             DB::commit();

@@ -211,7 +211,7 @@ class _KumpulanHistoriSetorPageState extends State<KumpulanHistoriSetorPage>
               ),
         ),
         title: Text(
-          'Daftar Setor Sampah',
+          'Daftar Histori Setor Sampah',
           style: GoogleFonts.poppins(
             fontWeight: FontWeight.bold,
             color: Colors.white,

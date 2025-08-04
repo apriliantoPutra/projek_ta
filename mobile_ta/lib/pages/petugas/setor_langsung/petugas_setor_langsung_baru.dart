@@ -135,7 +135,7 @@ class _PetugasSetorLangsungBaruState extends State<PetugasSetorLangsungBaru> {
       return Scaffold(
         appBar: AppBar(
           title: Text(
-            "Setor Langsung Sampah",
+            "Setor Sampah Langsung",
             style: GoogleFonts.poppins(
               fontWeight: FontWeight.bold,
               color: Color(0xFF128d54),
@@ -172,7 +172,7 @@ class _PetugasSetorLangsungBaruState extends State<PetugasSetorLangsungBaru> {
               ),
         ),
         title: Text(
-          "Daftar Setor Sampah",
+          "Setor Sampah Langsung",
           style: GoogleFonts.poppins(
             fontWeight: FontWeight.bold,
             color: Color(0xFF128d54),

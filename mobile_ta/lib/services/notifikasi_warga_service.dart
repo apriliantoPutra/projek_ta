@@ -6,7 +6,7 @@ import 'package:http/http.dart' as http;
 import 'package:mobile_ta/models/notification_model.dart';
 import 'package:mobile_ta/services/auth_service.dart';
 
-class NotificationService {
+class NotifikasiWargaService {
   final AuthService _authService = AuthService();
 
   Future<List<NotificationModel>> fetchNotifications() async {
@@ -19,7 +19,7 @@ class NotificationService {
 
     try {
       final response = await http.get(
-        Uri.parse('${dotenv.env['URL']}/notifikasi'),
+        Uri.parse('${dotenv.env['URL']}/notifikasi-warga'),
         headers: {
           'Authorization': 'Bearer $token',
           'Accept': 'application/json',
@@ -38,7 +38,9 @@ class NotificationService {
         }
         return [];
       } else {
-        throw Exception('Gagal memuat notifikasi. Status: ${response.statusCode}');
+        throw Exception(
+          'Gagal memuat notifikasi. Status: ${response.statusCode}',
+        );
       }
     } catch (e) {
       debugPrint('Error fetching notifications: $e');

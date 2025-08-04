@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
 import 'package:mobile_ta/services/auth_service.dart';
@@ -52,9 +53,12 @@ class _PetugasTambahProfilPageState extends State<PetugasTambahProfilPage> {
           child: Wrap(
             alignment: WrapAlignment.center,
             children: [
-              const Text(
+              Text(
                 "Pilih Foto Profil",
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                style: GoogleFonts.poppins(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 16,
+                ),
               ),
               const SizedBox(height: 16),
               ListTile(
@@ -234,97 +238,109 @@ class _PetugasTambahProfilPageState extends State<PetugasTambahProfilPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.greenAccent.shade400,
-        elevation: 0,
-        centerTitle: true,
-        title: const Text(
-          'Tambah Profil',
-          style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
-        ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.check, color: Colors.white),
-            onPressed: _isLoading ? null : _submitForm,
+    return WillPopScope(
+      onWillPop:
+          () async => false, 
+      child: Scaffold(
+        appBar: AppBar(
+          backgroundColor: Colors.white,
+          elevation: 0,
+          centerTitle: true,
+          automaticallyImplyLeading: false,
+          title: Text(
+            'Tambah Profil',
+            style: GoogleFonts.poppins(
+              fontWeight: FontWeight.bold,
+              color: Color(0xFF128d54),
+              fontSize: 24,
+            ),
           ),
-        ],
-      ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          children: [
-            GestureDetector(
-              onTap: _showImagePickerOptions,
-              child: Center(
-                child: Stack(
-                  alignment: Alignment.bottomRight,
-                  children: [
-                    CircleAvatar(
-                      radius: 55,
-                      backgroundColor: Colors.grey.shade300,
-                      backgroundImage:
-                          _profileImage != null
-                              ? FileImage(_profileImage!)
-                              : const NetworkImage(
-                                    'https://i.pinimg.com/736x/8a/e9/e9/8ae9e92fa4e69967aa61bf2bda967b7b.jpg',
-                                  )
-                                  as ImageProvider,
-                    ),
-                    const CircleAvatar(
-                      radius: 16,
-                      backgroundColor: Colors.white,
-                      child: Icon(Icons.edit, color: Colors.green),
+          actions: [
+            IconButton(
+              icon: const Icon(Icons.check, color: Color(0xFF128d54)),
+              onPressed: _isLoading ? null : _submitForm,
+            ),
+          ],
+        ),
+        body: SingleChildScrollView(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            children: [
+              GestureDetector(
+                onTap: _showImagePickerOptions,
+                child: Center(
+                  child: Stack(
+                    alignment: Alignment.bottomRight,
+                    children: [
+                      CircleAvatar(
+                        radius: 55,
+                        backgroundColor: Colors.grey.shade300,
+                        backgroundImage:
+                            _profileImage != null
+                                ? FileImage(_profileImage!)
+                                : const NetworkImage(
+                                      'https://i.pinimg.com/736x/8a/e9/e9/8ae9e92fa4e69967aa61bf2bda967b7b.jpg',
+                                    )
+                                    as ImageProvider,
+                      ),
+                      const CircleAvatar(
+                        radius: 16,
+                        backgroundColor: Colors.white,
+                        child: Icon(Icons.edit, color: Colors.green),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(height: 20),
+              // Form Data
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [Color(0xFF6BBE44), Color(0xFF128d54)],
+                    begin: Alignment.bottomCenter,
+                    end: Alignment.topCenter,
+                  ),
+                  borderRadius: BorderRadius.circular(20),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.green.withOpacity(0.10),
+                      blurRadius: 16,
+                      offset: Offset(0, 6),
                     ),
                   ],
                 ),
-              ),
-            ),
-            const SizedBox(height: 20),
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: Colors.greenAccent.shade400,
-                borderRadius: BorderRadius.circular(20),
-              ),
-              child: Column(
-                children: [
-                  _buildTextField("Nama Lengkap", _namapenggunaController),
-                  _buildTextField("Telpon", _nohppenggunaController),
-                  _buildTextField("Alamat", _alamatpenggunaController),
-                  _buildTextField(
-                    "Titik Koordinat",
-                    _koordinatpenggunaController,
-                  ),
-                  const SizedBox(height: 12),
-                  SizedBox(
-                    width: double.infinity, // Agar tombol memenuhi lebar
-                    child: ElevatedButton.icon(
-                      icon: const Icon(Icons.location_on, size: 20),
-                      label: const Text('Lokasi Terkini'),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.white,
-                        foregroundColor: Colors.greenAccent.shade400,
-                        padding: const EdgeInsets.symmetric(vertical: 12),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _buildTextField("Nama Lengkap", _namapenggunaController),
+                    _buildTextField("Telpon", _nohppenggunaController),
+                    _buildTextField("Alamat", _alamatpenggunaController),
+                    _buildCoordinateField(),
+                    const SizedBox(height: 12),
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton.icon(
+                        icon: const Icon(Icons.location_on, size: 20),
+                        label: const Text('Lokasi Terkini'),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.white,
+                          foregroundColor: Color(0xFF128d54),
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
                         ),
+                        onPressed: _isLoading ? null : _getCurrentLocation,
                       ),
-                      onPressed:
-                          _isLoading
-                              ? null
-                              : () async {
-                                setState(() => _isLoading = true);
-                                await _getCurrentLocation();
-                                setState(() => _isLoading = false);
-                              },
                     ),
-                  ),
-                  const SizedBox(height: 12),
-                ],
+                    const SizedBox(height: 12),
+                  ],
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -336,7 +352,7 @@ class _PetugasTambahProfilPageState extends State<PetugasTambahProfilPage> {
       children: [
         Text(
           label,
-          style: const TextStyle(
+          style: GoogleFonts.poppins(
             color: Colors.white,
             fontWeight: FontWeight.bold,
           ),
@@ -360,5 +376,46 @@ class _PetugasTambahProfilPageState extends State<PetugasTambahProfilPage> {
         const SizedBox(height: 12),
       ],
     );
+  }
+
+  Widget _buildCoordinateField() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          "Titik Koordinat",
+          style: GoogleFonts.poppins(
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        const SizedBox(height: 4),
+        TextField(
+          controller: _koordinatpenggunaController,
+          decoration: InputDecoration(
+            filled: true,
+            fillColor: Colors.white,
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 12,
+              vertical: 8,
+            ),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide.none,
+            ),
+          ),
+        ),
+        const SizedBox(height: 12),
+      ],
+    );
+  }
+
+  @override
+  void dispose() {
+    _namapenggunaController.dispose();
+    _nohppenggunaController.dispose();
+    _alamatpenggunaController.dispose();
+    _koordinatpenggunaController.dispose();
+    super.dispose();
   }
 }

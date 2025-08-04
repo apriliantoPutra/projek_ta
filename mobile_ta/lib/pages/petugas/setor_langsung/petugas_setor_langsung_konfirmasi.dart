@@ -159,7 +159,7 @@ class _PetugasSetorLangsungKonfirmasiState
 
       final response = jsonDecode(resp.body);
 
-      if (resp.statusCode == 200) {
+      if (resp.statusCode == 200 || resp.statusCode == 201) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text("Pengajuan berhasil dikonfirmasi.")),
@@ -215,7 +215,7 @@ class _PetugasSetorLangsungKonfirmasiState
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
-          'Setor Langsung Sampah',
+          'Setor Sampah Langsung',
           style: GoogleFonts.poppins(
             fontWeight: FontWeight.bold,
             color: Color(0xFF128d54),

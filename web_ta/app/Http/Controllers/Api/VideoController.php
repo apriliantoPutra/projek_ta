@@ -8,7 +8,7 @@ use Illuminate\Http\Request;
 
 class VideoController extends Controller
 {
-    public function index()
+    public function kumpulan()
     {
         $videos = Video::orderBy('created_at', 'desc')->get()->map(function ($videos) {
             $videos->video_url = asset('storage/' . $videos->video);
@@ -23,9 +23,9 @@ class VideoController extends Controller
         return response()->json([
             'success' => true,
             'data' => $videos
-        ]);
+        ], 200);
     }
-    public function terbaru()
+    public function limaTerbaru()
     {
         $videos = Video::orderBy('created_at', 'desc')->take(5)->get()->map(function ($videos) {
             $videos->video_url = asset('storage/' . $videos->video);
@@ -39,17 +39,17 @@ class VideoController extends Controller
         return response()->json([
             'success' => true,
             'data' => $videos
-        ]);
+        ], 200);
     }
 
-    public function show($id)
+    public function detail($id)
     {
         $video = Video::find($id);
 
         if (!$video) {
             return response()->json([
                 'success' => false,
-                'message' => 'Video tidak ditemukan'
+                'message' => 'Data video tidak ditemukan'
             ], 404);
         }
 
@@ -62,6 +62,6 @@ class VideoController extends Controller
         return response()->json([
             'success' => true,
             'data' => $video
-        ]);
+        ], 200);
     }
 }

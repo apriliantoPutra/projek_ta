@@ -39,7 +39,7 @@ class User extends Authenticatable
         'password',
         'remember_token',
     ];
-    
+
 
     /**
      * Get the attributes that should be cast.
@@ -76,6 +76,11 @@ class User extends Authenticatable
     {
         return $this->hasMany(PengajuanSetor::class, 'warga_id');
     }
+    public function tariksaldo(): HasMany
+    {
+        return $this->hasMany(TarikSaldo::class, 'warga_id');
+    }
+
     public function inputdetailsetor(): HasMany
     {
         return $this->hasMany(InputDetailSetor::class, 'petugas_id');

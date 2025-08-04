@@ -14,7 +14,7 @@ class WargaStatusTungguSetorJemput extends StatelessWidget {
         elevation: 0,
         centerTitle: true,
         title: Text(
-          'Setor Jemput',
+          'Status Setor Jemput',
           style: GoogleFonts.poppins(
             fontWeight: FontWeight.bold,
             color: Color(0xFF128d54),

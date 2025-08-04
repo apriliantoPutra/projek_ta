@@ -13,7 +13,7 @@ use Illuminate\Support\Facades\Validator;
 
 class ProfilController extends Controller
 {
-    public function store(Request $request)
+    public function tambah(Request $request)
     {
         $validator = Validator::make($request->all(), [
             'nama_pengguna' => 'required|string|max:255|unique:profil,nama_pengguna',
@@ -27,7 +27,7 @@ class ProfilController extends Controller
                 'success' => false,
                 'message' => 'Validasi gagal',
                 'errors' => $validator->errors()
-            ], 422);
+            ], 400);
         }
 
         DB::beginTransaction();
@@ -63,7 +63,7 @@ class ProfilController extends Controller
                 'success' => true,
                 'message' => 'Berhasil Tambah Profil ' . $cek_role,
                 'data' => $profil
-            ]);
+            ], 201);
         } catch (\Exception $e) {
             DB::rollBack();
             return response()->json(
@@ -76,7 +76,7 @@ class ProfilController extends Controller
         }
     }
 
-    public function show()
+    public function detail()
     {
         $akun_id = Auth::user()->id;
         $item = Profil::where('akun_id', '=', $akun_id)->first();
@@ -84,7 +84,7 @@ class ProfilController extends Controller
         if (!$item) {
             return response()->json([
                 'success' => false,
-                'message' => 'Profil tidak ditemukan'
+                'message' => 'Data profil tidak ditemukan'
             ], 404);
         }
 
@@ -107,10 +107,10 @@ class ProfilController extends Controller
         return response()->json([
             'success' => true,
             'data' => $profil
-        ]);
+        ], 200);
     }
 
-    public function update(Request $request)
+    public function edit(Request $request)
     {
         $akun_id = Auth::user()->id;
         $profil = Profil::where('akun_id', '=', $akun_id)->first();
@@ -128,8 +128,9 @@ class ProfilController extends Controller
                 'success' => false,
                 'message' => 'Validasi gagal',
                 'errors' => $validator->errors()
-            ], 422);
+            ], 400);
         }
+        
         $gambar_path = $profil->gambar_pengguna;
 
         DB::beginTransaction();
@@ -157,7 +158,7 @@ class ProfilController extends Controller
                 'success' => true,
                 'message' => 'Berhasil Edit Profil',
                 'data' => $profil
-            ]);
+            ], 200);
         } catch (\Exception $e) {
             DB::rollBack();
             return response()->json(

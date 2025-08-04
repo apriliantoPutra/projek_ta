@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\Auth;
 class HistoriController extends Controller
 {
     // warga
-    public function listSetorBaru()
+    public function kumpulanSetorBaru()
     {
         $warga_id = Auth::id();
         $pengajuan_setor = PengajuanSetor::with('user.profil')->where('warga_id', '=', $warga_id)->where('status_pengajuan', 'menunggu')->get()->map(function ($item) {
@@ -29,9 +29,9 @@ class HistoriController extends Controller
         return response()->json([
             'success' => true,
             'data' => $pengajuan_setor
-        ]);
+        ], 200);
     }
-    public function listSetorProses()
+    public function kumpulanSetorProses()
     {
         $warga_id = Auth::id();
         $pengajuan_setor = PengajuanSetor::with(['user.profil', 'inputdetail'])
@@ -57,10 +57,10 @@ class HistoriController extends Controller
         return response()->json([
             'success' => true,
             'data' => $pengajuan_setor
-        ]);
+        ], 200);
     }
 
-    public function listSetorSelesai()
+    public function kumpulanSetorSelesai()
     {
         $warga_id = Auth::id();
         $pengajuan_setor = PengajuanSetor::with(['user.profil', 'inputdetail'])
@@ -85,9 +85,9 @@ class HistoriController extends Controller
         return response()->json([
             'success' => true,
             'data' => $pengajuan_setor
-        ]);
+        ], 200);
     }
-    public function listSetorBatal()
+    public function kumpulanSetorBatal()
     {
         $warga_id = Auth::id();
         $pengajuan_setor = PengajuanSetor::with(['user.profil'])
@@ -109,16 +109,16 @@ class HistoriController extends Controller
         return response()->json([
             'success' => true,
             'data' => $pengajuan_setor
-        ]);
+        ], 200);
     }
 
-    public function detailSetor($id)
+    public function detailSetorSampah($id)
     {
         $item = PengajuanSetor::with('user.profil', 'inputdetail')->find($id);
         if (!$item) {
             return response()->json([
                 'success' => false,
-                'message' => 'Pengajuan tidak ditemukan',
+                'message' => 'Data histori detail setor sampah tidak ditemukan',
             ], 404);
         }
         $profil = $item->user->profil;
@@ -151,10 +151,10 @@ class HistoriController extends Controller
         return response()->json([
             'success' => true,
             'data' => $pengajuan_setor,
-        ]);
+        ], 200);
     }
 
-    public function listSaldo()
+    public function kumpulanTarikSaldo()
     {
         $warga_id = Auth::id();
         $histori_saldo = TarikSaldo::with('user.profil')->where('warga_id', '=', $warga_id)->get()->map(function ($item) {
@@ -177,10 +177,10 @@ class HistoriController extends Controller
         return response()->json([
             'success' => true,
             'data' => $histori_saldo,
-        ]);
+        ], 200);
     }
 
-    public function detailSaldo($id)
+    public function detailTarikSaldo($id)
     {
         $item = TarikSaldo::with('user.profil')->find($id);
         if (!$item) {
@@ -208,6 +208,6 @@ class HistoriController extends Controller
         return response()->json([
             'success' => true,
             'data' => $histori_saldo,
-        ]);
+        ], 200);
     }
 }

@@ -30,7 +30,7 @@ class TarikSaldoController extends Controller
                 'success' => true,
                 'message' => 'Berhasil Tambah Pengajuan Tarik Saldo',
                 'data' => $tarik_saldo
-            ]);
+            ], 201);
         } catch (\Exception $e) {
             DB::rollBack();
             return response()->json(
@@ -54,6 +54,6 @@ class TarikSaldoController extends Controller
         return response()->json([
             'success' => true,
             'data' => (int) $jumlah_saldo,
-        ]);
+        ], 200);
     }
 }

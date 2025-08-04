@@ -8,7 +8,7 @@ use Illuminate\Http\Request;
 
 class TotalSampahController
 {
-    public function totalSampah()
+    public function semuaSampah()
     {
         $total_berat = TotalSampah::sum('total_berat');
 
@@ -17,9 +17,9 @@ class TotalSampahController
         return response()->json([
             'success' => true,
             'data' => $total_sampah,
-        ]);
+        ], 200);
     }
-    public function totalSampahBotol()
+    public function sampahBotolPlastik()
     {
         $item = JenisSampah::where('nama_sampah', 'botol plastik')->first();
         $total_berat_botol = TotalSampah::where('sampah_id', $item->id)->value('total_berat');
@@ -29,6 +29,6 @@ class TotalSampahController
         return response()->json([
             'success' => true,
             'data' => $total_sampah_botol,
-        ]);
+        ], 200);
     }
 }

@@ -147,8 +147,16 @@ class _ChatbotPageState extends State<ChatbotPage> {
         decoration: BoxDecoration(
           color:
               message.isUser
-                  ? Theme.of(context).colorScheme.primaryContainer
-                  : Theme.of(context).colorScheme.surfaceVariant,
+                  ? const Color(0xFF128d54).withOpacity(
+                    0.15,
+                  ) // User Bubble Hijau Muda
+                  : Colors.white, // Bot Bubble Putih
+          border:
+              message.isUser
+                  ? null
+                  : Border.all(
+                    color: const Color(0xFF128d54).withOpacity(0.3),
+                  ), // Border hijau tipis utk Bot
           borderRadius: BorderRadius.circular(20),
         ),
         child: MarkdownBody(
@@ -157,8 +165,8 @@ class _ChatbotPageState extends State<ChatbotPage> {
             p: TextStyle(
               color:
                   message.isUser
-                      ? Theme.of(context).colorScheme.onPrimaryContainer
-                      : Theme.of(context).colorScheme.onSurfaceVariant,
+                      ? const Color(0xFF128d54) // User Text hijau tegas
+                      : Colors.black87,
             ),
           ),
         ),
@@ -170,7 +178,7 @@ class _ChatbotPageState extends State<ChatbotPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Colors.greenAccent.shade400,
+        backgroundColor: const Color(0xFF128d54),
         title: const Text(
           'Chatbot',
           style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
@@ -284,8 +292,28 @@ class _ChatbotPageState extends State<ChatbotPage> {
                           _sendCount >= _maxSendCount
                               ? 'Message limit reached'
                               : 'Type your message...',
+                      filled: true,
+                      fillColor: Colors.white,
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(24),
+                        borderSide: BorderSide(
+                          color: const Color(0xFF128d54),
+                          width: 2,
+                        ),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(24),
+                        borderSide: BorderSide(
+                          color: const Color(0xFF128d54),
+                          width: 2,
+                        ),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(24),
+                        borderSide: BorderSide(
+                          color: const Color(0xFF128d54),
+                          width: 3,
+                        ),
                       ),
                       contentPadding: const EdgeInsets.symmetric(
                         horizontal: 16,
@@ -297,6 +325,7 @@ class _ChatbotPageState extends State<ChatbotPage> {
                                 padding: EdgeInsets.all(12),
                                 child: CircularProgressIndicator(
                                   strokeWidth: 2,
+                                  color: Color(0xFF128d54),
                                 ),
                               )
                               : null,

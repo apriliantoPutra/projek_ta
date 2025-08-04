@@ -9,44 +9,44 @@ use Illuminate\Http\Request;
 
 class MasterDataController extends Controller
 {
-    public function jenisSampahIndex()
+    public function kumpulanJenisSampah()
     {
         $jenisSampah = JenisSampah::all();
 
         return response()->json([
             'success' => true,
             'data' => $jenisSampah
-        ]);
+        ], 200);
     }
-    public function jenisSampahShow($id)
+    public function detailJenisSampah($id)
     {
         $jenisSampah = JenisSampah::find($id);
 
         if (!$jenisSampah) {
             return response()->json([
                 'success' => false,
-                'message' => 'Data tidak ditemukan'
+                'message' => 'Data jenis sampah ditemukan'
             ], 404);
         }
 
         return response()->json([
             'success' => true,
             'data' => $jenisSampah
-        ]);
+        ], 200);
     }
 
-    public function bankSampahIndex()
+    public function detailBankSampah()
     {
         $item = BankSampah::with('user.profil', 'layananJemput')->first();
 
         if (!$item) {
             return response()->json([
                 'success' => false,
-                'message' => 'Data tidak ditemukan'
+                'message' => 'Data Bank Sampah tidak ditemukan'
             ], 404);
         }
         $profil = $item->user->profil;
-        $koordinat = str_replace(' ', '', $item->koordinat_bank_sampah); // Hilangkan spasi
+        $koordinat = str_replace(' ', '', $item->koordinat_bank_sampah);
         $koordinatParts = explode(',', $koordinat);
         $latitude = $koordinatParts[0] ?? null;
         $longitude = $koordinatParts[1] ?? null;
@@ -76,7 +76,7 @@ class MasterDataController extends Controller
         return response()->json([
             'success' => true,
             'data' => $bankSampah
-        ]);
+        ], 200);
     }
 
     public function bankSampahShow($id)

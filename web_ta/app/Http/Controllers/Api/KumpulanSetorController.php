@@ -36,9 +36,9 @@ class KumpulanSetorController extends Controller
         return response()->json([
             'success' => true,
             'data' => $pengajuan_setor
-        ]);
+        ], 200);
     }
-    public function terbaru()
+    public function limaTerbaru()
     {
         $pengajuan_setor = PengajuanSetor::with(['user.profil'])->where('status_pengajuan', 'menunggu')->take(5)->get()->map(function ($item) {
             $profil = $item->user->profil;
@@ -65,7 +65,7 @@ class KumpulanSetorController extends Controller
         return response()->json([
             'success' => true,
             'data' => $pengajuan_setor
-        ]);
+        ], 200);
     }
     public function proses()
     {
@@ -104,7 +104,7 @@ class KumpulanSetorController extends Controller
         return response()->json([
             'success' => true,
             'data' => $pengajuan_setor
-        ]);
+        ], 200);
     }
     public function selesai()
     {
@@ -138,6 +138,6 @@ class KumpulanSetorController extends Controller
         return response()->json([
             'success' => true,
             'data' => $pengajuan_setor
-        ]);
+        ], 200);
     }
 }

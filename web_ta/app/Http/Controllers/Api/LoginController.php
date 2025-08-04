@@ -31,10 +31,11 @@ class LoginController extends Controller
         if ($validator->fails()) {
             return response()->json([
                 'success' => false,
-                'message' => $validator->errors()->first(),
+                'message' => 'Validasi gagal',
                 'errors' => $validator->errors()
-            ], 422);
+            ], 400);
         }
+
         DB::beginTransaction();
 
         try {
@@ -50,7 +51,7 @@ class LoginController extends Controller
                 'success' => true,
                 'message' => 'Registrasi Berhasil',
                 'data' => $akun
-            ]);
+            ], 201);
         } catch (\Exception $e) {
             DB::rollBack();
             return response()->json(
@@ -68,7 +69,7 @@ class LoginController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'Periksa kembali username atau password Anda',
-            ], 400);
+            ], 401);
         }
 
         $akun = User::where('username', $request['username'])->firstOrFail();
@@ -86,7 +87,7 @@ class LoginController extends Controller
             'access_token' => $access_token,
             'refresh_token' => $refresh_token,
             'data' => $akun
-        ]);
+        ], 200);
     }
     public function refresh(Request $request)
     {
@@ -94,7 +95,7 @@ class LoginController extends Controller
         $currentToken = $user->currentAccessToken();
 
         if (!$currentToken || $currentToken->name !== 'refresh-token' || $currentToken->expires_at->isPast()) {
-            return response()->json(['success' => false, 'message' => 'Invalid or expired refresh token'], 401);
+            return response()->json(['success' => false, 'message' => 'Token tidak valid/ kadaluarsa'], 401);
         }
 
         // Hapus semua access-token sebelumnya
@@ -113,7 +114,7 @@ class LoginController extends Controller
             'access_token' => $newAccessToken,
             'token_type' => 'Bearer',
             'data' => $user
-        ]);
+        ], 200);
     }
 
 
@@ -124,6 +125,6 @@ class LoginController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'Berhasil Logout'
-        ]);
+        ], 200);
     }
 }

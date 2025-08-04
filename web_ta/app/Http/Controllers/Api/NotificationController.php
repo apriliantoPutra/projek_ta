@@ -9,7 +9,34 @@ use Illuminate\Support\Facades\Auth;
 
 class NotificationController extends Controller
 {
-    public function detailNotifikasi()
+    public function warga()
+    {
+        $akunId = Auth::id();
+
+        $threeDaysAgo = \Carbon\Carbon::now()->subDays(3);
+
+        $notifs = Notification::where(function ($q) use ($akunId) {
+            $q->whereNull('akun_id')
+                ->whereNotIn('title', [
+                    'Pengajuan Setor Sampah Langsung Baru!',
+                    'Pengajuan Setor Sampah Jemput Baru!'
+                ])  // <-- Kecualikan title ini
+                ->orWhere('akun_id', '=', $akunId);
+        })
+            ->where('created_at', '>=', $threeDaysAgo)
+            ->orderBy('sent_at', 'desc')
+            ->limit(4)
+            ->get();
+
+
+
+        return response()->json([
+            'success' => true,
+            'data' => $notifs,
+        ], 200);
+    }
+
+    public function petugas()
     {
         $akunId = Auth::id();
 
@@ -28,6 +55,6 @@ class NotificationController extends Controller
         return response()->json([
             'success' => true,
             'data' => $notifs,
-        ]);
+        ], 200);
     }
 }

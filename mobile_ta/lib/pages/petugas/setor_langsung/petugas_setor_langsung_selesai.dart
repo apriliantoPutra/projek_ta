@@ -163,7 +163,7 @@ class _PetugasSetorLangsungSelesaiState
   Widget build(BuildContext context) {
     if (isLoading || pengajuanDetailSetor == null) {
       return Scaffold(
-        appBar: AppBar(title: const Text("Setor Langsung Sampah")),
+        appBar: AppBar(title: const Text("Setor Sampah Langsung")),
         body: const Center(child: CircularProgressIndicator()),
       );
     }
@@ -194,7 +194,7 @@ class _PetugasSetorLangsungSelesaiState
               ),
         ),
         title: Text(
-          "Daftar Setor Sampah",
+          "Setor Sampah Langsung",
           style: GoogleFonts.poppins(
             fontWeight: FontWeight.bold,
             color: Colors.white,

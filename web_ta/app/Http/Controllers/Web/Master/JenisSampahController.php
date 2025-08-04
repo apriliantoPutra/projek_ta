@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Web\Master;
 
 use App\Http\Controllers\Controller;
-
+use App\Models\InputDetailSetor;
 use App\Models\Master\JenisSampah;
 use App\Models\TotalSampah;
 use Illuminate\Http\Request;
@@ -100,23 +100,26 @@ class JenisSampahController extends Controller
         $datas = JenisSampah::findOrFail($id);
         $total_sampah = TotalSampah::where('sampah_id', '=', $id)->first();
 
+        // Cek apakah jenis_sampah_id ini dipakai di InputDetailSetor
+        $usedInDetailSetor = InputDetailSetor::whereJsonContains('setoran_sampah', [['jenis_sampah_id' => (int) $id]])->exists();
+
+        if ($usedInDetailSetor) {
+            return redirect()->back()->with('error', 'Gagal menghapus data: Jenis Sampah ini masih digunakan pada Data Setoran.');
+        }
+
         DB::beginTransaction();
         try {
-
+            if ($total_sampah) {
+                $total_sampah->delete();
+            }
             $datas->delete();
-            $total_sampah->delete();
+
 
             DB::commit();
-            return redirect()->back();
+            return redirect()->back()->with('success', 'Data berhasil dihapus');
         } catch (\Exception $e) {
             DB::rollBack();
-            return response()->json(
-                [
-                    "success" => false,
-                    "message" => $e->getMessage()
-
-                ]
-            );
+            return redirect()->back()->with('error', 'Gagal menghapus data: ' . $e->getMessage());
         }
     }
 }

@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\Auth;
 
 class SaldoController extends Controller
 {
-    public function show()
+    public function detail()
     {
         $akun_id = Auth::user()->id;
         $saldo = Saldo::where('warga_id', '=', $akun_id)->first();
@@ -17,13 +17,13 @@ class SaldoController extends Controller
         if (!$saldo) {
             return response()->json([
                 'success' => false,
-                'message' => 'Saldo tidak ditemukan'
+                'message' => 'Data saldo tidak ditemukan'
             ], 404);
         }
 
         return response()->json([
             'success' => true,
             'data' => $saldo
-        ]);
+        ], 200);
     }
 }

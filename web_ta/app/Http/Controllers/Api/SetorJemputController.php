@@ -17,7 +17,7 @@ use Illuminate\Support\Facades\Validator;
 class SetorJemputController extends Controller
 {
     // store pengajuan dan detail oleh warga
-    public function storePengajuan(Request $request)
+    public function tambahPengajuan(Request $request)
     {
         $akun_id = Auth::user()->id;
         $validator = Validator::make($request->all(), [
@@ -30,7 +30,7 @@ class SetorJemputController extends Controller
                 'success' => false,
                 'message' => 'Validasi gagal',
                 'errors' => $validator->errors()
-            ], 422);
+            ], 400);
         }
 
         DB::beginTransaction();
@@ -52,6 +52,12 @@ class SetorJemputController extends Controller
                 'status_setor' => 'proses'
 
             ]);
+            app(NotificationController::class)->sendNotificationToAllUsers(
+                'Pengajuan Setor Sampah Jemput Baru!',
+                'Ada permintaan jemput sampah dari warga yang baru masuk. Yuk segera proses pengambilan sampahnya.'
+            );
+
+
 
             DB::commit();
             return response()->json([
@@ -59,7 +65,7 @@ class SetorJemputController extends Controller
                 'message' => 'Berhasil Tambah Pengajuan Setor Jemput',
                 'pengajuan' => $pengajuan_setor,
                 'detail' => $detail_setor
-            ]);
+            ], 201);
         } catch (\Exception $e) {
             DB::rollBack();
             return response()->json(
@@ -72,7 +78,196 @@ class SetorJemputController extends Controller
         }
     }
 
-    // petugas melihat list pengajuan jemput
+
+
+
+
+    // petugas melihat detail pengajuan jemput
+    public function detailPengajuan($id)
+    {
+        $item = PengajuanSetor::with('user.profil', 'inputdetail')->find($id);
+        if (!$item) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Data pengajuan tidak ditemukan',
+            ], 404);
+        }
+        $profil = $item->user->profil;
+
+        $koordinat = str_replace(' ', '', $profil->koordinat_pengguna); // Hilangkan spasi
+        $koordinatParts = explode(',', $koordinat);
+        $latitude = $koordinatParts[0] ?? null;
+        $longitude = $koordinatParts[1] ?? null;
+
+        $pengajuan_setor = [
+            'id' => $item->id,
+            'jenis_setor' => $item->jenis_setor,
+            'waktu_pengajuan' => $item->waktu_pengajuan,
+            'status_pengajuan' => $item->status_pengajuan,
+            'catatan_petugas' => $item->catatan_petugas,
+            'user' => [
+                'username' => $item->user->username,
+                'email' => $item->user->email,
+                'profil' => [
+                    'nama_pengguna' => $profil->nama_pengguna,
+                    'alamat_pengguna' => $profil->alamat_pengguna,
+                    'no_hp_pengguna' => $profil->no_hp_pengguna,
+                    'gambar_pengguna' => $profil->gambar_pengguna,
+                    'gambar_url' => asset('storage/' . $profil->gambar_pengguna),
+                    'koordinat_pengguna' => $koordinat,
+                    'latitude' => $latitude,
+                    'longitude' => $longitude
+                ]
+            ],
+            'input_detail' => [
+                'setoran_sampah' => json_decode($item->inputdetail->setoran_sampah, true),
+                'total_berat' => $item->inputdetail->total_berat,
+                'total_harga' => $item->inputdetail->total_harga,
+                'status_setor' => $item->inputdetail->status_setor,
+            ]
+        ];
+
+        return response()->json([
+            'success' => true,
+            'data' => $pengajuan_setor,
+        ], 200);
+    }
+    // edit dan menyetujui
+    public function terimaPengajuan(Request $request, $id)
+    {
+        $pengajuan_setor = PengajuanSetor::find($id);
+        $detail_setor = InputDetailSetor::where('pengajuan_id', '=', $id)->first();
+
+        DB::beginTransaction();
+        try {
+            $pengajuan_setor->update([
+                'status_pengajuan' => 'diterima',
+            ]);
+
+            $detail_setor->update([
+                'petugas_id' => Auth::id(), // id petugas
+            ]);
+
+            app(NotificationController::class)->sendNotificationToUser(
+                $pengajuan_setor->warga_id,
+                'Permintaan Setor Jemput!',
+                'Permintaan setor jemput Anda di proses.'
+            );
+            DB::commit();
+            return response()->json([
+                'success' => true,
+                'message' => 'Berhasil Terima Pengajuan Setor Jemput',
+                'pengajuan' => $pengajuan_setor,
+            ], 200);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json(
+                [
+                    "success" => false,
+                    "message" => $e->getMessage()
+
+                ]
+            );
+        }
+    }
+
+    public function batalPengajuan(Request $request, $id)
+    {
+
+        $pengajuan_setor = PengajuanSetor::find($id);
+        $detail_setor = InputDetailSetor::where('pengajuan_id', '=', $id)->first();
+
+        DB::beginTransaction();
+        try {
+            $pengajuan_setor->update([
+                'status_pengajuan' => 'batalkan',
+            ]);
+
+            $detail_setor->delete();
+
+            app(NotificationController::class)->sendNotificationToUser(
+                $pengajuan_setor->warga_id,
+                'Permintaan Setor Jemput!',
+                'Permintaan setor jemput Anda di tolak.'
+            );
+            DB::commit();
+            return response()->json([
+                'success' => true,
+                'message' => 'Berhasil Batalkan Pengajuan Setor Jemput',
+
+            ], 200);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json(
+                [
+                    "success" => false,
+                    "message" => $e->getMessage()
+
+                ]
+            );
+        }
+    }
+    public function konfirmasiPengajuan(Request $request, $id)
+    {
+
+        $pengajuan_setor = PengajuanSetor::find($id);
+        $detail_setor = InputDetailSetor::where('pengajuan_id', '=', $id)->first();
+
+        DB::beginTransaction();
+        try {
+            $detail_setor->update([
+                'setoran_sampah' => json_encode($request->setoran_sampah),
+                'total_berat' => $request->total_berat,
+                'total_harga' => $request->total_harga,
+                'status_setor' => 'selesai'
+
+            ]);
+            // perulangan update tiap jenis sampah
+            foreach ($request->setoran_sampah as $item) {
+                $jenisId = $item['jenis_sampah_id'];
+                $berat = $item['berat'];
+
+                $total_sampah = TotalSampah::where('sampah_id', $jenisId)->first();
+
+                if ($total_sampah) {
+                    $total_sampah->update([
+                        'total_berat' => $total_sampah->total_berat + $berat
+                    ]);
+                }
+            }
+
+            // Update jumlah saldo
+            $saldo = Saldo::where('warga_id', '=', $pengajuan_setor->warga_id)->first();
+            $saldo->update([
+                "total_saldo" => $saldo->total_saldo + $request->total_harga
+            ]);
+
+            app(NotificationController::class)->sendNotificationToUser(
+                $pengajuan_setor->warga_id,
+                'Konfirmasi Setor Jemput!',
+                'Permintaan setor jemput Anda telah selesai.'
+            );
+
+            DB::commit();
+            return response()->json([
+                'success' => true,
+                'message' => 'Berhasil Edit Pengajuan Setor Jemput',
+                'data' => $detail_setor
+            ], 200);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json(
+                [
+                    "success" => false,
+                    "message" => $e->getMessage()
+
+                ]
+            );
+        }
+    }
+
+
+    // tidak digunakan
     public function listPengajuanBaru()
     {
         $pengajuan_setor = PengajuanSetor::with(['user.profil'])->where('jenis_setor', '=', 'jemput')->where('status_pengajuan', 'menunggu')->get()->map(function ($item) {
@@ -182,191 +377,5 @@ class SetorJemputController extends Controller
             'success' => true,
             'data' => $pengajuan_setor
         ]);
-    }
-
-
-
-    // petugas melihat detail pengajuan jemput
-    public function showPengajuan($id)
-    {
-        $item = PengajuanSetor::with('user.profil', 'inputdetail')->find($id);
-        if (!$item) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Pengajuan tidak ditemukan',
-            ], 404);
-        }
-        $profil = $item->user->profil;
-
-        $koordinat = str_replace(' ', '', $profil->koordinat_pengguna); // Hilangkan spasi
-        $koordinatParts = explode(',', $koordinat);
-        $latitude = $koordinatParts[0] ?? null;
-        $longitude = $koordinatParts[1] ?? null;
-
-        $pengajuan_setor = [
-            'id' => $item->id,
-            'jenis_setor' => $item->jenis_setor,
-            'waktu_pengajuan' => $item->waktu_pengajuan,
-            'status_pengajuan' => $item->status_pengajuan,
-            'catatan_petugas' => $item->catatan_petugas,
-            'user' => [
-                'username' => $item->user->username,
-                'email' => $item->user->email,
-                'profil' => [
-                    'nama_pengguna' => $profil->nama_pengguna,
-                    'alamat_pengguna' => $profil->alamat_pengguna,
-                    'no_hp_pengguna' => $profil->no_hp_pengguna,
-                    'gambar_pengguna' => $profil->gambar_pengguna,
-                    'gambar_url' => asset('storage/' . $profil->gambar_pengguna),
-                    'koordinat_pengguna' => $koordinat,
-                    'latitude' => $latitude,
-                    'longitude' => $longitude
-                ]
-            ],
-            'input_detail' => [
-                'setoran_sampah' => json_decode($item->inputdetail->setoran_sampah, true),
-                'total_berat' => $item->inputdetail->total_berat,
-                'total_harga' => $item->inputdetail->total_harga,
-                'status_setor' => $item->inputdetail->status_setor,
-            ]
-        ];
-
-        return response()->json([
-            'success' => true,
-            'data' => $pengajuan_setor,
-        ]);
-    }
-    // edit dan menyetujui
-    public function terimaPengajuan(Request $request, $id)
-    {
-        $pengajuan_setor = PengajuanSetor::find($id);
-        $detail_setor = InputDetailSetor::where('pengajuan_id', '=', $id)->first();
-
-        DB::beginTransaction();
-        try {
-            $pengajuan_setor->update([
-                'status_pengajuan' => 'diterima',
-            ]);
-
-            $detail_setor->update([
-                'petugas_id' => Auth::id(), // id petugas
-            ]);
-
-            app(NotificationController::class)->sendNotificationToUser(
-                $pengajuan_setor->warga_id,
-                'Permintaan Setor Jemput!',
-                'Permintaan setor jemput Anda di proses.'
-            );
-            DB::commit();
-            return response()->json([
-                'success' => true,
-                'message' => 'Berhasil Terima Pengajuan Setor Jemput',
-                'pengajuan' => $pengajuan_setor,
-            ]);
-        } catch (\Exception $e) {
-            DB::rollBack();
-            return response()->json(
-                [
-                    "success" => false,
-                    "message" => $e->getMessage()
-
-                ]
-            );
-        }
-    }
-
-    public function batalPengajuan(Request $request, $id)
-    {
-
-        $pengajuan_setor = PengajuanSetor::find($id);
-        $detail_setor = InputDetailSetor::where('pengajuan_id', '=', $id)->first();
-
-        DB::beginTransaction();
-        try {
-            $pengajuan_setor->update([
-                'status_pengajuan' => 'batalkan',
-            ]);
-
-            $detail_setor->delete();
-
-            app(NotificationController::class)->sendNotificationToUser(
-                $pengajuan_setor->warga_id,
-                'Permintaan Setor Jemput!',
-                'Permintaan setor jemput Anda di tolak.'
-            );
-            DB::commit();
-            return response()->json([
-                'success' => true,
-                'message' => 'Berhasil Batalkan Pengajuan Setor Jemput',
-
-            ]);
-        } catch (\Exception $e) {
-            DB::rollBack();
-            return response()->json(
-                [
-                    "success" => false,
-                    "message" => $e->getMessage()
-
-                ]
-            );
-        }
-    }
-    public function konfirmasiPengajuan(Request $request, $id)
-    {
-
-        $pengajuan_setor = PengajuanSetor::find($id);
-        $detail_setor = InputDetailSetor::where('pengajuan_id', '=', $id)->first();
-
-        DB::beginTransaction();
-        try {
-            $detail_setor->update([
-                'setoran_sampah' => json_encode($request->setoran_sampah),
-                'total_berat' => $request->total_berat,
-                'total_harga' => $request->total_harga,
-                'status_setor' => 'selesai'
-
-            ]);
-            // perulangan update tiap jenis sampah
-            foreach ($request->setoran_sampah as $item) {
-                $jenisId = $item['jenis_sampah_id'];
-                $berat = $item['berat'];
-
-                $total_sampah = TotalSampah::where('sampah_id', $jenisId)->first();
-
-                if ($total_sampah) {
-                    $total_sampah->update([
-                        'total_berat' => $total_sampah->total_berat + $berat
-                    ]);
-                }
-            }
-
-            // Update jumlah saldo
-            $saldo = Saldo::where('warga_id', '=', $pengajuan_setor->warga_id)->first();
-            $saldo->update([
-                "total_saldo" => $saldo->total_saldo + $request->total_harga
-            ]);
-
-            app(NotificationController::class)->sendNotificationToUser(
-                $pengajuan_setor->warga_id,
-                'Konfirmasi Setor Jemput!',
-                'Permintaan setor jemput Anda telah selesai.'
-            );
-
-            DB::commit();
-            return response()->json([
-                'success' => true,
-                'message' => 'Berhasil Edit Pengajuan Setor Jemput',
-                'data' => $detail_setor
-            ]);
-        } catch (\Exception $e) {
-            DB::rollBack();
-            return response()->json(
-                [
-                    "success" => false,
-                    "message" => $e->getMessage()
-
-                ]
-            );
-        }
     }
 }

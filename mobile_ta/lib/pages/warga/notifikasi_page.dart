@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:mobile_ta/models/notification_model.dart';
-import 'package:mobile_ta/services/notification_service.dart';
+import 'package:mobile_ta/services/notifikasi_warga_service.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:mobile_ta/widget/notifikasi_card.dart';
 
@@ -18,11 +18,11 @@ class WargaNotifikasiPage extends StatelessWidget {
         elevation: 0,
         centerTitle: true,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Color(0xFF128d54)),
+          icon: const Icon(Icons.arrow_back, color: Colors.white),
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
-          'Setor Langsung',
+          'Notifikasi',
           style: GoogleFonts.poppins(
             fontWeight: FontWeight.bold,
             color: Color(0xFF128d54),
@@ -33,7 +33,7 @@ class WargaNotifikasiPage extends StatelessWidget {
       body: Padding(
         padding: const EdgeInsets.all(10),
         child: FutureBuilder<List<NotificationModel>>(
-          future: NotificationService().fetchNotifications(),
+          future: NotifikasiWargaService().fetchNotifications(),
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
               return const Center(child: CircularProgressIndicator());
@@ -48,7 +48,6 @@ class WargaNotifikasiPage extends StatelessWidget {
             if (notifs.isEmpty) {
               return const Center(child: Text('Belum ada notifikasi'));
             }
-
             return ListView.builder(
               itemCount: notifs.length,
               itemBuilder: (context, index) {

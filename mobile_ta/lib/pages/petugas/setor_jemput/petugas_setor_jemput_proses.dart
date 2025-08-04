@@ -632,7 +632,7 @@ class _PetugasSetorJemputProsesState extends State<PetugasSetorJemputProses> {
   Widget build(BuildContext context) {
     if (isLoading || pengajuanDetailSetor == null) {
       return Scaffold(
-        appBar: AppBar(title: Text("Setor Jemput Sampah")),
+        appBar: AppBar(title: Text("Setor Sampah Jemput")),
         body: Center(child: CircularProgressIndicator()),
       );
     }
@@ -649,7 +649,7 @@ class _PetugasSetorJemputProsesState extends State<PetugasSetorJemputProses> {
         title: Column(
           children: [
             Text(
-              "Setor Jemput Sampah",
+              "Setor Sampah Jemput",
               style: GoogleFonts.poppins(
                 fontSize: 24,
                 fontWeight: FontWeight.w700,

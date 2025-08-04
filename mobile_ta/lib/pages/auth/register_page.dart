@@ -40,7 +40,7 @@ class _RegisterPageState extends State<RegisterPage> {
 
       final responseData = jsonDecode(response.body);
 
-      if (response.statusCode == 200 && responseData['success'] == true) {
+      if (response.statusCode == 200 || response.statusCode == 201) {
         // Tampilkan pesan sukses dan redirect ke login
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(

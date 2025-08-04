@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
+import 'package:mobile_ta/services/notifikasi_petugas_service.dart';
 import '../../models/notification_model.dart';
-import '../../services/notification_service.dart';
+import 'package:mobile_ta/widget/notifikasi_card.dart';
 
 class PetugasNotifikasiPage extends StatelessWidget {
   const PetugasNotifikasiPage({super.key});
@@ -32,7 +33,7 @@ class PetugasNotifikasiPage extends StatelessWidget {
       body: Padding(
         padding: const EdgeInsets.all(10),
         child: FutureBuilder<List<NotificationModel>>(
-          future: NotificationService().fetchNotifications(),
+          future: NotifikasiPetugasService().fetchNotifications(),
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
               return const Center(child: CircularProgressIndicator());
@@ -52,46 +53,10 @@ class PetugasNotifikasiPage extends StatelessWidget {
               itemCount: notifs.length,
               itemBuilder: (context, index) {
                 final notif = notifs[index];
-                return Container(
-                  width: width * 0.95,
-                  margin: const EdgeInsets.symmetric(
-                    vertical: 6,
-                    horizontal: 8,
-                  ),
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: const Color(0xff8fd14f),
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        notif.title,
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
-                          fontSize: width * 0.045,
-                        ),
-                      ),
-                      const SizedBox(height: 6),
-                      Text(
-                        DateFormat('dd/MM/yyyy – HH:mm').format(notif.sentAt),
-                        style: TextStyle(
-                          color: Colors.white70,
-                          fontSize: width * 0.035,
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        notif.body,
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: width * 0.04,
-                        ),
-                      ),
-                    ],
-                  ),
+                return NotifikasiCard(
+                  title: notif.title,
+                  date: DateFormat('dd/MM/yyyy – HH:mm').format(notif.sentAt),
+                  body: notif.body,
                 );
               },
             );

@@ -8,7 +8,7 @@ use Illuminate\Http\Request;
 
 class ArtikelController extends Controller
 {
-    public function index()
+    public function kumpulan()
     {
         $artikels = Artikel::orderBy('created_at', 'desc')->get()->map(function ($artikel) {
             $artikel->gambar_url = $artikel->gambar_artikel ? asset('storage/' . $artikel->gambar_artikel) : 'https://i.pinimg.com/736x/2d/d3/79/2dd379968693700ec12af8f1974b491e.jpg';
@@ -19,9 +19,9 @@ class ArtikelController extends Controller
         return response()->json([
             'success' => true,
             'data' => $artikels
-        ]);
+        ], 200);
     }
-    public function terbaru()
+    public function limaTerbaru()
     {
         $artikels = Artikel::orderBy('created_at', 'desc')->take(5)->get()->map(function ($artikel) {
             $artikel->gambar_url = $artikel->gambar_artikel ? asset('storage/' . $artikel->gambar_artikel) : 'https://i.pinimg.com/736x/2d/d3/79/2dd379968693700ec12af8f1974b491e.jpg';
@@ -32,19 +32,19 @@ class ArtikelController extends Controller
         return response()->json([
             'success' => true,
             'data' => $artikels
-        ]);
+        ], 200);
     }
 
 
 
-    public function show($id)
+    public function detail($id)
     {
         $artikel = Artikel::find($id);
 
         if (!$artikel) {
             return response()->json([
                 'success' => false,
-                'message' => 'Artikel tidak ditemukan'
+                'message' => 'Data artikel tidak ditemukan'
             ], 404);
         }
 
@@ -54,6 +54,6 @@ class ArtikelController extends Controller
         return response()->json([
             'success' => true,
             'data' => $artikel
-        ]);
+        ], 200);
     }
 }

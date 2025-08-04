@@ -131,7 +131,7 @@ class _DetailHistoriSaldoPageState extends State<DetailHistoriSaldoPage> {
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
-          'Detail Tarik Saldo',
+          'Histori Tarik Saldo',
           style: GoogleFonts.poppins(
             fontWeight: FontWeight.bold,
             color: Colors.white,
