@@ -14,7 +14,7 @@ class WargaStatusTungguSetorLangsung extends StatelessWidget {
         elevation: 0,
         centerTitle: true,
         title: Text(
-          'Status Setor Langsung',
+          'Status',
           style: GoogleFonts.poppins(
             fontWeight: FontWeight.bold,
             color: Color(0xFF128d54),

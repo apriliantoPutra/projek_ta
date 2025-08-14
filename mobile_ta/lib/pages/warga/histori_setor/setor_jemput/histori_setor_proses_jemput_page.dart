@@ -380,7 +380,7 @@ class HistoriSetorProsesJemputPageState
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
-          'Histori Setor Jemput',
+          'Setor Jemput',
           style: GoogleFonts.poppins(
             fontWeight: FontWeight.bold,
             color: Color(0xFF128d54),

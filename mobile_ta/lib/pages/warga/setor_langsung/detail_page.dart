@@ -276,7 +276,7 @@ class _WargaDetailSetorLangsungState extends State<WargaDetailSetorLangsung> {
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
-          'Konfirmasi Setor Langsung',
+          'Setor Langsung',
           style: GoogleFonts.poppins(
             fontWeight: FontWeight.bold,
             color: Color(0xFF128d54),

@@ -60,13 +60,13 @@ class HistoriSetorSelesaiJemputPageState
       await fetchBankSampah();
 
       if (pengajuanDetailSetor != null && bankSampah != null) {
-        final profil = pengajuanDetailSetor!['user']?['profil'];
+        final inputDetail = pengajuanDetailSetor!['input_detail'];
 
         // Parse coordinates with proper error handling
         latitudeWarga =
-            double.tryParse(profil?['latitude']?.toString() ?? '0') ?? 0;
+            double.tryParse(inputDetail?['latitude']?.toString() ?? '0') ?? 0;
         longitudeWarga =
-            double.tryParse(profil?['longitude']?.toString() ?? '0') ?? 0;
+            double.tryParse(inputDetail?['longitude']?.toString() ?? '0') ?? 0;
         latitudeBankSampah =
             double.tryParse(bankSampah?['latitude']?.toString() ?? '0') ?? 0;
         longitudeBankSampah =
@@ -95,8 +95,12 @@ class HistoriSetorSelesaiJemputPageState
             setoranSampah.map((item) {
               final jenisId = item['jenis_sampah_id'];
               final berat = (item['berat'] as num).toDouble();
+              final harga =
+                  item['harga']
+                      as int; // Ambil harga langsung dari data setoran
               final jenisInfo = jenisSampahCache[jenisId];
-              final subtotal = (berat * (jenisInfo?['harga'] ?? 0)).round();
+              final subtotal =
+                  (berat * harga).round(); // Gunakan harga dari setoran
 
               totalBerat += berat;
               totalHarga += subtotal;
@@ -223,7 +227,7 @@ class HistoriSetorSelesaiJemputPageState
 
     try {
       final response = await http.get(
-        Uri.parse('${dotenv.env['URL']}/setor-jemput/${widget.id}'),
+        Uri.parse('${dotenv.env['URL']}/setor-jemput/selesai/${widget.id}'),
         headers: {
           'Authorization': 'Bearer $token',
           'Accept': 'application/json',
@@ -379,7 +383,7 @@ class HistoriSetorSelesaiJemputPageState
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
-          'Histori Setor Jemput',
+          'Setor Jemput',
           style: GoogleFonts.poppins(
             fontWeight: FontWeight.bold,
             color: Color(0xFF128d54),
@@ -643,7 +647,6 @@ class HistoriSetorSelesaiJemputPageState
               ),
             ),
             const SizedBox(height: 10),
-           
           ],
         ),
       ),

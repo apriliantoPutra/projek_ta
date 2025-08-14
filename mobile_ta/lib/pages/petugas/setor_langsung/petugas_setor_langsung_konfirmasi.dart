@@ -83,6 +83,7 @@ class _PetugasSetorLangsungKonfirmasiState
               'warna': data['warna_indikasi'],
             };
             jenisSampahCache[jenisId] = jenisData;
+            item['harga'] = data['harga_per_satuan'];
           } else if (response.statusCode == 401) {
             final refreshed = await authService.refreshToken();
             if (refreshed) {
@@ -95,7 +96,7 @@ class _PetugasSetorLangsungKonfirmasiState
           }
         }
 
-        final int harga = jenisData['harga'];
+        final int harga = item['harga'] ?? jenisData['harga'];
         final int subtotal = (berat * harga).round();
         processedSetoran.add({
           'nama': jenisData['nama'],
@@ -143,7 +144,16 @@ class _PetugasSetorLangsungKonfirmasiState
           'Accept': 'application/json',
         },
         body: jsonEncode({
-          'setoran_sampah': widget.dataSetoran,
+          'setoran_sampah':
+              widget.dataSetoran
+                  .map(
+                    (item) => {
+                      'berat': item['berat'],
+                      'jenis_sampah_id': item['jenis_sampah_id'],
+                      'harga': item['harga'],
+                    },
+                  )
+                  .toList(),
           'total_berat': totalBerat,
           'total_harga': totalHarga,
         }),
@@ -215,11 +225,11 @@ class _PetugasSetorLangsungKonfirmasiState
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
-          'Setor Sampah Langsung',
+          'Setor Langsung',
           style: GoogleFonts.poppins(
             fontWeight: FontWeight.bold,
             color: Color(0xFF128d54),
-            fontSize: 24,
+            fontSize: 22,
           ),
         ),
       ),

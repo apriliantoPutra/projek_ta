@@ -57,7 +57,7 @@ class _PetugasKumpulanVideoPageState extends State<PetugasKumpulanVideoPage> {
           style: GoogleFonts.poppins(
             fontWeight: FontWeight.bold,
             color: Colors.white, // <-- Ubah biar kontras
-            fontSize: 24,
+            fontSize: 22,
           ),
         ),
       ),

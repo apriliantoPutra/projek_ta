@@ -60,7 +60,7 @@ class _PetugasDetailArtikelPage extends State<PetugasDetailArtikelPage> {
           style: GoogleFonts.poppins(
             fontWeight: FontWeight.bold,
             color: Colors.white,
-            fontSize: 24,
+            fontSize: 22,
           ),
         ),
       ),

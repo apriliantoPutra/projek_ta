@@ -85,14 +85,6 @@ class _PetugasSetorLangsungSelesaiState
   Future<void> processSetoranData() async {
     if (pengajuanDetailSetor == null) return;
 
-    final authService = AuthService();
-    final token = await authService.getToken();
-
-    if (token == null) {
-      debugPrint('Token tidak ditemukan');
-      return;
-    }
-
     try {
       final detailSetoran = pengajuanDetailSetor!['input_detail'];
       final setoranSampah = detailSetoran['setoran_sampah'] as List;
@@ -105,8 +97,18 @@ class _PetugasSetorLangsungSelesaiState
       for (var item in setoranSampah) {
         final int jenisId = item['jenis_sampah_id'];
         final double berat = (item['berat'] as num).toDouble();
+        final int harga =
+            item['harga']
+                as int;
 
+        final int subtotal = (berat * harga).round();
+
+        // Tetap ambil nama dan warna dari cache/API untuk tampilan
         if (!jenisSampahCache.containsKey(jenisId)) {
+          final authService = AuthService();
+          final token = await authService.getToken();
+          if (token == null) return;
+
           final response = await http.get(
             Uri.parse('${dotenv.env['URL']}/jenis-sampah/$jenisId'),
             headers: {
@@ -119,10 +121,9 @@ class _PetugasSetorLangsungSelesaiState
             final data = json.decode(response.body)['data'];
             jenisSampahCache[jenisId] = {
               'nama': data['nama_sampah'],
-              'harga': data['harga_per_satuan'],
-              'warna': data['warna_indikasi'],
+              'warna': data['warna_indikasi'], // Harga tidak disimpan di cache
             };
-          } else if (response.statusCode == 401) {
+          }else if (response.statusCode == 401) {
             final refreshed = await authService.refreshToken();
             if (refreshed) {
               return await processSetoranData(); // Retry entire process
@@ -131,24 +132,16 @@ class _PetugasSetorLangsungSelesaiState
           }
         }
 
-        final jenisData = jenisSampahCache[jenisId];
-        if (jenisData != null) {
-          final int harga = jenisData['harga'];
-          final int subtotal = (berat * harga).round();
-
-          processedSetoran.add({
-            'nama': jenisData['nama'],
-            'berat': berat,
-            'harga': harga,
-            'subtotal': subtotal,
-            'warna': jenisData['warna'],
-          });
-        }
+        processedSetoran.add({
+          'nama': jenisSampahCache[jenisId]?['nama'] ?? 'Unknown',
+          'berat': berat,
+          'harga': harga, // Gunakan harga dari data setoran
+          'subtotal': subtotal,
+          'warna': jenisSampahCache[jenisId]?['warna'] ?? '#999999',
+        });
       }
 
-      if (mounted) {
-        setState(() {}); // Trigger UI update
-      }
+      if (mounted) setState(() {});
     } catch (e) {
       debugPrint('Error in processSetoranData: $e');
       if (mounted) {
@@ -194,11 +187,11 @@ class _PetugasSetorLangsungSelesaiState
               ),
         ),
         title: Text(
-          "Setor Sampah Langsung",
+          "Setor Langsung",
           style: GoogleFonts.poppins(
             fontWeight: FontWeight.bold,
             color: Colors.white,
-            fontSize: 24,
+            fontSize: 22,
           ),
         ),
       ),

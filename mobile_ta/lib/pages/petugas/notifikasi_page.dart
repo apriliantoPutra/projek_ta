@@ -26,7 +26,7 @@ class PetugasNotifikasiPage extends StatelessWidget {
           style: GoogleFonts.poppins(
             fontWeight: FontWeight.bold,
             color: Colors.white,
-            fontSize: 24,
+            fontSize: 22,
           ),
         ),
       ),
@@ -40,13 +40,31 @@ class PetugasNotifikasiPage extends StatelessWidget {
             }
 
             if (snapshot.hasError) {
-              return const Center(child: Text('Gagal memuat notifikasi'));
+              return Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: const [
+                    Icon(Icons.error_outline, color: Colors.red, size: 48),
+                    SizedBox(height: 8),
+                    Text('Gagal memuat notifikasi'),
+                  ],
+                ),
+              );
             }
 
             final notifs = snapshot.data ?? [];
 
             if (notifs.isEmpty) {
-              return const Center(child: Text('Belum ada notifikasi'));
+              return Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: const [
+                    Icon(Icons.notifications_off, color: Colors.grey, size: 48),
+                    SizedBox(height: 8),
+                    Text('Belum ada notifikasi'),
+                  ],
+                ),
+              );
             }
 
             return ListView.builder(

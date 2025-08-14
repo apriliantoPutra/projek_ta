@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:mobile_ta/pages/auth/lupa_password_page.dart';
 import 'package:mobile_ta/pages/auth/register_page.dart';
 import 'package:mobile_ta/providers/auth_provider.dart';
 import 'package:mobile_ta/widget/petugas_main_widget.dart';
@@ -18,6 +19,7 @@ class _LoginPageState extends State<LoginPage> {
   final TextEditingController _passwordController = TextEditingController();
   bool _isLoading = false;
   bool _isInitializing = true;
+  bool _obscurePassword = true;
 
   @override
   void initState() {
@@ -174,7 +176,7 @@ class _LoginPageState extends State<LoginPage> {
                       SizedBox(height: 18),
                       TextField(
                         controller: _passwordController,
-                        obscureText: true,
+                        obscureText: _obscurePassword,
                         decoration: InputDecoration(
                           prefixIcon: Icon(
                             Icons.lock_outline_rounded,
@@ -185,6 +187,19 @@ class _LoginPageState extends State<LoginPage> {
                             borderRadius: BorderRadius.circular(30),
                           ),
                           contentPadding: EdgeInsets.symmetric(horizontal: 20),
+                          suffixIcon: IconButton(
+                            icon: Icon(
+                              _obscurePassword
+                                  ? Icons.visibility_off
+                                  : Icons.visibility,
+                              color: Color(0xFF128d54),
+                            ),
+                            onPressed: () {
+                              setState(() {
+                                _obscurePassword = !_obscurePassword;
+                              });
+                            },
+                          ),
                         ),
                       ),
                       SizedBox(height: 22),
@@ -225,30 +240,45 @@ class _LoginPageState extends State<LoginPage> {
                         ],
                       ),
                       SizedBox(height: 10),
-                      TextButton(
-                        onPressed: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => const RegisterPage(),
-                            ),
-                          );
-                        },
-                        child: Text.rich(
-                          TextSpan(
-                            text: "Belum punya akun? ",
-                            style: GoogleFonts.poppins(color: Colors.grey[700]),
-                            children: [
-                              TextSpan(
-                                text: "Daftar",
-                                style: GoogleFonts.poppins(
-                                  fontWeight: FontWeight.bold,
-                                  color: Color(0xFF128d54),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          TextButton(
+                            onPressed: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => RegisterPage(),
                                 ),
+                              );
+                            },
+                            child: Text(
+                              "Daftar",
+                              style: GoogleFonts.poppins(
+                                fontWeight: FontWeight.w500,
+                                color: const Color(0xFF128d54),
                               ),
-                            ],
+                            ),
                           ),
-                        ),
+                          SizedBox(width: 5), 
+                          TextButton(
+                            onPressed: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => LupaPasswordPage(),
+                                ),
+                              );
+                            },
+                            child: Text(
+                              "Lupa Password?",
+                              style: GoogleFonts.poppins(
+                                fontWeight: FontWeight.w500,
+                                color: Colors.red[600],
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                     ],
                   ),

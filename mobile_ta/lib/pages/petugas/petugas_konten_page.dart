@@ -29,7 +29,7 @@ class PetugasKontenPage extends StatelessWidget {
           style: GoogleFonts.poppins(
             fontWeight: FontWeight.bold,
             color: Color(0xFF128d54),
-            fontSize: 24,
+            fontSize: 22,
           ),
         ),
       ),

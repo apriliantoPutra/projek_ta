@@ -180,7 +180,7 @@ class _HistoriSetorBaruLangsungPageState
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
-          'Histori Setor Langsung',
+          'Setor Langsung',
           style: GoogleFonts.poppins(
             fontWeight: FontWeight.bold,
             color: Color(0xFF128d54),

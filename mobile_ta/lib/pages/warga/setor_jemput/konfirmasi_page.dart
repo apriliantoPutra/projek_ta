@@ -57,6 +57,7 @@ class _WargaKonfirmasiSetorJemputPageState
   String? formattedDate;
   bool isTotalValid = true;
   String? totalError;
+  bool isJarakDalamLayanan = true;
 
   @override
   void initState() {
@@ -447,6 +448,7 @@ class _WargaKonfirmasiSetorJemputPageState
         latitudeBankSampah == null ||
         longitudeBankSampah == null) {
       biayaLayanan = 0;
+      isJarakDalamLayanan = true; // default dianggap aman
       return;
     }
 
@@ -456,6 +458,9 @@ class _WargaKonfirmasiSetorJemputPageState
       latitudeBankSampah!,
       longitudeBankSampah!,
     );
+
+    // Set status jarak aman atau tidak
+    isJarakDalamLayanan = jarak <= 10;
 
     biayaLayanan = jarak * ongkir_per_jarak;
   }
@@ -472,7 +477,7 @@ class _WargaKonfirmasiSetorJemputPageState
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
-          'Konfirmasi Setor Jemput',
+          'Setor Jemput',
           style: GoogleFonts.poppins(
             fontWeight: FontWeight.bold,
             color: Colors.white,
@@ -635,6 +640,8 @@ class _WargaKonfirmasiSetorJemputPageState
                                 ),
                               ),
                               const SizedBox(height: 12),
+
+                              // Total harga sampah selalu ditampilkan
                               Row(
                                 mainAxisAlignment:
                                     MainAxisAlignment.spaceBetween,
@@ -650,6 +657,8 @@ class _WargaKonfirmasiSetorJemputPageState
                                 ],
                               ),
                               const Divider(),
+
+                              // Jarak selalu ditampilkan
                               Row(
                                 mainAxisAlignment:
                                     MainAxisAlignment.spaceBetween,
@@ -669,59 +678,98 @@ class _WargaKonfirmasiSetorJemputPageState
                                 ],
                               ),
                               const Divider(),
-                              Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Text(
-                                    "Biaya Layanan (Ongkir)",
-                                    style: GoogleFonts.poppins(),
-                                  ),
-                                  Text(
-                                    'Rp $biayaLayanan',
-                                    style: GoogleFonts.poppins(),
-                                  ),
-                                ],
-                              ),
-                              const Divider(),
-                              Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Text(
-                                    "Total Insentif",
-                                    style: GoogleFonts.poppins(
-                                      fontWeight: FontWeight.bold,
+
+                              // Jika jarak dalam layanan → tampilkan ongkir + total
+                              if (isJarakDalamLayanan) ...[
+                                Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Text(
+                                      "Biaya Layanan (Ongkir)",
+                                      style: GoogleFonts.poppins(),
                                     ),
-                                  ),
-                                  Column(
-                                    crossAxisAlignment: CrossAxisAlignment.end,
-                                    children: [
-                                      Text(
-                                        'Rp${totalHarga - biayaLayanan}',
-                                        style: GoogleFonts.poppins(
-                                          fontWeight: FontWeight.bold,
-                                          color:
-                                              isTotalValid
-                                                  ? Colors.black
-                                                  : Colors.red,
-                                        ),
+                                    Text(
+                                      'Rp $biayaLayanan',
+                                      style: GoogleFonts.poppins(),
+                                    ),
+                                  ],
+                                ),
+                                const Divider(),
+                                Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Text(
+                                      "Total Insentif",
+                                      style: GoogleFonts.poppins(
+                                        fontWeight: FontWeight.bold,
                                       ),
-                                      if (!isTotalValid)
+                                    ),
+                                    Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.end,
+                                      children: [
                                         Text(
-                                          totalError!,
+                                          'Rp${totalHarga - biayaLayanan}',
                                           style: GoogleFonts.poppins(
-                                            color: Colors.red,
-                                            fontSize: 12,
+                                            fontWeight: FontWeight.bold,
+                                            color:
+                                                isTotalValid
+                                                    ? Colors.black
+                                                    : Colors.red,
                                           ),
                                         ),
+                                        if (!isTotalValid)
+                                          Text(
+                                            totalError!,
+                                            style: GoogleFonts.poppins(
+                                              color: Colors.red,
+                                              fontSize: 12,
+                                            ),
+                                          ),
+                                      ],
+                                    ),
+                                  ],
+                                ),
+                              ] else ...[
+                                // Jika jarak di luar layanan → tampilkan warning card
+                                const SizedBox(height: 8),
+                                Container(
+                                  width: double.infinity,
+                                  padding: const EdgeInsets.all(12),
+                                  decoration: BoxDecoration(
+                                    color: Colors.red.shade50,
+                                    borderRadius: BorderRadius.circular(8),
+                                    border: Border.all(
+                                      color: Colors.red.shade300,
+                                    ),
+                                  ),
+                                  child: Row(
+                                    children: [
+                                      Icon(
+                                        Icons.warning_amber_rounded,
+                                        color: Colors.red,
+                                        size: 20,
+                                      ),
+                                      const SizedBox(width: 8),
+                                      Expanded(
+                                        child: Text(
+                                          "Jarak yang dilayani kurang dari 10 KM",
+                                          style: GoogleFonts.poppins(
+                                            color: Colors.red.shade700,
+                                            fontWeight: FontWeight.w600,
+                                          ),
+                                        ),
+                                      ),
                                     ],
                                   ),
-                                ],
-                              ),
+                                ),
+                              ],
                             ],
                           ),
                         ),
+
                         // Detail Penyetoran
                         Container(
                           margin: const EdgeInsets.only(bottom: 20),
@@ -866,9 +914,12 @@ class _WargaKonfirmasiSetorJemputPageState
                               ),
                             ),
                             onPressed:
-                                (isLoading || !isTotalValid)
+                                (isLoading ||
+                                        !isTotalValid ||
+                                        !isJarakDalamLayanan)
                                     ? null
                                     : storePengajuanSetorJemput,
+
                             child:
                                 isLoading
                                     ? const CircularProgressIndicator()

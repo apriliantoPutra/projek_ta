@@ -83,11 +83,11 @@ class _KalkulatorSetorSampahPageState extends State<KalkulatorSetorSampahPage> {
         elevation: 0,
         centerTitle: true,
         title: Text(
-          'Kalkulator Setor Sampah',
+          'Kalkulator Setor',
           style: GoogleFonts.poppins(
             fontWeight: FontWeight.bold,
             color: Color(0xFF128d54),
-            fontSize: 24,
+            fontSize: 22,
           ),
         ),
       ),

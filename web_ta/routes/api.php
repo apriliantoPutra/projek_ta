@@ -23,6 +23,11 @@ use Illuminate\Support\Facades\Route;
 
 Route::prefix('v1')->group(function () {
     Route::post('register', [ApiLoginController::class, 'register']);
+    Route::post('/confirm-email', [ApiLoginController::class, 'confirmEmail']);
+    Route::post('/lupa-password', [ApiLoginController::class, 'lupaPassword']);
+    Route::post('/reset-password', [ApiLoginController::class, 'resetPassword']);
+
+
     Route::post('authenticate', [ApiLoginController::class, 'authenticate']);
 
     Route::middleware('auth:sanctum')->group(function () {
@@ -58,6 +63,8 @@ Route::prefix('v1')->group(function () {
                 Route::post('/', [SetorJemputController::class, 'tambahPengajuan']);
                 // petugas
                 Route::get('/{id}', [SetorJemputController::class, 'detailPengajuan']);
+                Route::get('/selesai/{id}', [SetorJemputController::class, 'detailPengajuanSelesai']);
+
                 Route::patch('/terima-pengajuan/{id}', [SetorJemputController::class, 'terimaPengajuan']);
                 Route::patch('/batal-pengajuan/{id}', [SetorJemputController::class, 'batalPengajuan']);
                 Route::patch('/konfirmasi/{id}', [SetorJemputController::class, 'konfirmasiPengajuan']);
@@ -84,7 +91,7 @@ Route::prefix('v1')->group(function () {
             // logout
             Route::post('/logout', [ApiLoginController::class, 'logout']);
         });
-        
+
         Route::post('/refresh', [ApiLoginController::class, 'refresh'])->middleware('ability_with_message:' . TokenAbility::ISSUE_ACCESS_TOKEN->value);
     });
 

@@ -476,7 +476,7 @@ class _PetugasSetorJemputBaruState extends State<PetugasSetorJemputBaru> {
         title: Column(
           children: [
             Text(
-              "Setor Sampah Jemput",
+              "Setor Jemput",
               style: GoogleFonts.poppins(
                 fontSize: 24,
                 fontWeight: FontWeight.w600,

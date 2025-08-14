@@ -512,13 +512,74 @@ class _PetugasSetorJemputProsesState extends State<PetugasSetorJemputProses> {
       // Pastikan perhitungan terbaru
       _recalculateTotals();
 
-      final setoranSampah =
-          _jenisSampahList.map((item) {
-            return {
-              'jenis_sampah_id': item['jenis_sampah_id'] as int,
-              'berat': item['berat'] as double,
-            };
-          }).toList();
+      final setoranSampah = await Future.wait(
+        _jenisSampahList.map((item) async {
+          final jenisId = item['jenis_sampah_id'] as int;
+          int harga = 0;
+
+          // Cek cache terlebih dahulu
+          if (jenisSampahCache.containsKey(jenisId)) {
+            harga = jenisSampahCache[jenisId]?['harga'] ?? 0;
+          } else {
+            // Jika tidak ada di cache, ambil dari API
+            try {
+              final response = await http.get(
+                Uri.parse('${dotenv.env['URL']}/jenis-sampah/$jenisId'),
+                headers: {
+                  'Authorization': 'Bearer $token',
+                  'Accept': 'application/json',
+                },
+              );
+
+              if (response.statusCode == 200) {
+                final data = json.decode(response.body)['data'];
+                harga = data['harga_per_satuan'] as int;
+                jenisSampahCache[jenisId] = {
+                  'nama': data['nama_sampah'],
+                  'harga': harga,
+                  'warna': data['warna_indikasi'],
+                };
+              } else if (response.statusCode == 401) {
+                final refreshed = await authService.refreshToken();
+                if (refreshed) {
+                  final retryResponse = await http.get(
+                    Uri.parse('${dotenv.env['URL']}/jenis-sampah/$jenisId'),
+                    headers: {
+                      'Authorization': 'Bearer ${await authService.getToken()}',
+                      'Accept': 'application/json',
+                    },
+                  );
+                  if (retryResponse.statusCode == 200) {
+                    final retryData = json.decode(retryResponse.body)['data'];
+                    harga = retryData['harga_per_satuan'] as int;
+                    jenisSampahCache[jenisId] = {
+                      'nama': retryData['nama_sampah'],
+                      'harga': harga,
+                      'warna': retryData['warna_indikasi'],
+                    };
+                  }
+                }
+              }
+            } catch (e) {
+              debugPrint('Gagal mengambil harga jenis sampah: $e');
+              // Fallback ke options jika gagal
+              final jenisOption = _jenisSampahOptions.firstWhere(
+                (option) => option['id'] == jenisId,
+                orElse: () => {},
+              );
+              if (jenisOption.isNotEmpty) {
+                harga = jenisOption['harga_per_satuan'] as int;
+              }
+            }
+          }
+
+          return {
+            'jenis_sampah_id': jenisId,
+            'berat': item['berat'] as double,
+            'harga': harga, // Tambahkan harga ke data yang dikirim
+          };
+        }),
+      );
 
       final totalAkhir = totalHarga - biayaLayanan;
 
@@ -545,6 +606,7 @@ class _PetugasSetorJemputProsesState extends State<PetugasSetorJemputProses> {
         },
         body: jsonEncode({
           'setoran_sampah': setoranSampah,
+          'koordinat_warga': '$latitudeWarga,$longitudeWarga',
           'total_berat': totalBerat,
           'total_harga': totalAkhir,
         }),
@@ -649,7 +711,7 @@ class _PetugasSetorJemputProsesState extends State<PetugasSetorJemputProses> {
         title: Column(
           children: [
             Text(
-              "Setor Sampah Jemput",
+              "Setor Jemput",
               style: GoogleFonts.poppins(
                 fontSize: 24,
                 fontWeight: FontWeight.w700,

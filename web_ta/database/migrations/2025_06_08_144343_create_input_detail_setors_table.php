@@ -16,6 +16,7 @@ return new class extends Migration
             $table->foreignId('pengajuan_id')->constrained('pengajuan_setor');
             $table->foreignId('petugas_id')->nullable()->constrained('akun');
             $table->json('setoran_sampah')->nullable();
+            $table->string('koordinat_warga')->nullable();
             $table->float('total_berat');
             $table->integer('total_harga');
             $table->string('status_setor');

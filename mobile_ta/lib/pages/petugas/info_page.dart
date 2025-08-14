@@ -19,7 +19,7 @@ class PetugasInfoPage extends StatelessWidget {
         title: Text(
           'Info Aplikasi',
           style: GoogleFonts.poppins(
-            fontSize: 24,
+            fontSize: 22,
             color: Colors.white,
             fontWeight: FontWeight.w700,
           ),

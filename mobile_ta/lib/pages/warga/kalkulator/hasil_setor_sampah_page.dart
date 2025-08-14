@@ -115,7 +115,7 @@ class _HasilSetorSampahPageState extends State<HasilSetorSampahPage> {
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
-          'Kalkulator Setor Sampah',
+          'Kalkulator Setor',
           style: GoogleFonts.poppins(
             fontWeight: FontWeight.bold,
             color: Color(0xFF128d54),

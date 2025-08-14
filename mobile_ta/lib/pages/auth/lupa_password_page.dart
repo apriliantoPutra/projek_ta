@@ -1,68 +1,59 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'dart:convert';
-import 'package:http/http.dart' as http;
 import 'package:google_fonts/google_fonts.dart';
+import 'package:http/http.dart' as http;
 import 'package:mobile_ta/pages/auth/login_page.dart';
-import 'package:mobile_ta/pages/auth/verifikasi_email_page.dart';
+import 'package:mobile_ta/pages/auth/reset_password_page.dart';
 
-class RegisterPage extends StatefulWidget {
-  const RegisterPage({super.key});
+class LupaPasswordPage extends StatefulWidget {
+  const LupaPasswordPage({super.key});
 
   @override
-  State<RegisterPage> createState() => _RegisterPageState();
+  State<LupaPasswordPage> createState() => _LupaPasswordPageState();
 }
 
-class _RegisterPageState extends State<RegisterPage> {
-  final TextEditingController _usernameController = TextEditingController();
+class _LupaPasswordPageState extends State<LupaPasswordPage> {
   final TextEditingController _emailController = TextEditingController();
-  final TextEditingController _passwordController = TextEditingController();
-  final TextEditingController _konfirmasiPasswordController =
-      TextEditingController();
 
   bool _isLoading = false;
-  bool _obscurePassword = true;
-  bool _obscureConfirmPassword = true;
-
-  Future<void> registerUser() async {
+  Future<void> lupaPassword() async {
     setState(() {
       _isLoading = true;
     });
 
     try {
       final response = await http.post(
-        Uri.parse('${dotenv.env['URL']}/register'),
+        Uri.parse('${dotenv.env['URL']}/lupa-password'),
         headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({
-          'username': _usernameController.text.trim(),
-          'email': _emailController.text.trim(),
-          'password': _passwordController.text,
-          'konfirmasiPassword': _konfirmasiPasswordController.text,
-        }),
+        body: jsonEncode({'email': _emailController.text.trim()}),
       );
 
       final responseData = jsonDecode(response.body);
 
-      if (response.statusCode == 201) {
-        // Sukses registrasi
+      if (response.statusCode == 200) {
+        // Kirim token ke email sukses
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(responseData['message'] ?? 'Registrasi berhasil'),
+            content: Text(
+              responseData['message'] ?? 'Email reset password terkirim',
+            ),
             backgroundColor: Colors.green,
           ),
         );
 
         await Future.delayed(const Duration(seconds: 2));
         if (mounted) {
-          Navigator.pushAndRemoveUntil(
+          Navigator.push(
             context,
-            MaterialPageRoute(builder: (_) => const VerifikasiEmailPage()),
-            (route) => false,
+            MaterialPageRoute(builder: (_) => const ResetPasswordPage()),
           );
         }
       } else {
-        // Gagal registrasi
-        String errorMessage = responseData['message'] ?? 'Registrasi gagal';
+        // Tampilkan error dari backend
+        String errorMessage =
+            responseData['message'] ?? 'Gagal mengirim email reset password';
         if (responseData['errors'] != null &&
             responseData['errors'].isNotEmpty) {
           errorMessage = responseData['errors'].values.first[0];
@@ -126,7 +117,7 @@ class _RegisterPageState extends State<RegisterPage> {
             ),
             SizedBox(height: 30),
             Text(
-              "Daftar",
+              "Lupa Password",
               style: GoogleFonts.poppins(
                 fontSize: 32,
                 fontWeight: FontWeight.bold,
@@ -135,7 +126,7 @@ class _RegisterPageState extends State<RegisterPage> {
             ),
             SizedBox(height: 8),
             Text(
-              "Buat akun baru untuk aplikasi Bank Sampah",
+              "Masukkan email Anda untuk mengatur ulang password.",
               textAlign: TextAlign.center,
               style: GoogleFonts.poppins(color: Colors.grey[700], fontSize: 15),
             ),
@@ -156,25 +147,10 @@ class _RegisterPageState extends State<RegisterPage> {
                   child: Column(
                     children: [
                       TextField(
-                        controller: _usernameController,
-                        decoration: InputDecoration(
-                          prefixIcon: Icon(
-                            Icons.person_outline_rounded,
-                            color: Color(0xFF128d54),
-                          ),
-                          hintText: "Username",
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(30),
-                          ),
-                          contentPadding: EdgeInsets.symmetric(horizontal: 20),
-                        ),
-                      ),
-                      SizedBox(height: 15),
-                      TextField(
                         controller: _emailController,
                         decoration: InputDecoration(
                           prefixIcon: Icon(
-                            Icons.email_outlined,
+                            Icons.person_outline_rounded,
                             color: Color(0xFF128d54),
                           ),
                           hintText: "Email",
@@ -184,68 +160,10 @@ class _RegisterPageState extends State<RegisterPage> {
                           contentPadding: EdgeInsets.symmetric(horizontal: 20),
                         ),
                       ),
-                      SizedBox(height: 15),
-                      TextField(
-                        controller: _passwordController,
-                        obscureText: _obscurePassword,
-                        decoration: InputDecoration(
-                          prefixIcon: Icon(
-                            Icons.lock_outline_rounded,
-                            color: Color(0xFF128d54),
-                          ),
-                          hintText: "Password",
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(30),
-                          ),
-                          contentPadding: EdgeInsets.symmetric(horizontal: 20),
-                          suffixIcon: IconButton(
-                            icon: Icon(
-                              _obscurePassword
-                                  ? Icons.visibility_off
-                                  : Icons.visibility,
-                              color: Color(0xFF128d54),
-                            ),
-                            onPressed: () {
-                              setState(() {
-                                _obscurePassword = !_obscurePassword;
-                              });
-                            },
-                          ),
-                        ),
-                      ),
-                      SizedBox(height: 15),
-                      TextField(
-                        controller: _konfirmasiPasswordController,
-                        obscureText: _obscureConfirmPassword,
-                        decoration: InputDecoration(
-                          prefixIcon: Icon(
-                            Icons.lock_outline_rounded,
-                            color: Color(0xFF128d54),
-                          ),
-                          hintText: "Konfirmasi Password",
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(30),
-                          ),
-                          contentPadding: EdgeInsets.symmetric(horizontal: 20),
-                          suffixIcon: IconButton(
-                            icon: Icon(
-                              _obscureConfirmPassword
-                                  ? Icons.visibility_off
-                                  : Icons.visibility,
-                              color: Color(0xFF128d54),
-                            ),
-                            onPressed: () {
-                              setState(() {
-                                _obscureConfirmPassword =
-                                    !_obscureConfirmPassword;
-                              });
-                            },
-                          ),
-                        ),
-                      ),
+
                       SizedBox(height: 22),
                       ElevatedButton(
-                        onPressed: _isLoading ? null : registerUser,
+                        onPressed: _isLoading ? null : lupaPassword,
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Color(0xFF128d54),
                           shape: RoundedRectangleBorder(
@@ -258,7 +176,7 @@ class _RegisterPageState extends State<RegisterPage> {
                             _isLoading
                                 ? CircularProgressIndicator(color: Colors.white)
                                 : Text(
-                                  "Sign up",
+                                  "Kirim Token Reset",
                                   style: GoogleFonts.poppins(
                                     color: Colors.white,
                                     fontSize: 16,
@@ -307,15 +225,15 @@ class _RegisterPageState extends State<RegisterPage> {
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                  builder: (_) => const VerifikasiEmailPage(),
+                                  builder: (_) => const ResetPasswordPage(),
                                 ),
                               );
                             },
                             child: Text(
-                              "Verifikasi Email",
+                              "Reset Password",
                               style: GoogleFonts.poppins(
                                 fontWeight: FontWeight.bold,
-                                color: Colors.red[600],
+                                color: Colors.redAccent,
                               ),
                             ),
                           ),

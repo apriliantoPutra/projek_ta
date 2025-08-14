@@ -172,11 +172,11 @@ class _PetugasSetorLangsungBaruState extends State<PetugasSetorLangsungBaru> {
               ),
         ),
         title: Text(
-          "Setor Sampah Langsung",
+          "Setor Langsung",
           style: GoogleFonts.poppins(
             fontWeight: FontWeight.bold,
             color: Color(0xFF128d54),
-            fontSize: 24,
+            fontSize: 22,
           ),
         ),
       ),

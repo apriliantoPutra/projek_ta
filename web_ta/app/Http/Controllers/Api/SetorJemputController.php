@@ -132,6 +132,58 @@ class SetorJemputController extends Controller
             'data' => $pengajuan_setor,
         ], 200);
     }
+
+    public function detailPengajuanSelesai($id)
+    {
+        $item = PengajuanSetor::with('user.profil', 'inputdetail')->find($id);
+        if (!$item) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Data pengajuan tidak ditemukan',
+            ], 404);
+        }
+        $profil = $item->user->profil;
+
+        $koordinat = str_replace(' ', '', $item->inputdetail->koordinat_warga); // Hilangkan spasi
+        $koordinatParts = explode(',', $koordinat);
+        $latitude = $koordinatParts[0] ?? null;
+        $longitude = $koordinatParts[1] ?? null;
+
+        $pengajuan_setor = [
+            'id' => $item->id,
+            'jenis_setor' => $item->jenis_setor,
+            'waktu_pengajuan' => $item->waktu_pengajuan,
+            'status_pengajuan' => $item->status_pengajuan,
+            'catatan_petugas' => $item->catatan_petugas,
+            'user' => [
+                'username' => $item->user->username,
+                'email' => $item->user->email,
+                'profil' => [
+                    'nama_pengguna' => $profil->nama_pengguna,
+                    'alamat_pengguna' => $profil->alamat_pengguna,
+                    'no_hp_pengguna' => $profil->no_hp_pengguna,
+                    'gambar_pengguna' => $profil->gambar_pengguna,
+                    'gambar_url' => asset('storage/' . $profil->gambar_pengguna),
+
+                ]
+            ],
+            'input_detail' => [
+                'setoran_sampah' => json_decode($item->inputdetail->setoran_sampah, true),
+                'koordinat_warga' => $item->inputdetail->koordinat_warga,
+                'latitude' => $latitude,
+                'longitude' => $longitude,
+                'total_berat' => $item->inputdetail->total_berat,
+                'total_harga' => $item->inputdetail->total_harga,
+                'status_setor' => $item->inputdetail->status_setor,
+            ]
+        ];
+
+        return response()->json([
+            'success' => true,
+            'data' => $pengajuan_setor,
+        ], 200);
+    }
+
     // edit dan menyetujui
     public function terimaPengajuan(Request $request, $id)
     {
@@ -217,6 +269,7 @@ class SetorJemputController extends Controller
         try {
             $detail_setor->update([
                 'setoran_sampah' => json_encode($request->setoran_sampah),
+                'koordinat_warga' => $request->koordinat_warga ?? null,
                 'total_berat' => $request->total_berat,
                 'total_harga' => $request->total_harga,
                 'status_setor' => 'selesai'

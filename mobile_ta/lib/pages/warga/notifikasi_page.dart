@@ -14,7 +14,7 @@ class WargaNotifikasiPage extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: Color(0xFF128d54),
         elevation: 0,
         centerTitle: true,
         leading: IconButton(
@@ -25,7 +25,7 @@ class WargaNotifikasiPage extends StatelessWidget {
           'Notifikasi',
           style: GoogleFonts.poppins(
             fontWeight: FontWeight.bold,
-            color: Color(0xFF128d54),
+            color: Colors.white,
             fontSize: 22,
           ),
         ),
@@ -40,14 +40,33 @@ class WargaNotifikasiPage extends StatelessWidget {
             }
 
             if (snapshot.hasError) {
-              return const Center(child: Text('Gagal memuat notifikasi'));
+              return Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: const [
+                    Icon(Icons.error_outline, color: Colors.red, size: 48),
+                    SizedBox(height: 8),
+                    Text('Gagal memuat notifikasi'),
+                  ],
+                ),
+              );
             }
 
             final notifs = snapshot.data ?? [];
 
             if (notifs.isEmpty) {
-              return const Center(child: Text('Belum ada notifikasi'));
+              return Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: const [
+                    Icon(Icons.notifications_off, color: Colors.grey, size: 48),
+                    SizedBox(height: 8),
+                    Text('Belum ada notifikasi'),
+                  ],
+                ),
+              );
             }
+
             return ListView.builder(
               itemCount: notifs.length,
               itemBuilder: (context, index) {

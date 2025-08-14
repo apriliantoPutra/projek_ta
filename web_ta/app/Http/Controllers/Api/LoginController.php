@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Enums\TokenAbility;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\LoginRequest;
+use App\Models\PendingRegistration;
 use App\Models\User;
 use Carbon\Carbon;
 use GrahamCampbell\ResultType\Success;
@@ -13,8 +14,8 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
-use PHPOpenSourceSaver\JWTAuth\Exceptions\JWTException;
-use PHPOpenSourceSaver\JWTAuth\Facades\JWTAuth;
+use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Mail;
 
 class LoginController extends Controller
 {
@@ -25,7 +26,6 @@ class LoginController extends Controller
             'email' => 'required|string|email|max:255|unique:akun,email',
             'password' => 'required|min:6',
             'konfirmasiPassword' => 'required|min:6|same:password',
-
         ]);
 
         if ($validator->fails()) {
@@ -37,32 +37,205 @@ class LoginController extends Controller
         }
 
         DB::beginTransaction();
-
         try {
-            $akun = User::create([
-                'username' => $request->get('username'),
-                'email' => $request->get('email'),
-                'password' => Hash::make($request->get('password')),
-                'role' => 'warga'
+
+            $token = Str::random(20);
+
+            PendingRegistration::create([
+                'username' => $request->username,
+                'email' => $request->email,
+                'password' => Hash::make($request->password),
+                'token' => $token,
+                'expires_at' => Carbon::now()->addMinutes(15)
             ]);
 
+            // Kirim email verifikasi
+            Mail::to($request->email)->send(new \App\Mail\VerifyEmail($token));
+
             DB::commit();
+
             return response()->json([
                 'success' => true,
-                'message' => 'Registrasi Berhasil',
-                'data' => $akun
+                'message' => 'Silakan cek email untuk verifikasi akun'
             ], 201);
         } catch (\Exception $e) {
             DB::rollBack();
-            return response()->json(
-                [
-                    "success" => false,
-                    "message" => $e->getMessage()
 
-                ]
-            );
+            return response()->json([
+                'success' => false,
+                'message' => 'Terjadi kesalahan saat registrasi: ' . $e->getMessage()
+            ], 500);
         }
     }
+
+
+    public function confirmEmail(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'email' => 'required|email',
+            'token' => 'required|string'
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Validasi gagal',
+                'errors' => $validator->errors()
+            ], 400);
+        }
+
+        DB::beginTransaction();
+        try {
+
+            $pending = PendingRegistration::where('email', $request->email)
+                ->where('token', $request->token)
+                ->first();
+
+            if (!$pending) {
+                DB::rollBack();
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Token tidak valid'
+                ], 400);
+            }
+
+            if (Carbon::now()->greaterThan($pending->expires_at)) {
+                DB::rollBack();
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Token kadaluarsa'
+                ], 400);
+            }
+
+            // Buat akun baru
+            User::create([
+                'username' => $pending->username,
+                'email' => $pending->email,
+                'password' => $pending->password,
+                'role' => 'warga'
+            ]);
+
+            // Hapus pending registration
+            $pending->delete();
+
+            DB::commit();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Akun telah dibuat, Silakan login!'
+            ]);
+        } catch (\Exception $e) {
+            DB::rollBack();
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Terjadi kesalahan saat verifikasi email: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+
+    public function lupaPassword(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'email' => 'required|email|exists:akun,email',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Validasi gagal',
+                'errors' => $validator->errors()
+            ], 400);
+        }
+
+        DB::beginTransaction();
+        try {
+
+            $token = Str::random(20);
+            DB::table('password_resets')->updateOrInsert(
+                ['email' => $request->email],
+                ['token' => $token, 'created_at' => Carbon::now()]
+            );
+
+            Mail::to($request->email)->send(new \App\Mail\ResetPassword($token));
+
+            DB::commit();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Token reset password telah dikirim ke email'
+            ], 200);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json([
+                'success' => false,
+                'message' => 'Terjadi kesalahan: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function resetPassword(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'email' => 'required|email|exists:akun,email',
+            'token' => 'required|string',
+            'password' => 'required|min:6',
+            'konfirmasiPassword' => 'required|min:6|same:password'
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Validasi gagal',
+                'errors' => $validator->errors()
+            ], 400);
+        }
+
+        DB::beginTransaction();
+        try {
+
+            $reset = DB::table('password_resets')
+                ->where('email', $request->email)
+                ->where('token', $request->token)
+                ->first();
+
+            if (!$reset) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Token tidak valid'
+                ], 400);
+            }
+
+            if (Carbon::parse($reset->created_at)->addMinutes(15)->isPast()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Token kadaluarsa'
+                ], 400);
+            }
+
+            User::where('email', $request->email)->update([
+                'password' => Hash::make($request->password)
+            ]);
+
+            DB::table('password_resets')->where('email', $request->email)->delete();
+
+            DB::commit();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Password berhasil direset'
+            ], 200);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json([
+                'success' => false,
+                'message' => 'Terjadi kesalahan: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+
     public function authenticate(LoginRequest $request)
     {
         if (!Auth::attempt($request->only('username', 'password'))) {
@@ -89,6 +262,7 @@ class LoginController extends Controller
             'data' => $akun
         ], 200);
     }
+
     public function refresh(Request $request)
     {
         $user = $request->user();
@@ -116,6 +290,8 @@ class LoginController extends Controller
             'data' => $user
         ], 200);
     }
+
+
 
 
     public function logout(Request $request)

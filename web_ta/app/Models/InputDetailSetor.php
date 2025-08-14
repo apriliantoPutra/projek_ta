@@ -11,10 +11,12 @@ class InputDetailSetor extends Model
         'pengajuan_id',
         'petugas_id',
         'setoran_sampah',
+        'koordinat_warga',
         'total_berat',
         'total_harga',
         'status_setor',
     ];
+    
     protected $casts = [
         'total_berat' => 'float',
         'total_harga' => 'integer',

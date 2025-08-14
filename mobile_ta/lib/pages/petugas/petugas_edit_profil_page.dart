@@ -387,7 +387,7 @@ class _PetugasEditProfilPageState extends State<PetugasEditProfilPage> {
           style: GoogleFonts.poppins(
             fontWeight: FontWeight.bold,
             color: Color(0xFF128d54),
-            fontSize: 24,
+            fontSize: 22,
           ),
         ),
         actions: [

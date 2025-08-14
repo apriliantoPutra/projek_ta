@@ -1,21 +1,22 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'dart:convert';
-import 'package:http/http.dart' as http;
 import 'package:google_fonts/google_fonts.dart';
+import 'package:http/http.dart' as http;
 import 'package:mobile_ta/pages/auth/login_page.dart';
-import 'package:mobile_ta/pages/auth/verifikasi_email_page.dart';
+import 'package:mobile_ta/pages/auth/lupa_password_page.dart';
 
-class RegisterPage extends StatefulWidget {
-  const RegisterPage({super.key});
+class ResetPasswordPage extends StatefulWidget {
+  const ResetPasswordPage({super.key});
 
   @override
-  State<RegisterPage> createState() => _RegisterPageState();
+  State<ResetPasswordPage> createState() => _ResetPasswordPageState();
 }
 
-class _RegisterPageState extends State<RegisterPage> {
-  final TextEditingController _usernameController = TextEditingController();
+class _ResetPasswordPageState extends State<ResetPasswordPage> {
   final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _tokenController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _konfirmasiPasswordController =
       TextEditingController();
@@ -24,30 +25,31 @@ class _RegisterPageState extends State<RegisterPage> {
   bool _obscurePassword = true;
   bool _obscureConfirmPassword = true;
 
-  Future<void> registerUser() async {
+  Future<void> resetPassword() async {
     setState(() {
       _isLoading = true;
     });
 
     try {
       final response = await http.post(
-        Uri.parse('${dotenv.env['URL']}/register'),
+        Uri.parse('${dotenv.env['URL']}/reset-password'),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({
-          'username': _usernameController.text.trim(),
           'email': _emailController.text.trim(),
-          'password': _passwordController.text,
-          'konfirmasiPassword': _konfirmasiPasswordController.text,
+          'token': _tokenController.text.trim(),
+          'password': _passwordController.text.trim(),
+          'konfirmasiPassword': _konfirmasiPasswordController.text.trim(),
         }),
       );
 
       final responseData = jsonDecode(response.body);
 
-      if (response.statusCode == 201) {
-        // Sukses registrasi
+      if (response.statusCode == 200) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(responseData['message'] ?? 'Registrasi berhasil'),
+            content: Text(
+              responseData['message'] ?? 'Password berhasil direset',
+            ),
             backgroundColor: Colors.green,
           ),
         );
@@ -56,13 +58,13 @@ class _RegisterPageState extends State<RegisterPage> {
         if (mounted) {
           Navigator.pushAndRemoveUntil(
             context,
-            MaterialPageRoute(builder: (_) => const VerifikasiEmailPage()),
+            MaterialPageRoute(builder: (_) => const LoginPage()),
             (route) => false,
           );
         }
       } else {
-        // Gagal registrasi
-        String errorMessage = responseData['message'] ?? 'Registrasi gagal';
+        String errorMessage =
+            responseData['message'] ?? 'Gagal mereset password';
         if (responseData['errors'] != null &&
             responseData['errors'].isNotEmpty) {
           errorMessage = responseData['errors'].values.first[0];
@@ -126,7 +128,7 @@ class _RegisterPageState extends State<RegisterPage> {
             ),
             SizedBox(height: 30),
             Text(
-              "Daftar",
+              "Reset Password",
               style: GoogleFonts.poppins(
                 fontSize: 32,
                 fontWeight: FontWeight.bold,
@@ -135,7 +137,7 @@ class _RegisterPageState extends State<RegisterPage> {
             ),
             SizedBox(height: 8),
             Text(
-              "Buat akun baru untuk aplikasi Bank Sampah",
+              "Masukkan email dan token verifikasi untuk mengatur ulang password Anda.",
               textAlign: TextAlign.center,
               style: GoogleFonts.poppins(color: Colors.grey[700], fontSize: 15),
             ),
@@ -156,13 +158,13 @@ class _RegisterPageState extends State<RegisterPage> {
                   child: Column(
                     children: [
                       TextField(
-                        controller: _usernameController,
+                        controller: _emailController,
                         decoration: InputDecoration(
                           prefixIcon: Icon(
                             Icons.person_outline_rounded,
                             color: Color(0xFF128d54),
                           ),
-                          hintText: "Username",
+                          hintText: "Email",
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(30),
                           ),
@@ -171,13 +173,13 @@ class _RegisterPageState extends State<RegisterPage> {
                       ),
                       SizedBox(height: 15),
                       TextField(
-                        controller: _emailController,
+                        controller: _tokenController,
                         decoration: InputDecoration(
                           prefixIcon: Icon(
                             Icons.email_outlined,
                             color: Color(0xFF128d54),
                           ),
-                          hintText: "Email",
+                          hintText: "Token Verifikasi",
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(30),
                           ),
@@ -243,9 +245,10 @@ class _RegisterPageState extends State<RegisterPage> {
                           ),
                         ),
                       ),
+
                       SizedBox(height: 22),
                       ElevatedButton(
-                        onPressed: _isLoading ? null : registerUser,
+                        onPressed: _isLoading ? null : resetPassword,
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Color(0xFF128d54),
                           shape: RoundedRectangleBorder(
@@ -258,7 +261,7 @@ class _RegisterPageState extends State<RegisterPage> {
                             _isLoading
                                 ? CircularProgressIndicator(color: Colors.white)
                                 : Text(
-                                  "Sign up",
+                                  "Verifikasi Email",
                                   style: GoogleFonts.poppins(
                                     color: Colors.white,
                                     fontSize: 16,
@@ -281,45 +284,22 @@ class _RegisterPageState extends State<RegisterPage> {
                         ],
                       ),
                       SizedBox(height: 10),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          TextButton(
-                            onPressed: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (_) => const LoginPage(),
-                                ),
-                              );
-                            },
-                            child: Text(
-                              "Login",
-                              style: GoogleFonts.poppins(
-                                fontWeight: FontWeight.bold,
-                                color: const Color(0xFF128d54),
-                              ),
+                      TextButton(
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => LupaPasswordPage(),
                             ),
+                          );
+                        },
+                        child: Text(
+                          "Lupa Password",
+                          style: GoogleFonts.poppins(
+                            fontWeight: FontWeight.w500,
+                            color: Colors.red[600],
                           ),
-                          SizedBox(width: 5),
-                          TextButton(
-                            onPressed: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (_) => const VerifikasiEmailPage(),
-                                ),
-                              );
-                            },
-                            child: Text(
-                              "Verifikasi Email",
-                              style: GoogleFonts.poppins(
-                                fontWeight: FontWeight.bold,
-                                color: Colors.red[600],
-                              ),
-                            ),
-                          ),
-                        ],
+                        ),
                       ),
                     ],
                   ),
