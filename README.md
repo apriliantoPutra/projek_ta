@@ -3,9 +3,9 @@
 ### Tentang Aplikasi
 Bank Sampah Digital adalah aplikasi terintegrasi yang memudahkan pengelolaan sampah berbasis komunitas. Aplikasi ini menghubungkan warga, petugas bank sampah, dan administrator dalam satu platform digital untuk meningkatkan efisiensi pengelolaan sampah dan mendorong gaya hidup berkelanjutan.
 
-🌐 Website Admin: https://banksampah.cloud/
-📱 Download Aplikasi: https://drive.google.com/drive/folders/1EGf2lB8_szINtG4TmIjTm5CGILhI7d33
-🎯 Dokumentasi API: https://banksampah.cloud/docs/api/
+- 🌐 Website Admin: https://banksampah.cloud/
+- 📱 Download Aplikasi: https://drive.google.com/drive/folders/1EGf2lB8_szINtG4TmIjTm5CGILhI7d33
+- 🎯 Dokumentasi API: https://banksampah.cloud/docs/api/
 
 ### Fitur utama
 #### 🏠 Role Warga (Aplikasi Mobile)
